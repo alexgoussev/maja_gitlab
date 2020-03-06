@@ -201,8 +201,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
         # Set the real value of the L1 NoData
         self.RealL1NoData = -10
 
-        #Set the Reflectance to 1.0
-        self.ReflectanceQuantification = 1.0
+        #Set the Reflectance
+        self.ReflectanceQuantification = 0.02
 
         # # Get the projection ref
         # self.ProjectionRef = lASCIIHandler.get_toa_image_filename_from_band_code("B1")

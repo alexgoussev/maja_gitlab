@@ -117,8 +117,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             for band in l_ListOfL1BandCode:
                 curMULT = self._header_handler.get_ref_mutl_factor_from_band_code(band)
                 curADD = self._header_handler.get_ref_add_factor_from_band_code(band)
-
-                expression_bandmath = "im2b1?"+str(self._reall1nodata) + ":"
+                expression_bandmath = "(im2b1 || (im1b1-0.00001)<0)?"+str(self._reall1nodata) + ":"
                 if xml_tools.as_bool(l2comm.get_value("CalAdjustOption")):
                     expression_bandmath = expression_bandmath + str(factor) + "*"
                 expression_bandmath = expression_bandmath + "(im1b1*" + str(curMULT) + "+" + str(curADD) + ")/cos(" + str(solzenith) + "*" + str(math.pi/180)+")"
@@ -178,13 +177,13 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
 
             tmp_toa_resample = os.path.join(working_dir, "tmp_toa_resample.tif")
             app_toa_resample = resample(self._l1toaimagelist[0], dtm, tmp_toa_resample, OtbResampleType.LINEAR_WITH_RADIUS,
-                           write_output=False)
+                           write_output=True)
             self._l2toa_pipeline.add_otb_app(app_toa_resample)
 
 
             # L2TOA
             tmp_toa_roi = os.path.join(working_dir, "L2TOAImageList_{}.tif".format(curL1Res))
-            l2toa_roi_app = extract_roi(app_toa_resample.getoutput()["out"],
+            l2toa_roi_app = extract_roi(app_toa_resample.getoutput().get("out"),
                                         l_l1bandidx,
                                         tmp_toa_roi, write_output=True)
             self._l2toa_pipeline.add_otb_app(l2toa_roi_app)
