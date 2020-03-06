@@ -243,11 +243,11 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             out_sub_edg = os.path.join(working_dir, "edg_thresholder2.tif")
             param_edg_thresholder2 = {"im": app_edg_resample.getoutput().get("out"),
                              "thresholdvalue": 0,
-                             "equalvalue": 0,
-                             "outsidevalue": 1,
+                             "equalvalue": 1,
+                             "outsidevalue": 0,
                              "out": out_sub_edg + ":uint8"
                              }
-            app_edg_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edg_thresholder2, write_output=False)
+            app_edg_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edg_thresholder2, write_output=True)
             self._edg_pipeline.add_otb_app(app_edg_thresholder2)
 
             # *********************************************************************************************************
