@@ -99,8 +99,8 @@ class L2ImageWriterBase(object):
         self._testedwatermask = None
         self._dealingltc = None
         self._ltc_image = None
-        self._global_product_filename = None
-        self._production_report_filename = None
+        self._global_product_filename = ""
+        self._production_report_filename = ""
         self._l2privateimagefilenamesprovider = None
 
     def set_dtm(self, dtm):

@@ -657,7 +657,7 @@ class MuscateXMLFileHandler(object):
         return os.path.join(lpath, xml_tools.get_xml_string_value(self.root, localpath))
 
     def get_the_xpath_root_of_the_private_directory_filename(self):
-        return ""
+        return "//Data_List/Data[Data_Properties/NATURE='Private_Directory']"
 
     def has_per_band_angles(self):
         nodes = self.root.xpath("//Mean_Value_List/Mean_Viewing_Incidence_Angle_List/Mean_Viewing_Incidence_Angle")
