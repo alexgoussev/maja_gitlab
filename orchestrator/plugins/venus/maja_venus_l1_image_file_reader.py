@@ -270,6 +270,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             self._edgsub = app_edgsub_thresholder2.getoutput().get("out")
             self._edg_pipeline.add_otb_app(app_edgsub_thresholder2)
 
+
             # *********************************************************************************************************
             # L2 TOA image pipeline connection
             # *********************************************************************************************************
@@ -300,9 +301,22 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                           tmp_toasub_resample,
                                           OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=False)
             self._l2toa_pipeline.add_otb_app(app_toasub_resample)
+
+            # Threshold the output
+            out_edgsub_threshold = os.path.join(working_dir, "edgsubthreshold.tif")
+            param_edgsub_threshold = {"im": app_edgsub_resample.getoutput().get("out"),
+                                      "thresholdvalue": 0,
+                                      "equalvalue": 1,
+                                      "outsidevalue": 0,
+                                      "out": out_edgsub_threshold + ":uint8"
+                                      }
+            app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold)
+            self._edg_pipeline.add_otb_app(app_edgsub_threshold)
+
+
             tmp_l2subtoa = os.path.join(working_dir, "toasub.tif")
             app_l2subtoa = apply_mask(app_toasub_resample.getoutput().get("out"),
-                                   self._edgsub,
+                                   app_edgsub_threshold.getoutput().get("out"),
                                    l_toathresholvalue, tmp_l2subtoa)
             self._toasub = app_l2subtoa.getoutput().get("out")
             self._l2toa_pipeline.add_otb_app(app_l2subtoa)
