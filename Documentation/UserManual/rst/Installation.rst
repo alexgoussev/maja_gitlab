@@ -85,8 +85,7 @@ installation directory):
 			            **/ddc: ddc files for project management.** . Do not modify.
            
 			            /doc: copyright information
-           
-			            **/examples: contains examples of GIPPs files**
+           		            
            
 			            **/schemas**: contains all the ICD schemas used by the chains (EarthExplorer, Venus, Maja, Senitnel2, etc…)
            

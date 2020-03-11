@@ -14,7 +14,7 @@
 Software: **MAJA**
 **SETG-**\ **MU-**\ **MAJA-**\ **010-**\ **CS**                       
 Change                                          02 Date              29/11/2019
-Issue                                           00 Date              29/11/2019
+Issue                                           01 Date              10/03/2020
 Distribution Code                               E
 Ref. : CSSI/SPACE/PD&A/MAJA/MU 
 =============================================== == ================= ============
@@ -22,14 +22,14 @@ Ref. : CSSI/SPACE/PD&A/MAJA/MU
 **USER, INSTALLATION AND OPERATING MANUAL FOR MAJA CHAINS [MU]**
 
 =================================== =================
-Written by :                        Date : 29/11/2011 
+Written by :                        Date : 10/03/2020 
                                                     
 ESQUIS Benjamin CSSI/ESPACE/PDA/IP                   
 BRICIER Aurélien CSSI/ESPACE/PDA/IP                  
 Approved by :                       Date : 22/05/2018 
                                                      
 OLIVIE Francis CSSI/ESPACE/DSM                       
-For application :                   Date : 29/11/2019
+For application :                   Date : 10/03/2020
                                                      
 Esquis Benjamin CSSI/ESPACE/PDA/IP                   
 =================================== =================
@@ -61,7 +61,7 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | CONFIGURATION MANAGEMENT : NG                                                          | CM RESP. :                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CAUSE D'EVOLUTION : Update document for MAJA v4.0.0                                                                                                                                   |
+| CAUSE D'EVOLUTION : Update document for MAJA v4.1.0                                                                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | CONTRACT : Marché ACIS n°131348                                                                                                                                                       |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
@@ -73,8 +73,9 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 ================== ==================== =================== ============
 Name               Entity               Internal Postal Box Observations
 OLIVIE Francis     CSSI/ESPACE/DSM                         
-CHOGNARD Catherine CSSI/ESPACE/PDA/PDGS                    
-BRICIER Aurélien   CSSI/ESPACE/PDA/IP                      
+RECULEAU Serge     CSSI/ESPACE/PDA/PDGS                    
+BROSSARD julie     CSSI/ESPACE/PDA/IP                      
+ESQUIS Benjamin    CSSI/ESPACE/PDA/IP                      
 \                                                          
 \                                                          
 \                                                          
@@ -107,6 +108,11 @@ LASSALLE Pierre    DNO/OT/IS
 		    
 ===== ==== ========== ===============================================================================================
 Issue Rev. Date       Reference, Author(s), Reasons for evolution
+02    01   10/03/2020  CSSI/SPACE/PD&A/MAJA/MU
+                     
+                      ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                     
+                      Update document for MAJA v4.1.0
 02    00   29/11/2019  CSSI/SPACE/PD&A/MAJA/MU
                      
                       ESQUIS Benjamin CSSI/ESPACE/PDA/IP
