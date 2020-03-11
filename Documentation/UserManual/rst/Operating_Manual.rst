@@ -44,6 +44,8 @@ Note:
 -  Number of cores used for the execution (“NbThreads’ field). By
    default, the number of threads is set to 1,
 
+-  RAM maximum usage. By default, the RAM max is set to 8192,
+
 -  The notes (or comments) inserted in the "Note” field in the output
    header product,
 
@@ -615,7 +617,7 @@ helper lines
      -w WORKINGDIR, --workingdir WORKINGDIR
                            Working directory (working 'temporary' directory). Default value: the '--output parameter value'
      -p PLUGIN, --plugin PLUGIN
-                           Output plugin to use to write L2 product. Available plugins : SENTINEL2 , SENTINEL2_MUSCATE , VENUS_MUSCATE , LANDSAT8_MUSCATE , 
+                           Output plugin to use to write L2 product. Available plugins : SENTINEL2 , SENTINEL2_MUSCATE , VENUS_MUSCATE , LANDSAT8_MUSCATE. Default is to use the MUSCATE version of the input L1 product plugin
      -ucs CONF, --conf CONF
                            User Configuration directory (contains for example MAJAUserConfigSystem.xml)
      --NbThreads NBTHREADS

@@ -458,9 +458,12 @@ Snow Masking
 ^^^^^^^^^^^^
 
 L’algorithme de détection de la neige est mis en place dans la chaîne
-MAJA pour les capteurs Sentinel-2 et Landsat qui, à la différence de
-Venµs et Formosat, disposent d’une bande spectrale SWIR (Short-Wave
-Infra-Red).
+MAJA pour les capteurs Sentinel-2, Landsat et Venus.
+Les capteurs Sentinel-2 et Landsat disposant d'une bande spectrale SWIR (Short-Wave
+Infra-Red) ils peuvent l'utiliser afin de générer ce masque. L'algorithme concernant Venus est plus simple et n'utilise pas
+de bande SWIR car non présente sur le capteur mais utilise une bande proche afin d'approximer le même comportement.
+En effet bien que non SWIR la bande rouge absorbe partiellement les longueur d'ondes SWIR et permet donc la détection de neige.
+
 
 La détection de la neige sur les images Sentinel-2 repose sur un
 seuillage de l’indice NDSI définit par :
@@ -470,7 +473,7 @@ seuillage de l’indice NDSI définit par :
    :height: 1.5in
     
 
-La réflectance de la bande SWIR permet de distinguer nettement la neige,
+La réflectance de la bande SWIR ( bande rouge pour Venus) permet de distinguer nettement la neige,
 qui a une réflectance faible dans cette bande, des nuages qui ont eux
 une réflectance élevée. De ce fait, les pixels neigeux ont un indice
 NDSI élevé tandis que les nuages ont un indice faible tendant vers zéro.
@@ -485,10 +488,8 @@ Un filtrage est également effectué sur les bords de l’image.
 Enfin, une opération de morphologie mathématique de type fermeture
 (dilatation + érosion) est appliquée au masque de neige.
 
-Le masque de neige étant utilisé dans de nombreux algorithmes (Cloud
-Masking, Rain Detection, AOT Estimation, Composite Image), une image
-constante nulle est générée dans L2Processor pour les capteurs ne
-disposant pas de bande spectrale SWIR (Venµs et Formosat). Le câblage de
+Le masque de neige est utilisé dans de nombreux algorithmes (Cloud
+Masking, Rain Detection, AOT Estimation, Composite Image). Le câblage de
 cet algorithme dans L2Processor est réalisé via un paramètre présent
 dans le fichier de configuration.
 
@@ -737,7 +738,7 @@ Une nouvelle fonction de coût est ajoutée pour la méthode multi
 spectrale. La méthode spectro temporelle utilise les deux.
 
 .. image:: Art/image12.png
-   :width: 6.07292in
+   :width: 7.57292in
    :height: 5.10417in
 
 Figure 11 : diagramme de classes pour les fonctions de coût
@@ -772,8 +773,7 @@ d’acquisition (valeurs des angles au centre de l’image) associées au
 produit traité.
 
 ===================================== ===================================================================================================
-\                                     Description
-Paramètres                           
+**Paramètres**                        **Description**
 Min_Difference_Thresholds_Calculation Seuil sur la différence entre des réflectances de surface obtenues pour deux valeurs extrêmes d’AOT
 First_AOT                             Valeur minimum d’AOT pour calculer la première gamme de réflectance
 Second_AOT                            Valeur maximum d’AOT pour calculer la première gamme de réflectance

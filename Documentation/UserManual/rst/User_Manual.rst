@@ -204,20 +204,20 @@ Depending on the spectral bands and stereoscopic capabilities of the
 satellite, some methods can or cannot be applied to the times series of
 the satellite. Table 1 summarizes the main options.
 
-========================== ==================== ========= =================================== ======================================= =========================================== ====================
-\                          **Formosat**         **Venus** **Landsat(5/7)**                    **Sentinel2**                           **Landsat8**                                **Spot4**
-                                                                                                                                                                                 
-                           **(“proto” format)**           **(“proto” and “muscate” formats)** **(GPP, “muscate” and native formats)** **(“proto”, “muscate” and native formats)** **(“proto” format)**
-Stereoscopic                                    X                                                                                                                                
-                                                                                                                                                                                 
-cloud detection                                                                                                                                                                  
-Water vapour determination                      X                                             X                                                                                  
-Snow detection                                            X                                   X                                       X                                           X
-Cirrus flag                                     X                                                                                                                                
-Cirrus mask                                                                                   X                                       X                                          
-========================== ==================== ========= =================================== ======================================= =========================================== ====================
+========================== ================================== ================================== ==================================
+\                          **Venus**                          **Sentinel2**                      **Landsat8**                      
+                                                                                                                                                  
+                           **(“muscate” and native formats)** **(“muscate” and native formats)** **(“muscate” and native formats)**
+Stereoscopic               X                                                                                                                                
+                                                                                                                                                            
+cloud detection                                                                                                                                              
+Water vapour determination X                                  X                                                                                  
+Snow detection                                                X                                  X                                 
+Cirrus flag                X                                                                                                                               
+Cirrus mask                                                   X                                  X                                          
+Snow mask                  X                                  X                                  X                                          
+========================== ================================== ================================== ==================================
 
-Note: “proto” is the “muscate proto” format.
 
 The products
 ------------
@@ -287,7 +287,7 @@ slightly different algorithms applied to the input data:
 -  Cirrus mask is provided exclusively in Landsat8 and Sentinel-2
    products
 
--  Snow mask is provided exclusively in Landsat 5, 7, 8 and Sentinel-2
+-  Snow mask is provided Landsat 8, Sentinel-2 and Venus format
    products
 
 -  The quality mask indicating if water vapor mask has been estimated or
@@ -389,35 +389,6 @@ and 20 meters).
 The scale factors are provided in the global header of the level 2
 product (e.g. in the <Reflectance_Quantification_Value> tag so BOA
 reflectance = X \* 0.001).
-
-The Landsat L5/L7 Image products
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. _level-1-product-content-1:
-
-Level 1 product content
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The LANDSAT L1 product conforms with the specification contained in the
-document [RD04]_.
-
-The chain allows to mix Landsat 5 and Landsat 7 products in nominal and
-backward modes.
-
-The directory of a LANDSAT L1 product contains an image header file and
-a geoTIF file but also a subdirectory MASK that contains the mask of
-saturated pixels.
-
-.. image:: ./Art/Landsat_L1.png
-
-Level 2 product content
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The structure of LANDSAT and VENUS level 2 products is nearly the same.
-The differences are found in the number of spectral bands and the
-resolution of images. The level 2 product does not contain angle grids.
-
-.. image:: ./Art/Landsat_L2.png
 
 The Landsat L8 Image products
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
