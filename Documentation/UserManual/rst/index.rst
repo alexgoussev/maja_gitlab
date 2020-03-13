@@ -63,8 +63,6 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | CAUSE D'EVOLUTION : Update document for MAJA v4.1.0                                                                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CONTRACT : Marché ACIS n°131348                                                                                                                                                       |
-+----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | HOST SYSTEM : WordVersion                                                                                                                                                             |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 
@@ -89,18 +87,17 @@ ESQUIS Benjamin    CSSI/ESPACE/PDA/IP
 
 **External Distribution :**
 
-================== ======================== ============
-Name               Entity                   Observations
-BAILLARIN Simon    DNO/OT/IS               
-DESJARDINS Camille DSO/SI/MO               
-HAGOLLE Olivier    DSO/SI/CB               
-LARIF Marie-France DNO/SC/3S               
-LONJOU Vincent     DSO/SI/MO               
-PETRUCCI Beatrice  DNO/OT/IS               
-DELHEM Yamina      SCALAGENT POUR DNO/DA/AQ
-LASSALLE Pierre    DNO/OT/IS               
-\                                          
-================== ======================== ============
+=================== ======================== ============
+Name                Entity                   Observations
+BAILLARIN Simon     DNO/OT/IS                
+HAGOLLE Olivier     DSO/SI/CB                
+KETTIG Peter        DNO/OT/IS                
+LARIF Marie-France  DNO/OT/PE                
+SELLE Arnaud        DNO/OT/TA                
+PACHOLCZYK Philippe DNO/OT/TA                
+PUJOL Mathilde      DNO/DA/AQ                
+\                                            
+=================== ======================== ============
 
 **Changes history :**
 
