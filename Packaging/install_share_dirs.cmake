@@ -48,12 +48,7 @@ function(install_share_dirs)
   #all MAJA share files
   install_without_message("${PKG_SHARE_SOURCE_DIR}/ddc" "share" )
   install_without_message("${PKG_SHARE_SOURCE_DIR}/config" "share" )
-#  install_without_message("${PKG_SHARE_SOURCE_DIR}/examples" "share" )
   install_without_message("${PKG_SHARE_SOURCE_DIR}/schemas" "share" )
-  install_without_message("${PKG_SHARE_SOURCE_DIR}/docs/Copyright" "share/doc" )  
-  install(
-    FILES ${PKG_SHARE_SOURCE_DIR}/docs/Copyright.txt
-    DESTINATION ${PKG_STAGE_DIR}/share/doc)
 
   install(FILES ${SUPERBUILD_INSTALL_DIR}/MAJA_VERSION_FOR_SW_COMPONENT
     DESTINATION ${PKG_STAGE_DIR})
