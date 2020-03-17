@@ -217,7 +217,7 @@ class L2Processor(BaseProcessor):
                 l_rhsampling = l_gippl2commhandler.get_value("RHSampling").split()
                 l_models = l_gippl2commhandler.get_value("ListOfModels").split()
                 l_time_window = l_gippl2commhandler.get_value_f("TimeWindowsCAMS")
-                tmp_cams_dir = self._apphandler.get_directory_manager().get_temporary_directory("CAMSRead_",do_always_remove=True)
+                tmp_cams_dir = self._apphandler.get_directory_manager().get_temporary_directory("CAMSRead_",do_always_remove=False)
                 self._CAMS_Files_HandlersMAP[l_sat] = CAMSFileHandler(
                     l_limaot, l_rhsampling, l_models, l_time_window, tmp_cams_dir)
                 self._CAMS_Files_HandlersMAP[l_sat].initializelistofcamsfiledescription(l_ListOfCAMSDataFilenames)
