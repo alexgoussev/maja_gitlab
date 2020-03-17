@@ -54,7 +54,6 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         self._l2toaimagelist = []
         self._sub_toa = ""
         self._l2satmasklist = []
-        self._l2satimagelist = []
         self._subsatimage = ""
         self._l2zonemasklist = []
         self._l2defectmasklist = []
@@ -280,11 +279,12 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
             self._l2defectmasklist.append([])
             self._l2satimagelist.append([])
             self._l2dfpimagelist.append(None)
+
         # Init the coarse elements
         for coarseband in p_ListOfTOABandCode:
-            self._satmasksublist.append(None)
             self._l2satmasklist.append(None)
-
+        for l1res in range(l_NbL1Res):
+            self._satmasksublist.append(None)
         # Test if the plugin has PIX and SAT ?
         has_pix_masks = False
         defectivPixFileNames = []
@@ -361,35 +361,24 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
 
                         if l_BandsDefinitions.get_list_of_l1_band_code(curL1Res) != \
                                 l_BandsDefinitions.get_list_of_l2_band_code(curL1Res):
-                            sat_list = []
-
+                            tmp_l2_band_idx_list = []
+                            #Create the list of index to build the current res sat mask
                             for l2band in l_BandsDefinitions.get_list_of_l2_band_code(curL1Res):
                                 l2BandIdxInHeader = self._header_handler.get_index_of_band_code(l2band)
-
-                                tmp_satmask_roi = os.path.join(working, "tmp_extract_{}.tif".format(l2band))
-                                tmp_extract_sat_toi_app = extract_roi(
-                                    sat_mask_app.getoutput()["out"], [
-                                        self._header_handler.get_l1_sat_image_index(l2BandIdxInHeader) - 1],
-                                        tmp_satmask_roi, write_output=True)
-                                tmp_sat_l2_resample_roi = os.path.join(
-                                    working, "tmp_sat_l2_resample_roi_{}.tif".format(l2band))
-                                resamp_l2_app = resample(
-                                    tmp_extract_sat_toi_app.getoutput()["out"],
-                                    self._dem.ALTList[l1res],
-                                    tmp_sat_l2_resample_roi,
-                                    OtbResampleType.LINEAR_WITH_RADIUS,
-                                    threshold=0.5,
-                                    padradius=4)
-
-                                sat_list.append(resamp_l2_app.getoutput()["out"])
-
-                            param_concatenate = {"il": sat_list,
-                                                 "out": tmp_sat_l2_resample
-                                                 }
-                            concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+                                tmp_l2_band_idx_list.append(self._header_handler.get_l1_sat_image_index(l2BandIdxInHeader) - 1)
+                            tmp_satmask_roi = os.path.join(working, "tmp_sat_extract_{}.tif".format(l1res))
+                            tmp_extract_sat_toi_app = extract_roi(
+                                 sat_mask_app.getoutput()["out"], tmp_l2_band_idx_list,
+                                    tmp_satmask_roi, write_output=False)
+                            resamp_l2_app = resample(
+                                tmp_extract_sat_toi_app.getoutput()["out"],
+                                self._dem.ALTList[l1res],
+                                tmp_sat_l2_resample,
+                                OtbResampleType.LINEAR_WITH_RADIUS,
+                                threshold=0.5,
+                                padradius=4)
                             self._l2satmasklist[l_ListOfL2Resolution.index(
-                                curL1Res)] = concat_app.getoutput().get("out")
-
+                                curL1Res)] = resamp_l2_app.getoutput().get("out")
                         else:
                             resamp_l2_app = resample(sat_mask_app.getoutput()["out"], self._dem.ALTList[l1res],
                                                      tmp_sat_l2_resample,
@@ -398,21 +387,19 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
 
                             self._l2satmasklist[l_ListOfL2Resolution.index(curL1Res)] = resamp_l2_app.getoutput()["out"]
 
+                    tmp_l1_band_idx_list = []
                     for l1band in listOfL1Bands:
-                        LOGGER.debug("l1band")
-                        LOGGER.debug(l1band)
                         l1BandIdxInHeader = self._header_handler.get_index_of_band_code(l1band)
-                        l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l1band)
-                        tmp_sat_roi = os.path.join(working, "tmp_extract_roi_sat_{}.tif".format(l1band))
-                        tmp_sat_roi_app = extract_roi(
-                            sat_mask_app.getoutput()["out"], [
-                                self._header_handler.get_l1_sat_image_index(l1BandIdxInHeader) - 1], tmp_sat_roi, write_output=False)
-                        tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1band))
-                        app_resample = resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
-                                                OtbResampleType.LINEAR_WITH_RADIUS, write_output=True)
+                        tmp_l1_band_idx_list.append(self._header_handler.get_l1_sat_image_index(l1BandIdxInHeader) - 1)
+                    tmp_sat_roi = os.path.join(working, "tmp_l1_extract_roi_sat_{}.tif".format(l1res))
+                    tmp_sat_roi_app = extract_roi(
+                        sat_mask_app.getoutput()["out"], tmp_l1_band_idx_list, tmp_sat_roi, write_output=False)
+                    tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1band))
+                    app_resample = resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
+                                            OtbResampleType.LINEAR_WITH_RADIUS, write_output=True)
 
-                        self._satmasksub_pipeline.add_otb_app(app_resample)
-                        self._satmasksublist[l1BandIdx] = app_resample.getoutput()["out"]
+                    self._satmasksub_pipeline.add_otb_app(app_resample)
+                    self._satmasksublist[l1res] = app_resample.getoutput()["out"]
 
                 else:
                     raise MajaExceptionPluginMuscate("Product format not supported : not the same file for band on SAT")
