@@ -454,15 +454,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 if self._l2dfpimagelist is not None:
                     param_dfp_binconcat = {"im":  self._l2dfpimagelist[resol],
                                            "out": l_BaseL2FullMASKSFilename + "_DFP_" + l_grpSuffix + ".tif"
-                                           + ":uint8"+ file_utils.get_extended_filename_write_mask_file_muscate()
                                            }
                     dfp_binconcat_app = OtbAppHandler("BinaryConcatenate", param_dfp_binconcat, write_output=True)
                 else:
                     LOGGER.debug("DFP Masks not available.")
 
                 # START WRITING EDG Image file DATA
-                otb_file_utils.write_images([self._l2edgimagelist[resol]], [l_BaseL2FullMASKSFilename + "_EDG_" +
-                                                                            l_grpSuffix + ".tif"])
+                file_utils.copy_file(self._l2edgimagelist[resol], l_BaseL2FullMASKSFilename + "_EDG_" +
+                                                                            l_grpSuffix + ".tif")
 
                 # START WRITING CLM (CLD) Image file DATA
                 # Connect the CLD image
