@@ -346,7 +346,7 @@ class L2ImageWriterBase(object):
             idx = idx + 1
         exp = exp + "0"
         param_mask = {"il": il,
-                      "out": cld_image_filename + file_utils.get_extended_filename_write_image_file_standard(),
+                      "out": cld_image_filename + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard(),
                       "exp": exp
                       }
         cld_app = OtbAppHandler("BandMath", param_mask)
@@ -400,7 +400,7 @@ class L2ImageWriterBase(object):
                     pwa_concat_app.getoutput().get("out"),
                     twa_concat_app.getoutput().get("out")],
                 "out": p_L2PrivateImageFilenamesProvider.get_wam_image_filename() +
-                file_utils.get_extended_filename_write_image_file_standard()}
+                ":uint16"+  file_utils.get_extended_filename_write_image_file_standard()}
 
             OtbAppHandler("ConcatenateImages", param_wam_concat)
 
