@@ -338,7 +338,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_iab_concat_app = OtbAppHandler("ConcatenateImages", param_iab_concat)
                 param_iab_binconcat = {"im": tmp_iab_concat_app.getoutput().get("out"),
                                        "out": l_BaseL2FullMASKSFilename + "_IAB_" + l_grpSuffix + ".tif"
-                                       + file_utils.get_extended_filename_write_mask_file_muscate()
+                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
                                        }
                 iab_binconcat_app = OtbAppHandler("BinaryConcatenate", param_iab_binconcat, write_output=True)
 
@@ -407,7 +407,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_mg2_concat_app = OtbAppHandler("ConcatenateImages", param_mg2_concat)
                 param_mg2_binconcat = {"im": tmp_mg2_concat_app.getoutput().get("out"),
                                        "out": l_BaseL2FullMASKSFilename + "_MG2_" + l_grpSuffix + ".tif"
-                                       + file_utils.get_extended_filename_write_mask_file_muscate()
+                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
                                        }
                 mg2_binconcat_app = OtbAppHandler("BinaryConcatenate", param_mg2_binconcat, write_output=True)
                 mg2_pipeline.free_otb_app()
@@ -416,15 +416,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 # TODO Create the writer with test on number of bands
                 param_sat_binconcat = {"im": self._l2satimagelist[resol],
                                        "out": l_BaseL2FullMASKSFilename + "_SAT_" + l_grpSuffix + ".tif"
-                                       + file_utils.get_extended_filename_write_mask_file_muscate()
+                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
                                        }
                 sat_binconcat_app = OtbAppHandler("BinaryConcatenate", param_sat_binconcat, write_output=True)
 
                 # START WRITING PIX Image file DATA
                 if "PIXImages" in self._l1_image_info.MuscateData:
                     LOGGER.debug("The L1 product have 'Aberrant_Pixels' masks. There are writed in the L2 out product...")
-                    otb_file_utils.write_images([self._l2piximagelist[resol]], [l_BaseL2FullMASKSFilename + "_PIX_" + l_grpSuffix + ".tif"
-                                                                                + file_utils.get_extended_filename_write_mask_file_muscate()])
+                    otb_file_utils.write_images([self._l2piximagelist[resol]], [l_BaseL2FullMASKSFilename + "_PIX_" + l_grpSuffix + ".tif"])
                 else:
                     LOGGER.debug("No PIX node detected to write")
 
@@ -455,15 +454,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 if self._l2dfpimagelist is not None:
                     param_dfp_binconcat = {"im":  self._l2dfpimagelist[resol],
                                            "out": l_BaseL2FullMASKSFilename + "_DFP_" + l_grpSuffix + ".tif"
-                                           + file_utils.get_extended_filename_write_mask_file_muscate()
                                            }
                     dfp_binconcat_app = OtbAppHandler("BinaryConcatenate", param_dfp_binconcat, write_output=True)
                 else:
                     LOGGER.debug("DFP Masks not available.")
 
                 # START WRITING EDG Image file DATA
-                otb_file_utils.write_images([self._l2edgimagelist[resol]], [l_BaseL2FullMASKSFilename + "_EDG_" +
-                                                                            l_grpSuffix + ".tif" + file_utils.get_extended_filename_write_mask_file_muscate()])
+                file_utils.copy_file(self._l2edgimagelist[resol], l_BaseL2FullMASKSFilename + "_EDG_" +
+                                                                            l_grpSuffix + ".tif")
 
                 # START WRITING CLM (CLD) Image file DATA
                 # Connect the CLD image
