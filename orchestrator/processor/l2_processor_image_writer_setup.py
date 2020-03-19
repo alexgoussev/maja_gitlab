@@ -99,7 +99,6 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
             l2_list = []
             for r in range(0, l_nbRes):
                 l_res = l_bandsdefinition.ListOfL2Resolution[r]
-                # TODO create constant masks
                 const_mask = os.path.join(l2_write_working, "constant_mask_" + l_res + ".tif:uint8")
                 out_const_app = constant_image(in_global_dict.get("DEM").ALTList[r], 0, const_mask)
                 l2_list.append(out_const_app.getoutput().get("out"))

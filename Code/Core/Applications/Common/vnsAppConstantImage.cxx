@@ -1,4 +1,4 @@
-/************************************************************************************************************ 
+/************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
  *                             o                                                                            *
@@ -25,67 +25,122 @@
  *                                                                                                          *
  ************************************************************************************************************
  *                                                                                                          *
- * Author: CS Systemes d'Information  (France)                                                              * 
- *                                                                                                          * 
- ************************************************************************************************************ 
+ * Author: CS Systemes d'Information  (France)                                                              *
+ *                                                                                                          *
+ ************************************************************************************************************
  * HISTORIQUE                                                                                               *
  *                                                                                                          *
- * VERSION : 5-1-0 : FA : LAIG-FA-MAC-145739-CS : 13 juillet 2016 : Audit code - initialisation membre      *
- * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 23 avr. 2010 : Creation                                                           
+ * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 15 juil. 2010 : Creation
  *                                                                                                          *
  * FIN-HISTORIQUE                                                                                           *
  *                                                                                                          *
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsRoundVectorImageFunctor_h
-#define __vnsRoundVectorImageFunctor_h
-
-#include "itkMath.h"
+#include "otbWrapperApplication.h"
+#include "otbWrapperApplicationFactory.h"
+#include "vnsConstantImageSource.h"
+#include "vnsMacro.h"
+#include "vnsLoggers.h"
+#include <string>
 
 namespace vns
 {
-     namespace Functor
-     {
-         template< typename TInput, typename TOutput >
-         class RoundVectorImage
-         {
-             public:
-             RoundVectorImage() : m_Coef(1.0)
-             {};
-             ~RoundVectorImage() = default;
+namespace Wrapper
+{
 
-             void SetCoef(const double acoef)
-             {
-            	 m_Coef = acoef;
-             }
+using namespace otb::Wrapper;
 
-             bool operator!=(const RoundVectorImage &) const
-             {
-                return false;
-             }
+class ConstantImage : public Application
+{
+public:
+	/** Standard class typedefs. */
+	typedef ConstantImage                 Self;
+	typedef otb::Wrapper::Application     Superclass;
+	typedef itk::SmartPointer<Self>       Pointer;
+	typedef itk::SmartPointer<const Self> ConstPointer;
 
-             bool operator==(const RoundVectorImage & other) const
-             {
-                 return !( *this != other );
-             }
+	/** Standard macro */
+	itkNewMacro(Self);
 
-             inline TOutput
-             operator()(const TInput & A) const
-             {
-                const unsigned int lSize = A.Size();
-                TOutput out(lSize);
-                for (unsigned int bd = 0; bd < lSize; bd++)
-                {
-                out[bd] = itk::Math::Round<typename TOutput::ValueType,typename TInput::ValueType>(m_Coef * A[bd]);
-                }
-                return out ;
-             }
-            // unsigned int m_OutputSize;
-            double  m_Coef;
-         };
-     }
+	itkTypeMacro(ConstantImage, otb::Wrapper::Application);
 
-} // end namespace vns
+	/** Some convenient typedefs. */
+	typedef DoubleImageType ImageType;
+	typedef ImageType::ConstPointer ImageConstPointer;
+	typedef ImageType::Pointer ImagePointer;
+	typedef ImageType::PixelType PixelType;
 
-#endif
+	typedef ConstantImageSource<ImageType> RealConstantImageSourceFilterType;
+    typedef typename RealConstantImageSourceFilterType::Pointer RealConstantImageSourceFilterPointer;
+
+private:
+	void DoInit()
+	{
+		SetName("ConstantImage");
+		SetDescription("ConstantImage algo.");
+		Loggers::GetInstance()->Initialize(GetName());
+		// Documentation
+		SetDocName("constantimage");
+		SetDocLongDescription("This applicatio create a constant image");
+		SetDocLimitations("None");
+		SetDocAuthors("MAJA-Team");
+		SetDocSeeAlso("MAJA Doc");
+
+		AddDocTag("Statistics");
+
+		AddParameter(ParameterType_InputImage,  "dtm",   "DTM");
+		SetParameterDescription("dtm", "Image used as reference grid");
+		AddParameter(ParameterType_Float,  "value", "constant value");
+		SetParameterDescription("value", "constant value of the output");
+		AddRAMParameter("ram");
+		SetDefaultParameterInt("ram",2048);
+
+		AddParameter(ParameterType_OutputImage, "out", "image");
+		SetParameterDescription("out","output image");
+
+	}
+
+	void DoUpdateParameters()
+	{
+	}
+
+
+	void DoExecute()
+	{
+		vns::Loggers::GetInstance()->Initialize(GetName());
+		// Init filters
+		m_ConstImageFilter = RealConstantImageSourceFilterType::New();
+		vnsLogDebugMacro("Number of threads : "<<itk::MultiThreader::GetGlobalDefaultNumberOfThreads());
+		//Get dtm for reference size
+		ImagePointer l_dtmPtr = GetParameterDoubleImage("dtm");
+		l_dtmPtr->UpdateOutputInformation();
+		//Set Parameters
+
+		//Output area
+		Area l_outArea;
+		l_outArea.Origin = l_dtmPtr->GetOrigin();
+		l_outArea.Spacing = l_dtmPtr->GetSignedSpacing();
+		l_outArea.Size = l_dtmPtr->GetLargestPossibleRegion().GetSize();
+        const double constant_val = GetParameterFloat("value");
+
+        m_ConstImageFilter->SetSize(l_outArea.Size);
+        m_ConstImageFilter->SetSpacing(l_outArea.Spacing);
+        m_ConstImageFilter->SetOrigin(l_outArea.Origin);
+
+        m_ConstImageFilter->SetConstantValue(constant_val);
+        m_ConstImageFilter->SetProjectionRef(l_dtmPtr->GetProjectionRef());
+
+        SetParameterOutputImage<ImageType>("out",m_ConstImageFilter->GetOutput());
+	}
+
+
+	/** Filters declaration */
+	RealConstantImageSourceFilterPointer m_ConstImageFilter;
+
+};
+
+}
+}
+
+OTB_APPLICATION_EXPORT(vns::Wrapper::ConstantImage)

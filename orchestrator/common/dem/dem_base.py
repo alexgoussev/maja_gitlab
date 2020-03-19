@@ -189,7 +189,8 @@ class DEMBase(object):
             else:
                 LOGGER.debug("Starting multiply " + self.__SLPListInternal[resol] + " * " + str(self._coeff))
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__SLPListInternal[resol]))
-                self._apps.add_otb_app(multiply_by_scalar(self.__SLPListInternal[resol], self._coeff, output_image=tmp))
+                slp_mul_app = multiply_by_scalar(self.__SLPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                self._apps.add_otb_app(slp_mul_app)
                 mtdat = GdalDatasetInfo(self.__SLPListInternal[resol])
                 l2area = Area()
                 l2area.size = mtdat.size
@@ -198,7 +199,7 @@ class DEMBase(object):
                 self.ProjRef = mtdat.dataset.GetProjectionRef()
                 self.L2Areas.append(l2area)
                 LOGGER.debug("Done")
-                self.SLPList.append(tmp)
+                self.SLPList.append(slp_mul_app.getoutput().get("out"))
             # --------------------------------------
             # Check existent of ALT filename
             if not os.path.exists(self.ALTList[resol]):
@@ -213,9 +214,10 @@ class DEMBase(object):
             else:
                 LOGGER.debug("Starting multiply " + self.__ASPListInternal[resol] + " * " + str(self._coeff))
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__ASPListInternal[resol]))
-                self._apps.add_otb_app(multiply_by_scalar(self.__ASPListInternal[resol], self._coeff, output_image=tmp))
+                asp_mul_app = multiply_by_scalar(self.__ASPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                self._apps.add_otb_app(asp_mul_app)
                 LOGGER.debug("Done")
-                self.ASPList.append(tmp)
+                self.ASPList.append(asp_mul_app.getoutput().get("out"))
 
         # end loop resol
 

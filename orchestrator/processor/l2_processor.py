@@ -581,7 +581,6 @@ class L2Processor(BaseProcessor):
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
             # START ALGORITHMS RAYLEIGH CORRECTION
             rayleigh_correction = MajaModule.create("RayleighCorrection")
-            rayleigh_correction = MajaModule.create("RayleighCorrection")
             rayleigh_correction.launch(global_input_dict, global_output_dict)
             l_module_list.append(rayleigh_correction)
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *

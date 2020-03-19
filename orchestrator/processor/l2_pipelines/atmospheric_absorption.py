@@ -50,6 +50,7 @@ class MajaAthmosphericAbsorption(MajaModule):
         """
         super(MajaAthmosphericAbsorption, self).__init__()
         self._coarse_pipeline = OtbPipelineManager()
+        self._l2_pipeline = OtbPipelineManager()
         self.in_keys_to_check = ["Params.WriteL2ProductToL2Resolution", "Params.RealL2NoData",
                                  "Params.OzoneAmount",
                                  "AppHandler", "Plugin", "L1Reader", "L1Info" ,
@@ -92,7 +93,7 @@ class MajaAthmosphericAbsorption(MajaModule):
                                  "wateramount": water_amount_image_sub,
                                  "gipwatv": dict_of_input.get("L2WATV").new_gipp_filename}
             water_vapour_app_sub = OtbAppHandler("WaterAmountGeneratorFilter", param_watervapour,
-                                                 write_output=True)
+                                                 write_output=False)
             self._coarse_pipeline.add_otb_app(water_vapour_app_sub)
             dict_of_output["VAP_Sub"] = water_vapour_app_sub.getoutput()["wateramount"]
 
@@ -125,7 +126,8 @@ class MajaAthmosphericAbsorption(MajaModule):
                 pressure_image = os.path.join(atm_working, "atmo_pressure_" + l_res + ".tif")
                 param_pressure["dtm"] = dict_of_input.get("DEM").ALTList[r]
                 param_pressure["pressure"] = pressure_image
-                OtbAppHandler("PressureFilter", param_pressure)
+                pressure_app = OtbAppHandler("PressureFilter", param_pressure,write_output=False)
+                self._l2_pipeline.add_otb_app(pressure_app)
                 water_image = os.path.join(atm_working, "atmo_wateramount_" + l_res + ".tif")
                 if (dict_of_input.get("Plugin").WaterVapourDetermination and
                         dict_of_input.get("L2COMM").get_value("GIP_L2COMM_UseDefaultConstantWaterAmount")):
@@ -134,11 +136,12 @@ class MajaAthmosphericAbsorption(MajaModule):
                                     "interp": "linear",
                                     "padradius": 4.0,
                                     "out": water_image}
-                    OtbAppHandler("Resampling", param_resamp)
-                    param_toa_correction["wateramount"] = water_image
+                    water_app = OtbAppHandler("Resampling", param_resamp, write_output=False)
+                    self._l2_pipeline.add_otb_app(water_app)
+                    param_toa_correction["wateramount"] = water_app.getoutput().get("out")
                 toac_image = os.path.join(atm_working, "atmo_toa_" + l_res + ".tif")
                 param_toa_correction["toa"] = dict_of_input.get("L1Reader").get_value("L2TOAImageList")[r]
-                param_toa_correction["pressure"] = pressure_image
+                param_toa_correction["pressure"] = pressure_app.getoutput().get("pressure")
                 band_list = bands_definition.get_list_of_l2_band_id(l_res)
                 LOGGER.debug("Athmo band_list")
                 LOGGER.debug(band_list)
@@ -151,7 +154,8 @@ class MajaAthmosphericAbsorption(MajaModule):
                 param_toa_correction["bandlist"] = band_list_l2
                 param_toa_correction["thetav"] = viewing_zenith_l2
                 param_toa_correction["toac"] = toac_image
-                OtbAppHandler("TOACorrection", param_toa_correction)
-                dict_of_output["AtmoAbsIPTOA_" + l_res] = toac_image
-                dict_of_output["L2TOA_" + l_res] = toac_image
+                toa_app = OtbAppHandler("TOACorrection", param_toa_correction,write_output=False)
+                self._l2_pipeline.add_otb_app(toa_app)
+                dict_of_output["AtmoAbsIPTOA_" + l_res] = toa_app.getoutput().get("toac")
+                dict_of_output["L2TOA_" + l_res] = toa_app.getoutput().get("toac")
 

@@ -101,6 +101,10 @@ OTB_CREATE_APPLICATION(NAME           RoundImage
 OTB_CREATE_APPLICATION(NAME           RoundVectorImage
                        SOURCES        vnsAppRoundVectorImage.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                       
+OTB_CREATE_APPLICATION(NAME           ConstantImage
+                       SOURCES        vnsAppConstantImage.cxx
+                       LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
 
 OTB_CREATE_APPLICATION(NAME           RescaleIntensity
                        SOURCES        vnsAppRescaleIntensity.cxx

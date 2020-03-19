@@ -25,7 +25,7 @@ It defines method mandatory for a processor
 
 ###################################################################################################
 """
-from orchestrator.cots.otb.algorithms.otb_band_math import band_math
+from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 
 
 def constant_image(dtm, value, output_image, write_output=True):
@@ -37,5 +37,10 @@ def constant_image(dtm, value, output_image, write_output=True):
     :param write_output:
     :return:
     """
-    out = band_math([dtm], str(value), output_image, write_output)
-    return out
+    parameters = {"value": value,
+                  "dtm": dtm,
+                  "out": output_image}
+
+    app = OtbAppHandler("ConstantImage", parameters, write_output)
+
+    return app

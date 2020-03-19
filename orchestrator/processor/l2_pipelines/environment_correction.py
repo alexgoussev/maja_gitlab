@@ -28,6 +28,7 @@ It defines method mandatory for a processor
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
 import os
@@ -100,13 +101,13 @@ class MajaEnvCorr(MajaModule):
             albdl2_filename = os.path.join(env_working, "albd_" + l_res + ".tif")
             rhoenvl2_filename= os.path.join(env_working, "rhoenv_extract_" + l_res + ".tif")
             # Extract tdif
-            tdifl2_image_app = extract_roi(tdif_image, l_l2bandidx, tdifl2_filename, write_output=True)
+            tdifl2_image_app = extract_roi(tdif_image, l_l2bandidx, tdifl2_filename, write_output=False)
             # Extract tdir
-            tdirl2_image_app = extract_roi(tdir_image, l_l2bandidx, tdirl2_filename, write_output=True)
+            tdirl2_image_app = extract_roi(tdir_image, l_l2bandidx, tdirl2_filename, write_output=False)
             # Extract albd
-            albdl2_image_app = extract_roi(albd_image, l_l2bandidx, albdl2_filename, write_output=True)
+            albdl2_image_app = extract_roi(albd_image, l_l2bandidx, albdl2_filename, write_output=False)
             # Extract rhoenv_sub
-            rhoenvl2_image_app = extract_roi(rhoenv_sub_image, l_l2bandidx, rhoenvl2_filename, write_output=True)
+            rhoenvl2_image_app = extract_roi(rhoenv_sub_image, l_l2bandidx, rhoenvl2_filename, write_output=False)
 
             rhoenv_image = os.path.join(env_working, "rhoenv_" + l_res + ".tif")
             sre_image = os.path.join(env_working, "sre_" + l_res + ".tif")
@@ -117,12 +118,15 @@ class MajaEnvCorr(MajaModule):
                              "albd": albdl2_image_app.getoutput()["out"],
                              "rhoenvsub": rhoenvl2_image_app.getoutput()["out"],
                              "nodata": dict_of_input.get("Params").get("RealL2NoData"),
+                             "ram": str(OtbAppHandler.ram_to_use/4),
                              "toc": dict_of_output["TOC_" + l_res],
                              "edg": dict_of_input.get("L1Reader").get_value("L2EDGOutputList")[r],
                              "sre": sre_image,
                              "rhoenv": rhoenv_image
                              }
-            OtbAppHandler("EnvCorrection", param_envcorr, write_output=True)
+            envcorr_app = OtbAppHandler("EnvCorrection", param_envcorr, write_output=False)
+            write_images([envcorr_app.getoutput().get("sre"), envcorr_app.getoutput().get("rhoenv")],
+                         [sre_image, rhoenv_image])
             dict_of_output["SRE_" + l_res] = sre_image
             dict_of_output["RhoEnv_" + l_res] = rhoenv_image
             sre_list.append(sre_image)

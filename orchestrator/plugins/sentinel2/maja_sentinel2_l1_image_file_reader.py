@@ -34,16 +34,15 @@ from orchestrator.common.xml_tools import check_xml
 from orchestrator.plugins.common.sentinel2_base.maja_sentinel2_l1_image_file_reader_base import \
     Sentinel2L1ImageFileReaderBase
 from orchestrator.plugins.sentinel2.maja_sentinel2_plugin import MajaSentinel2Plugin
-
+from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.constants import ReadL1Mode
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.common.maja_common import BoundingBox
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math
-from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math_or
-from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
+from orchestrator.cots.otb.algorithms.otb_one_band_equal_threshold import one_band_equal_value
 
 LOGGER = configure_logger(__name__)
 
@@ -51,6 +50,7 @@ LOGGER = configure_logger(__name__)
 class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
     def __init__(self):
         super(Sentinel2L1ImageFileReader, self).__init__()
+        self._l2edg_pipeline = OtbPipelineManager()
         self._Satellite = "SENTINEL2"
         self._plugin = MajaSentinel2Plugin()
 
@@ -91,67 +91,42 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         # *******************************************************************************************************
         LOGGER.debug("Start IPEDGSub")
         m_OneBandFilterList = []
-        m_ThresholdFilterList1 = []
-        m_ThresholdFilterList2 = []
         m_ResamplingList = []
         m_OrFilterList = []
-
+        tmp_edg_pipe = OtbPipelineManager()
         for i in range(2):
             toaFilename = listOfTOAImageFileNames[i]
             LOGGER.debug(("toaFilename : ", toaFilename))
             out_oneBandValue = os.path.join(working, "OneBandValue" + str(i) + ".tif")
-            band_math_OneBand = band_math([self._toa_scalar_list[i]], "abs(im1b1-0.0)<0.000001 ? 1:0",
-                                          output_image=out_oneBandValue + ":uint8")
+            band_math_OneBand = one_band_equal_value(self._toa_scalar_list[i], output_image=out_oneBandValue + ":uint8",
+                                                     threshold=0.0,write_output=False)
+            tmp_edg_pipe.add_otb_app(band_math_OneBand)
             m_OneBandFilterList.append(band_math_OneBand.getoutput()["out"])
-
-            out_threshold_mask1 = os.path.join(working, "ThresholdMask1" + str(i) + ".tif")
-            threshold_mask1 = multiply_by_scalar(band_math_OneBand.getoutput()["out"], 1000,
-                                                 output_image=out_threshold_mask1, write_output=False)
-            m_ThresholdFilterList1.append(threshold_mask1.getoutput()["out"])
-
             out_resample = os.path.join(working, "mask_resample" + str(i) + ".tif")
-            resample_mask = resample(threshold_mask1.getoutput()["out"], self._dem.ALC, out_resample,
-                                     OtbResampleType.LINEAR_WITH_RADIUS)
-
+            resample_mask = resample(band_math_OneBand.getoutput()["out"], self._dem.ALC, out_resample + ":uint8",
+                                     OtbResampleType.LINEAR_WITH_RADIUS,threshold=0.5,write_output=False)
+            tmp_edg_pipe.add_otb_app(resample_mask)
             m_ResamplingList.append(resample_mask.getoutput()["out"])
-
-            out_band_math_resample_mask = os.path.join(working, "band_math_resample_mask" + str(i) + ".tif")
-            band_math_resample_mask = band_math([resample_mask.getoutput()["out"]], "(im1b1-500) < 0.00001 ? 0:1",
-                                                output_image=out_band_math_resample_mask + ":uint8")
-            m_ThresholdFilterList2.append(band_math_resample_mask.getoutput()["out"])
-
-        out_or0 = os.path.join(working, "MaskOrMask_0.tif")
-        band_math_or_b1 = band_math_or([m_ThresholdFilterList2[0], m_ThresholdFilterList2[1]],
-                                       output_image=out_or0 + ":uint8")
-        m_OrFilterList.append(band_math_or_b1.getoutput()["out"])
 
         for i in range(l_NbBand - 2):
             out_oneBandValue = os.path.join(working, "OneBandValue" + str(i + 2) + ".tif")
-            band_math_OneBand = band_math([self._toa_scalar_list[i + 2]], "abs(im1b1-0.0)<0.000001 ? 1:0",
-                                          output_image=out_oneBandValue + ":uint8")
+            band_math_OneBand = one_band_equal_value(self._toa_scalar_list[i + 2],
+                                                     output_image=out_oneBandValue + ":uint8",
+                                                     threshold=0.0,write_output=False)
+            tmp_edg_pipe.add_otb_app(band_math_OneBand)
             m_OneBandFilterList.append(band_math_OneBand.getoutput()["out"])
 
-            out_threshold_mask1 = os.path.join(working, "ThresholdMask1" + str(i + 2) + ".tif")
-            threshold_mask1 = multiply_by_scalar(band_math_OneBand.getoutput()["out"], 1000,
-                                                 output_image=out_threshold_mask1, write_output=False)
-            m_ThresholdFilterList1.append(threshold_mask1.getoutput()["out"])
-
             out_resample = os.path.join(working, "mask_resample" + str(i + 2) + ".tif")
-            resample_mask = resample(threshold_mask1.getoutput()["out"], self._dem.ALC, out_resample,
-                                     OtbResampleType.LINEAR_WITH_RADIUS)
+            resample_mask = resample(band_math_OneBand.getoutput()["out"], self._dem.ALC, out_resample + ":uint8",
+                                     OtbResampleType.LINEAR_WITH_RADIUS,threshold=0.5,write_output=False)
+            tmp_edg_pipe.add_otb_app(resample_mask)
             m_ResamplingList.append(resample_mask.getoutput()["out"])
 
-            out_band_math_resample_mask = os.path.join(working, "band_math_resample_mask" + str(i + 2) + ".tif")
-            band_math_resample_mask = band_math([resample_mask.getoutput()["out"]], "(im1b1-500) < 0.00001 ? 0:1",
-                                                output_image=out_band_math_resample_mask + ":uint8")
-            m_ThresholdFilterList2.append(band_math_resample_mask.getoutput()["out"])
+        out_or0 = os.path.join(working, "MaskOrMask_0.tif")
+        band_math_or_b1 = band_math_or(m_ResamplingList,
+                                       output_image=out_or0 + ":uint8")
 
-            out_or = os.path.join(working, "MaskOrMask" + str(i + 2) + ".tif")
-            band_math_or_b1 = band_math_or([m_OrFilterList[i], band_math_resample_mask.getoutput()["out"]],
-                                           output_image=out_or + ":uint8")
-            m_OrFilterList.append(band_math_or_b1.getoutput()["out"])
-
-        self._edgsubmask = m_OrFilterList[len(m_OrFilterList) - 1]
+        self._edgsubmask = band_math_or_b1.getoutput().get("out")
         LOGGER.debug("End IPEDGSub.")
 
         # *******************************************************************************************************
@@ -169,29 +144,15 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
 
         for r in range(l_NbL2Res):
             res_str = l_ListOfL2Resolution[r]
-            # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
-            out_thresh = os.path.join(working, "EDGThreshL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage = binary_threshold(self._edgsubmask,
-                                                     lower_threshold=0,
-                                                     inside_value=1000,
-                                                     outside_value=0,
-                                                     output_image=out_thresh,
-                                                     write_output=True).getoutput()["out"]  # //l_ThresholdImageFilter
-
+            # Set the threshold to 0.0.001 so that all pixel above 1/1000 to edge pixels
+            # to identify the pixel contaminated by an edge pixel after resampling
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working, "IPEDGRealL2_{}.tif".format(res_str))
-            resample(m_L2EDGThresholdImage, self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR)
-
-            # Set Threshold value to one because the expand filter interpolates values set to 0
-            # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
-            m_L2EDGThresholdImage2_out = os.path.join(working, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage2 = binary_threshold(out_ressampling,
-                                                      lower_threshold=0.,
-                                                      inside_value=1,
-                                                      outside_value=0,
-                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8").getoutput()[
-                "out"]
-            self._l2edgmasklist.append(m_L2EDGThresholdImage2)
+            l2edg_resamp_app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling,
+                                        OtbResampleType.LINEAR,threshold=0.001,write_output=False)
+            self._l2edg_pipeline.add_otb_app(l2edg_resamp_app)
+            self._l2edgmasklist.append(l2edg_resamp_app.getoutput().get("out"))
+        LOGGER.debug("End L2EDG ...")
 
     # Can read method
     def read(self, product_info, app_handler, l2comm, dem, pReadL1Mode):

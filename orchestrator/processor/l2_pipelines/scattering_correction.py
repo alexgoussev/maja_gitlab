@@ -27,6 +27,7 @@ It defines method mandatory for a processor
 """
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
+from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
 
@@ -50,6 +51,7 @@ class MajaScatteringCorrection(MajaModule):
         self.in_keys_to_check = ["Params.Caching", "AppHandler", "Plugin", "L1Reader","L2COMM", "DEM","Params.RealL2NoData"]
         self.out_keys_to_check = ["AtmoAbsIPTOAC","hr_lutmap","AOT_Sub"]
         self.out_keys_provided = ["TOC_sub"]
+        self._l2_pipeline = OtbPipelineManager()
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Scattering Correction start")
@@ -69,7 +71,7 @@ class MajaScatteringCorrection(MajaModule):
                             "l2bandincoarse": bands_definition.get_list_of_band_id_in_l2_coarse(),
                             "tocr": tocr_sub_image
                             }
-        self._scattering_sub_app = OtbAppHandler("ScatteringCorrection", param_scattering, write_output=True)
+        self._scattering_sub_app = OtbAppHandler("ScatteringCorrection", param_scattering, write_output=False)
         dict_of_output["TOC_sub"] = self._scattering_sub_app.getoutput()["tocr"]
         # l2 scattering correction
         tocr_list = []
@@ -88,7 +90,8 @@ class MajaScatteringCorrection(MajaModule):
                 l_l2bandids = bands_definition.get_list_of_l2_coarse_band_id_associated_to_l2_band_code(
                     bands_definition.get_list_of_l2_band_code(l_res))
                 param_scattering["l2bandincoarse"] = [str(b) for b in l_l2bandids]
-                OtbAppHandler("ScatteringCorrection", param_scattering, write_output=True)
-                dict_of_output["TOC_" + l_res] = tocr_image
+                scat_app = OtbAppHandler("ScatteringCorrection", param_scattering, write_output=False)
+                self._l2_pipeline.add_otb_app(scat_app)
+                dict_of_output["TOC_" + l_res] = scat_app.getoutput().get("tocr")
                 tocr_list.append(dict_of_output["TOC_" + l_res])
             dict_of_output["L2TOCList"] = tocr_list

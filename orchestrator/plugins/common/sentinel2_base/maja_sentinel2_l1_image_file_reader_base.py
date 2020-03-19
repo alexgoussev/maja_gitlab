@@ -159,7 +159,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         for i, toa in enumerate(self._toa_scalar_list):
             # undersampling at L2CoarseResolution
             toa_sub_image = os.path.join(working, "aot_sub_{}.tif".format(i))
-            app = resample(toa, dtm_coarse, toa_sub_image, OtbResampleType.LINEAR_WITH_RADIUS, write_output=True)
+            app = resample(toa, dtm_coarse, toa_sub_image, OtbResampleType.LINEAR_WITH_RADIUS, write_output=False)
             self._toa_sub_list.append(app.getoutput()["out"])
             self._pipeline.add_otb_app(app)
         # end band loop
@@ -175,7 +175,8 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         self._sub_toa = toa_sub_image
 
     def rasterize_gml_masks(self, l1Resolution, l2res, l2Area, projectionRef, l1Band, satFilename, defectFilename,
-                          zoneFilename, boundingBox, gdalRasterizeMaskCmd, gdalRasterizeDetCmd, working):
+                          zoneFilename, boundingBox, gdalRasterizeMaskCmd, gdalRasterizeDetCmd,
+                            tmp_constant_image, working):
         """
 
         :param l1Resolution: string
@@ -202,14 +203,10 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                      "\n - zoneFilename      = %s \n", l1Band, l1Resolution, l2res, l2Area,
                      satFilename, defectFilename, zoneFilename)
 
-        dtm_coarse = self._dem.ALC
 
         # TODO: la generation d'une image constante cots.otb.otb_constant_image
         # ------------------------------------------------------------
-        # Generate a constant image that will be used if the gml masks are empty (no feature)
-        tmp_constant_filename = os.path.join(working, "const_{}.tif:uint8".format(l2res))
-        tmp_constant_image_app = constant_image(self._dem.ALTList[l2res], 0, tmp_constant_filename, write_output=True)
-        tmp_constant_image = tmp_constant_image_app.getoutput()["out"]
+
         # -----------------------------------------------------------------------------------
         # Rasterize gml masks at L2 resolution with gdal_rasterize system command
         # -----------------------------------------------------------------------------------
@@ -341,7 +338,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         # *******************************************************************************************************
         # Generate mask rasters by rasterizing the gml mask per L2 resolution per band
         # *******************************************************************************************************
-
+        LOGGER.debug("Start GML mask rasterization ...")
         l_BandsDefinitions = self._plugin.BandsDefinitions
         l2Area = None
         l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
@@ -361,6 +358,11 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             nbBand = len(listOfL2Bands)
             l2Area = l2Areas[l2res]
             counts = (0, 0, 0)
+            # Generate a constant image that will be used if the gml masks are empty (no feature)
+            tmp_constant_filename = os.path.join(working, "const_{}.tif:uint8".format(l2res))
+            tmp_constant_image_app = constant_image(self._dem.ALTList[l2res], 0, tmp_constant_filename,
+                                                    write_output=True)
+            tmp_constant_image = tmp_constant_image_app.getoutput()["out"]
             # For each band of the current resolution
             for l_StrBandIdL2 in listOfL2Bands:
                 # Get the L1 band index associated to the L2 band code
@@ -378,7 +380,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                                                     defectivPixFileNames[l1BandIdx],
                                                     zoneMaskFileNames[l1BandIdx],
                                                     l_BoundingBox, gdalRasterizeMaskCmd,
-                                                    gdalRasterizeDetCmd, working)
+                                                    gdalRasterizeDetCmd, tmp_constant_image, working)
                 counts = tuple(map(operator.add, counts, new_counts))
 
             # band loop
@@ -391,8 +393,9 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_concatenate = {"il": self._l2zonemasklist[l2res],
                                      "out": zone_mask
                                      }
-                OtbAppHandler("ConcatenateImages", param_concatenate)
-                self._l2zoneimagelist.append(zone_mask)
+                l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+                self._l2zoneimagelist.append(l2zoneimage_app.getoutput().get("out"))
+                self._pipeline.add_otb_app(l2zoneimage_app)
             else:
                 self._l2zoneimagelist.append(self._l2zonemasklist[l2res][0])
             # *******************************************************************************************************
@@ -409,25 +412,27 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_binconcatenate = {"im": pix_vector.getoutput().get("out"),
                                         "out": pix_mask + ":uint8"
                                         }
-                pix = OtbAppHandler("BinaryConcatenate", param_binconcatenate)
+                pix = OtbAppHandler("BinaryConcatenate", param_binconcatenate,write_output=False)
+                self._pipeline.add_otb_app(pix)
                 self._l2piximagelist.append(pix.getoutput().get("out"))
             else:
                 self._l2piximagelist.append(self._l2defectmasklist[l2res][0])
             # end res loop
+        LOGGER.debug("End GML mask rasterization ...")
 
     def get_solar_grids(self, dtm, solarAnglesFile, solH1, working):
 
         solar_grid_filename = os.path.join(working, "solar_grid.tif")
 
         # angle_list_to_image()
-        solarangle_grid_app = angle_list_to_image(dtm, solarAnglesFile, solar_grid_filename, write_output=True)
+        solarangle_grid_app = angle_list_to_image(dtm, solarAnglesFile, solar_grid_filename, write_output=False)
         # Multiply by the solar reference altitude
         solar_grid_mult_filename = os.path.join(working, "solar_grid_mult.tif")
         param_scaled_solar = {"im": solarangle_grid_app.getoutput().get("out"),
                               "coef": float(solH1),
                               "out": solar_grid_mult_filename
                               }
-        rta_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_solar, write_output=True)
+        rta_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_solar, write_output=False)
         # Expand at L2Coarse.
         solar_grid_resamp_filename = os.path.join(working, "solar_grid_resamp.tif")
         resample(rta_scal_app.getoutput().get("out"), dtm, solar_grid_resamp_filename, OtbResampleType.LINEAR)
@@ -784,8 +789,9 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            OtbAppHandler("ConcatenateImages", param_concatenate)
-            self._l2toaimagelist.append(out_concatenate)
+            l2toa_concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+            self._pipeline.add_otb_app(l2toa_concat_app)
+            self._l2toaimagelist.append(l2toa_concat_app.getoutput().get("out"))
 
     def generate_sat_images(self, working_dir):
         """
@@ -815,7 +821,8 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             param_concatenate = {"il": self._l2satimagelist[i],
                                  "out": out_concatenate + ":uint8"
                                  }
-            sat_image = OtbAppHandler("ConcatenateImages", param_concatenate)
+            sat_image = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+            self._pipeline.add_otb_app(sat_image)
             self._l2satmasklist.append(sat_image.getoutput().get("out"))
 
     def generate_cla_images(self, realL1Nodata, working):

@@ -28,21 +28,22 @@ It defines method mandatory for a processor
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 
 
-def apply_mask(image, mask, nodataval, output_image, write_output=True):
+def one_band_equal_value(image, output_image, threshold, equal_value=1, outside_value=0, write_output=True):
     """
     :param image:
-    :param mask:
-    :param nodataval:
     :param output_image:
+    :param threshold:
+    :param equal_value:
+    :param outside_value
     :param write_output:
     :return:
     """
-    parameters = {"in": image,
-                  "mode": "apply",
-                  "mode.apply.mask": mask,
-                  "mode.apply.ndval": nodataval,
+    parameters = {"im": image,
+                  "thresholdvalue": threshold,
+                  "equalvalue": equal_value,
+                  "outsidevalue": outside_value,
                   "out": output_image}
 
-    app = OtbAppHandler("ManageNoData", parameters, write_output)
+    app = OtbAppHandler("OneBandEqualThreshold", parameters, write_output)
 
     return app

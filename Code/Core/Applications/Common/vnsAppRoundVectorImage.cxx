@@ -102,7 +102,8 @@ private:
 		AddParameter(ParameterType_OutputImage, "out", "image");
 		SetParameterOutputImagePixelType("out", ImagePixelType_int16);
 		SetParameterDescription("out","output image");
-
+		AddParameter(ParameterType_Float,"coef","multiplication coeff");
+		MandatoryOff("coef");
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram", 2048);
 
@@ -119,6 +120,10 @@ private:
 		DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
 		m_filter = RealToMaskRoundVectorImageFilterType::New();
         m_filter->SetInput(l_im);
+        if(HasValue("coef"))
+        {
+        	m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
+        }
 		SetParameterOutputImage<VectorImageType>("out", m_filter->GetOutput());
 	}
 

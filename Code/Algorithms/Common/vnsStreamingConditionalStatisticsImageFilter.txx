@@ -373,6 +373,9 @@ PersistentStreamingConditionalStatisticsImageFilter<TInputImage, TInputMask, TPr
 		this->GetMeanOutput()->Set(static_cast<RealPixelType>(streamFirstOrderAccumulator));
 		this->GetVarianceOutput()->Set(static_cast<RealPixelType>(itk::NumericTraits<RealPixelType>::Zero));
 		this->GetStandardDeviationOutput()->Set(static_cast<RealPixelType>(itk::NumericTraits<RealPixelType>::Zero));
+		// Set the number of used pixels to compute statistics and the number of excluded values
+		this->GetNbOfValidValuesOutput()->Set(nbValidPixels);
+		this->GetNbOfExcludedValuesOutput()->Set(nbPixels - nbValidPixels);
 	}
 	// Set the outputs
 	else

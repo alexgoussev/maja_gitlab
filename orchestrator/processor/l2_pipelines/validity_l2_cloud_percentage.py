@@ -55,6 +55,9 @@ class MajaValidityL2Cloud(MajaModule):
                        "exclude": 1}
         l2_stat = OtbAppHandler("Stats", param_stats)
         # Test on the value
+        LOGGER.debug("L2Cloud : excludedcount : "+str(l2_stat.getoutput()["excludedcount"]))
+        LOGGER.debug("L2Cloud : validcount : " + str(l2_stat.getoutput()["validcount"]))
+        LOGGER.debug("L2Cloud : nodatanumber : " + str(dict_of_output["L2NoDataNumber"]))
         l_cloudrate = 0
         if l2_stat.getoutput()["excludedcount"] == 0 and l2_stat.getoutput()["validcount"] == 0:
             l_cloudrate = 0
