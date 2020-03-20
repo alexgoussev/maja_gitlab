@@ -56,6 +56,7 @@ class MajaReduceLutComputation(MajaModule):
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Lut computation start")
+        l_writeL2 = dict_of_input.get("Params").get("WriteL2ProductToL2Resolution")
         viewing_zenith = dict_of_input.get("L1Info").ListOfViewingZenithAnglesPerBandAtL2CoarseResolution
         viewing_azimuth = dict_of_input.get("L1Info").ListOfViewingAzimuthAnglesPerBandAtL2CoarseResolution
         # CR Lut generation
@@ -88,7 +89,7 @@ class MajaReduceLutComputation(MajaModule):
         l_listoffile.add_Relative_File_Path(os.path.basename(cr_lut_file))
         l_lut = LUT(index=0, Indexes=old_lut.get_Indexes(), List_Of_Files=l_listoffile)
         l_lutmap.add_LUT(l_lut)
-        if dict_of_input.get("Plugin").WideFieldSensor:
+        if dict_of_input.get("Plugin").WideFieldSensor and l_writeL2:
             m_ViewingZenithAnglesMap = dict_of_input.get("L1Reader").get_value("ViewingZenithMeanMap")
             m_ViewingAzimuthAnglesMap = dict_of_input.get("L1Reader").get_value("ViewingAzimuthMeanMap")
             for key in list(m_ViewingZenithAnglesMap.keys()):
