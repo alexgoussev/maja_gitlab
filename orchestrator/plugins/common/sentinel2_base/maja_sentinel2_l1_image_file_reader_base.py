@@ -391,7 +391,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             if counts[0] != 0:
                 zone_mask = os.path.join(working, "Masks_Zone_{}.tif".format(l2res))
                 param_concatenate = {"il": self._l2zonemasklist[l2res],
-                                     "out": zone_mask
+                                     "out": zone_mask+":uint8"
                                      }
                 l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
                 self._l2zoneimagelist.append(l2zoneimage_app.getoutput().get("out"))
