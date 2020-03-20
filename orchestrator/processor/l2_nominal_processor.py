@@ -125,7 +125,7 @@ class L2NominalProcessor(L2Processor):
                         self._CAMS_Files_HandlersMAP[l_Sat].proportions)
                     LOGGER.info("CAMS found, sampling : " + str(self._CAMS_Files_HandlersMAP[l_Sat].out_rh_sampling))
                     for m in l_modelList:
-                        l_use_rh = self._CAMS_Files_HandlersMAP[l_Sat].get_extinction_map[m]["rh_dep"]
+                        l_use_rh = self._CAMS_Files_HandlersMAP[l_Sat].get_extinction_map()[m]["rh_dep"]
                         self._AthmosphericLutHandlerMap[l_Sat].add_lut_for_model(
                             self._apphandler.get_input_directory(),
                             self._apphandler.get_working_directory(),
