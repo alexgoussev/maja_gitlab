@@ -559,9 +559,9 @@ class L2ImageWriterBase(object):
             tmp_qlk_red = os.path.join(working_dir, "tmp_qck_red.tif")
             tmp_qlk_green = os.path.join(working_dir, "tmp_qck_green.tif")
             tmp_qlk_blue = os.path.join(working_dir, "tmp_qck_blue.tif")
-            extract_roi(pInputImage, [p_QuicklookRedBandId], tmp_qlk_red)
-            extract_roi(pInputImage, [p_QuicklookGreenBandId], tmp_qlk_green)
-            extract_roi(pInputImage, [p_QuicklookBlueBandId], tmp_qlk_blue)
+            tmp_qlk_red_app = extract_roi(pInputImage, [p_QuicklookRedBandId], tmp_qlk_red,write_output=False)
+            tmp_qlk_green_app = extract_roi(pInputImage, [p_QuicklookGreenBandId], tmp_qlk_green,write_output=False)
+            tmp_qlk_blue_app = extract_roi(pInputImage, [p_QuicklookBlueBandId], tmp_qlk_blue,write_output=False)
 
             # Replace NoData value by min
             # TODO
@@ -571,9 +571,15 @@ class L2ImageWriterBase(object):
             tmp_qlk_blue_sub = os.path.join(working_dir, "tmp_qck_blue_sub.tif")
 
             # Call the resampling app
-            resampling_app_red = resample(tmp_qlk_red, dtm, tmp_qlk_red_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
-            resampling_app_green = resample(tmp_qlk_green, dtm, tmp_qlk_green_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
-            resampling_app_blue = resample(tmp_qlk_blue, dtm, tmp_qlk_blue_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
+            resampling_app_red = resample(tmp_qlk_red_app.getoutput().get("out"), dtm, tmp_qlk_red_sub,
+                                          OtbResampleType.LINEAR_WITH_RADIUS,
+                                          padradius=4, outarea=[1000,1000], write_output=False)
+            resampling_app_green = resample(tmp_qlk_green_app.getoutput().get("out"), dtm, tmp_qlk_green_sub,
+                                            OtbResampleType.LINEAR_WITH_RADIUS,
+                                            padradius=4, outarea=[1000,1000], write_output=False)
+            resampling_app_blue = resample(tmp_qlk_blue_app.getoutput().get("out"), dtm, tmp_qlk_blue_sub,
+                                           OtbResampleType.LINEAR_WITH_RADIUS,
+                                           padradius=4, outarea=[1000,1000], write_output=False)
 
             # Concatenate images
             tmp_qlk = os.path.join(working_dir, "tmp_qck_sub.tif")
@@ -582,12 +588,14 @@ class L2ImageWriterBase(object):
                     resampling_app_red.getoutput().get("out"),
                     resampling_app_blue.getoutput().get("out"),
                     resampling_app_green.getoutput().get("out")],
-                "out": tmp_qlk}
-            concat_app = OtbAppHandler("ConcatenateImages", param_concat)
+                "out": tmp_qlk,
+                "ram": str(OtbAppHandler.ram_to_use / 3)
+                }
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=True)
 
             # Rescale between 0 and 255
             rescale_intensity(
-                tmp_qlk,
+                concat_app.getoutput().get("out"),
                 0,
                 255,
                 filename +

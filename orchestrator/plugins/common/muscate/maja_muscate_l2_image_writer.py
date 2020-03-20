@@ -293,6 +293,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
 
                 # VAPScalar.SetInput(VAPThreshold.GetOutput())
                 # VAPScalar.SetCoef(p_VAPQuantificationValue)
+                atb_pipeline = OtbPipelineManager()
                 tmp_vap = os.path.join(working_dir, "tmp_vap_scaled_" + l_StrResolution + ".tif")
                 param_bandmath_vap = {"il": [self._l2vapimagelist[resol], self._l2edgimagelist[resol]],
                                       "exp": "(im2b1 == 1)?" + str(p_VAPNodataValue) + ":" + "im1b1*" + str(
@@ -300,13 +301,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                       "out": tmp_vap
                                       }
                 vap_scal_app = OtbAppHandler("BandMath", param_bandmath_vap, write_output=False)
+                atb_pipeline.add_otb_app(vap_scal_app)
 
                 tmp_round_vap = os.path.join(working_dir, "tmp_vap_round_" + l_StrResolution + ".tif")
                 param_round_vap = {"im": vap_scal_app.getoutput().get("out"),
                                     "out": tmp_round_vap
                                   }
                 vap_round_app = OtbAppHandler("RoundVectorImage", param_round_vap, write_output=False)
-
+                atb_pipeline.add_otb_app(vap_round_app)
                 tmp_aot = os.path.join(working_dir, "tmp_aot_scaled_" + l_StrResolution + ".tif")
                 param_bandmath_aot = {"il": [self._l2aotlist[resol], self._l2edgimagelist[resol]],
                                       "exp": "(im2b1 == 1)?" + str(p_AOTNodataValue) + ":" + "im1b1*" + str(
@@ -314,13 +316,13 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                       "out": tmp_aot
                                       }
                 aot_scal_app = OtbAppHandler("BandMath", param_bandmath_aot, write_output=False)
-
+                atb_pipeline.add_otb_app(aot_scal_app)
                 tmp_round_aot = os.path.join(working_dir, "tmp_aot_round_" + l_StrResolution + ".tif")
                 param_round_aot = {"im": aot_scal_app.getoutput().get("out"),
                                    "out": tmp_round_aot
                                    }
                 aot_round_app = OtbAppHandler("RoundVectorImage", param_round_aot, write_output=False)
-
+                atb_pipeline.add_otb_app(aot_round_app)
 
                 param_atb_concat = {
                     "il": [vap_round_app.getoutput().get("out"), aot_round_app.getoutput().get("out")],
@@ -328,8 +330,10 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     }
 
                 OtbAppHandler("ConcatenateImages", param_atb_concat,write_output=True)
+                atb_pipeline.free_otb_app()
 
                 # START WRITING IAB MASK
+                iab_pipeline = OtbPipelineManager()
                 # Create the image list
                 tmp_iab = os.path.join(working_dir, "tmp_iab_concat_" + l_StrResolution + ".tif")
                 param_iab_concat = {
@@ -337,12 +341,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     "out": tmp_iab
                 }
                 tmp_iab_concat_app = OtbAppHandler("ConcatenateImages", param_iab_concat,write_output=False)
+                iab_pipeline.add_otb_app(tmp_iab_concat_app)
                 param_iab_binconcat = {"im": tmp_iab_concat_app.getoutput().get("out"),
                                        "out": l_BaseL2FullMASKSFilename + "_IAB_" + l_grpSuffix + ".tif"
                                        + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
                                        }
                 iab_binconcat_app = OtbAppHandler("BinaryConcatenate", param_iab_binconcat, write_output=True)
-
+                iab_pipeline.add_otb_app(iab_binconcat_app)
+                iab_pipeline.free_otb_app()
                 # START WRITING MG2 Image file DATA
                 l_mg2_image_list = []
                 mg2_pipeline = OtbPipelineManager()
@@ -351,13 +357,12 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 app_resample_wat = resample(self._wasimage, self._dtm.ALTList[resol],
                                             wat_resampled, method=OtbResampleType.LINEAR, threshold=0.25, write_output=False)
                 l_mg2_image_list.append(app_resample_wat.getoutput().get("out"))
-
+                mg2_pipeline.add_otb_app(app_resample_wat)
                 # Extract the CM2 cloud mask
                 l_cm2_index = p_CLDCoreAlgorithmsMapBand[CLOUD_MASK_ALL_CLOUDS]
                 l_mg2_image_list.append(self._l2cldlist[resol][l_cm2_index])
 
                 #Connect the SNW image if any
-
                 if self._cld_snow is not None:
                     LOGGER.debug("Snow mask has been successfully computed, adding it to the MG2")
                     snw_resampled = os.path.join(working_dir, "snw_resampled_" + l_StrResolution + ".tif")
@@ -382,16 +387,18 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                               "im1b1 || im2b1",
                                               tmp_shador_bandmath,write_output=False)
                 l_mg2_image_list.append(tmp_band_math_app.getoutput().get("out"))
-
+                mg2_pipeline.add_otb_app(tmp_band_math_app)
                 # Connect the HID image
                 hid_resampled = os.path.join(working_dir, "hid_resampled_" + l_StrResolution + ".tif")
                 app_resample_hid = resample(self._dtm_hid, self._dtm.ALTList[resol],
                                             hid_resampled,  method=OtbResampleType.LINEAR,threshold=0.25, write_output=False)
                 l_mg2_image_list.append(app_resample_hid.getoutput().get("out"))
+                mg2_pipeline.add_otb_app(app_resample_hid)
                 # Connect the SHDimage
                 shd_resampled = os.path.join(working_dir, "shd_resampled_" + l_StrResolution + ".tif")
                 app_resample_shd = resample(self._dtm_shd, self._dtm.ALTList[resol],
                                             shd_resampled, method=OtbResampleType.LINEAR, threshold=0.25, write_output=False)
+                mg2_pipeline.add_otb_app(app_resample_shd)
                 l_mg2_image_list.append(app_resample_shd.getoutput().get("out"))
                 if p_EnvCorOption:
                     # Append STL
@@ -412,9 +419,11 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_mg2_concat_app = OtbAppHandler("ConcatenateImages", param_mg2_concat,write_output=False)
                 param_mg2_binconcat = {"im": tmp_mg2_concat_app.getoutput().get("out"),
                                        "out": l_BaseL2FullMASKSFilename + "_MG2_" + l_grpSuffix + ".tif"
-                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
+                                       + file_utils.get_extended_filename_write_mask_file_muscate(),
+                                       "ram": str(OtbAppHandler.ram_to_use / 4)
                                        }
                 mg2_binconcat_app = OtbAppHandler("BinaryConcatenate", param_mg2_binconcat, write_output=True)
+                mg2_pipeline.add_otb_app(mg2_binconcat_app)
                 mg2_pipeline.free_otb_app()
 
                 # START WRITING SAT Image file DATA

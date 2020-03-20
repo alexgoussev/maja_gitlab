@@ -37,7 +37,7 @@ def write_images(img_list, img_filenames):
     parameters = {"il": img_list,
                   "filenames": img_filenames,
                   "ram": str(OtbAppHandler.ram_to_use),
-                  "nblinesperstrip": 250}
+                  "nblinesperstrip": 500}
 
     app = OtbAppHandler("ImageListWriter", parameters)
 
