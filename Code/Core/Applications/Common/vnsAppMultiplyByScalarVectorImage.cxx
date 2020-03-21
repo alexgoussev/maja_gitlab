@@ -39,7 +39,7 @@
  ************************************************************************************************************/
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "otbMultiplyByScalarImageFilter.h"
+#include "vnsMultiplyByScalarVectorImageFilter.h"
 #include "vnsLoggers.h"
 #include <string>
 
@@ -67,7 +67,7 @@ public:
 
 	/** Some convenient typedefs. */
 	typedef DoubleVectorImageType ImageType;
-	typedef otb::MultiplyByScalarImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
+	typedef vns::MultiplyByScalarVectorImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
 
 
 private:
@@ -110,7 +110,7 @@ private:
 		ImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
 		const double l_coeff = this->GetParameterFloat("coef");
 		m_filter->SetInput(l_im);
-		m_filter->SetCoef(l_coeff);
+		m_filter->SetCoeff(l_coeff);
 		SetParameterOutputImage<ImageType>("out",m_filter->GetOutput());
 
 	}

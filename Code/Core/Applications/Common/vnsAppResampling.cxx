@@ -227,9 +227,23 @@ private:
 
 		if( isSamePhysical && HasValue("outareasize.x")==false && HasValue("outareasize.y")==false)
 		{
-		   vnsLogDebugMacro("No resampling needed")
-		   SetParameterOutputImagePixelType("out", ImagePixelType_double);
-		   SetParameterOutputImage<VectorImageType>("out", l_inPtr);
+		   vnsLogDebugMacro("No resampling needed");
+		   if(HasValue("threshold"))
+		   {
+			   m_Thresholder = BinaryThresholdVectorImageFilterType::New();
+			   m_Thresholder->SetInput(l_inPtr);
+			   m_Thresholder->ThresholdAbove(GetParameterFloat("threshold"));
+			   m_Thresholder->SetInsideValue(0);
+			   m_Thresholder->SetOutsideValue(1);
+			   SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
+			   SetParameterOutputImage<VectorImageType>("out",m_Thresholder->GetOutput());
+
+		   }
+		   else
+		   {
+			   SetParameterOutputImagePixelType("out", ImagePixelType_double);
+			   SetParameterOutputImage<VectorImageType>("out", l_inPtr);
+		   }
 		}
 		else
 		{

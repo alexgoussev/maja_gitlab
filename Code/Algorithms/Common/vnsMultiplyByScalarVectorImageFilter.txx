@@ -38,10 +38,10 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsBinaryToVectorImageFilter_txx
-#define __vnsBinaryToVectorImageFilter_txx
+#ifndef __vnsMultiplyByScalarVectorImageFilter_txx
+#define __vnsMultiplyByScalarVectorImageFilter_txx
 
-#include "vnsBinaryToVectorImageFilter.h"
+#include "vnsMultiplyByScalarVectorImageFilter.h"
 
 #include "itkImageRegionIterator.h"
 #include "itkImageRegionConstIterator.h"
@@ -52,19 +52,19 @@ namespace vns
 
     /** Constructor */
     template<class TInputImage, class TOutputImage>
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::BinaryToVectorImageFilter() : m_NumberOfComponentsPerPixel(1)
+        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::MultiplyByScalarVectorImageFilter() : m_Coeff(1.0)
         {
         }
 
     /** Destructor */
     template<class TInputImage, class TOutputImage>
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::~BinaryToVectorImageFilter()
+        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::~MultiplyByScalarVectorImageFilter()
         {
         }
 
     template<class TInputImage, class TOutputImage>
         void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
+        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
         {
             // Call to the superclass implementation
             Superclass::GenerateOutputInformation();
@@ -73,28 +73,12 @@ namespace vns
             typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
 
             // initialize the number of channels of the output image
-            outputPtr->SetNumberOfComponentsPerPixel(m_NumberOfComponentsPerPixel);
-        }
-
-    /** PrintSelf method */
-    template<class TInputImage, class TOutputImage>
-        void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::BeforeThreadedGenerateData()
-        {
-            if (m_NumberOfComponentsPerPixel > (sizeof(InputImagePixelType) * 8))
-            {
-                vnsExceptionBusinessMacro("The pixel type used to read the input image in not valid.\n"
-                        "Its size must be greater than the number of component extracted from the pixel.")
-            }
-            for (unsigned int i = 0; i < m_NumberOfComponentsPerPixel; i++)
-            {
-                m_BitWeight.push_back(static_cast<unsigned int> (vcl_pow(2., static_cast<double> (i))));
-            }
+            outputPtr->SetNumberOfComponentsPerPixel(inputPtr->GetNumberOfComponentsPerPixel());
         }
 
     template<class TInputImage, class TOutputImage>
         void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateData(
+        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateData(
                 const RegionType& outputRegionForThread, itk::ThreadIdType /*threadId*/)
         {
             // Grab the input and output
@@ -110,24 +94,25 @@ namespace vns
             inputIt.GoToBegin();
             outputIt.GoToBegin();
 
-
             OutputImagePixelType outputVectorValue;
-            outputVectorValue.SetSize(m_NumberOfComponentsPerPixel);
+
+            outputVectorValue.SetSize(inputPtr->GetNumberOfComponentsPerPixel());
             outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
             const unsigned int nbValue = outputVectorValue.GetSize();
 
             // Pixel loop
             while (inputIt.IsAtEnd() == false)
             {
-                InputImagePixelType inputValue = inputIt.Get();
+                const InputImagePixelType& inputValue = inputIt.Get();
+
                 // Band loop
+
                 for (unsigned int j = 0 ; j < nbValue ; j++)
                 {
                     // Set to one the bit to the associated band
-                    outputVectorValue[j] = static_cast<OutputImageInternalPixelType> ((inputValue
-                            & m_BitWeight[j]) >> j);
-
+                    outputVectorValue[j] = static_cast<OutputImageInternalPixelType> (m_Coeff * inputValue[j]);
                 }
+
                 // Set the output pixel value
                 outputIt.Set(static_cast<OutputImagePixelType> (outputVectorValue));
 
@@ -139,11 +124,11 @@ namespace vns
     /** PrintSelf method */
     template<class TInputImage, class TOutputImage>
         void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::PrintSelf(std::ostream& os, itk::Indent indent) const
+        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::PrintSelf(std::ostream& os, itk::Indent indent) const
         {
             Superclass::PrintSelf(os, indent);
         }
 
 } // End namespace vns
 
-#endif /* __vnsBinaryToVectorImageFilter_txx */
+#endif /* __vnsMultiplyByScalarVectorImageFilter_txx */

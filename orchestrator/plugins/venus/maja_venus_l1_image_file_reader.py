@@ -47,6 +47,7 @@ from orchestrator.common.maja_common import Area
 from orchestrator.cots.gdal.gdal_dataset_info import GdalDatasetInfo, update_projection
 LOGGER = configure_logger(__name__)
 from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.plugins.venus.maja_venus_l1_image_filenames import VenusL1ImageFilenames
 
 
@@ -172,12 +173,22 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                     tmp_l1toa_roi, write_output=False)
         self._l1toa_pipeline.add_otb_app(app_l1_toa_roi)
 
+        tmp_sat_roi = os.path.join(working_dir, "sat_roi.tif")
+        app_sat_roi = extract_roi(l_FilenameProvider.m_TOAImageFileName,
+                                  [VenusL1ImageFileReader.SATChannel - 1],
+                                  tmp_sat_roi, write_output=False)
+        self._sat_pipeline.add_otb_app(app_sat_roi)
+        #Multiply scalar by quantif
         tmp_l1toa_mbs = os.path.join(working_dir, "l1toa.tif")
-        app_l1toa_mbs= multiply_by_scalar(app_l1_toa_roi.getoutput()["out"],
+        app_l1toa_mbs= multiply_by_scalar(app_l1_toa_roi.getoutput().get("out"),
                                           l_ReflectanceQuantificationValue,
-                                          output_image=tmp_l1toa_mbs, write_output=True)
+                                          output_image=tmp_l1toa_mbs, write_output=False)
         self._l1toa_pipeline.add_otb_app(app_l1toa_mbs)
-        self._toascalar = app_l1toa_mbs.getoutput().get("out")
+        # update all extract ROI in once
+        write_images([app_l1toa_mbs.getoutput().get("out"), app_sat_roi.getoutput().get("out")],
+                     [tmp_l1toa_mbs, tmp_sat_roi])
+
+        self._toascalar = tmp_l1toa_mbs
 
         # *********************************************************************************************************
         # L1 PIX image pipeline connection
@@ -185,7 +196,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
         tmp_l1pix_roi = os.path.join(working_dir, "l1pix.tif")
         app_l1_pix_roi = extract_roi(l_FilenameProvider.m_TOAImageFileName,
                                      [VenusL1ImageFileReader.PIXChannel-1],
-                                     tmp_l1pix_roi, write_output=True)
+                                     tmp_l1pix_roi, write_output=False)
         self._l1pix_pipeline.add_otb_app(app_l1_pix_roi)
         self._l1pix = app_l1_pix_roi.getoutput().get("out")
 
@@ -217,7 +228,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_l2pix_binconcat = os.path.join(working_dir, "l2pix.tif")
             param_l2pix_binconcat = {"im": app_l2pix_resample.getoutput().get("out"),
                                    "out": tmp_l2pix_binconcat}
-            app_l2pix_binconcat = OtbAppHandler("BinaryConcatenate", param_l2pix_binconcat, write_output=True)
+            app_l2pix_binconcat = OtbAppHandler("BinaryConcatenate", param_l2pix_binconcat, write_output=False)
             self._l2pix = app_l2pix_binconcat.getoutput().get("out")
             self._l2pix_pipeline.add_otb_app(app_l2pix_binconcat)
 
@@ -256,7 +267,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_edgsub_resample = os.path.join(working_dir, "edgsub_resample.tif")
             app_edgsub_resample = resample(app_edg_resample.getoutput().get("out"), self._dem.ALC,
                                         tmp_edgsub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=False)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=True)
             self._edg_pipeline.add_otb_app(app_edgsub_resample)
             # Threshold the output
             out_sub_edgsub = os.path.join(working_dir, "edgsub.tif")
@@ -266,7 +277,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                       "outsidevalue": 1,
                                       "out": out_sub_edgsub + ":uint8"
                                       }
-            app_edgsub_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edgsub_thresholder2)
+            app_edgsub_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edgsub_thresholder2, write_output=False)
             self._edgsub = app_edgsub_thresholder2.getoutput().get("out")
             self._edg_pipeline.add_otb_app(app_edgsub_thresholder2)
 
@@ -277,18 +288,17 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_l2toa_resample = os.path.join(working_dir, "l2toa_resample.tif")
             app_l2toa_resample = resample(self._toascalar, self._dem.ALTList[0],
                                         tmp_l2toa_resample,
-                                        OtbResampleType.BCO, padradius=4.0)
+                                        OtbResampleType.BCO, padradius=4.0,write_output=False)
             self._l2toa_pipeline.add_otb_app(app_l2toa_resample)
             l2toa_list = []
             l_toathresholdminvalue = 0
             l_toathresholvalue = -10
-            LOGGER.debug(len(app_l2toa_resample.getoutput().get("out")))
 
             #Apply EDG mask on l2toa resampled
             tmp_l2toa = os.path.join(working_dir, "l2toa.tif")
             app_l2toa = apply_mask(app_l2toa_resample.getoutput().get("out"),
                                           app_edg_thresholder2.getoutput().get("out"),
-                                          l_toathresholvalue, tmp_l2toa)
+                                          l_toathresholvalue, tmp_l2toa,write_output=True)
             self._l2toa = app_l2toa.getoutput().get("out")
             self._l2toa_pipeline.add_otb_app(app_l2toa)
 
@@ -310,14 +320,14 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                       "outsidevalue": 0,
                                       "out": out_edgsub_threshold + ":uint8"
                                       }
-            app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold)
+            app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold, write_output=False)
             self._edg_pipeline.add_otb_app(app_edgsub_threshold)
 
 
             tmp_l2subtoa = os.path.join(working_dir, "toasub.tif")
             app_l2subtoa = apply_mask(app_toasub_resample.getoutput().get("out"),
                                    app_edgsub_threshold.getoutput().get("out"),
-                                   l_toathresholvalue, tmp_l2subtoa)
+                                   l_toathresholvalue, tmp_l2subtoa, write_output=True)
             self._toasub = app_l2subtoa.getoutput().get("out")
             self._l2toa_pipeline.add_otb_app(app_l2subtoa)
 
@@ -336,21 +346,15 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             app_l2edg_resample = resample(app_l2edg_threshold.getoutput().get("out"),
                                            self._dem.ALTList[0],
                                           tmp_l2edg_resample,
-                                           OtbResampleType.LINEAR, padradius=4.0, threshold=1.0)
+                                           OtbResampleType.LINEAR, padradius=4.0, threshold=1.0,write_output=False)
             self._l2edg = app_l2edg_resample.getoutput().get("out")
             self._l2edg_pipeline.add_otb_app(app_l2edg_resample)
 
             # *********************************************************************************************************
             # SAT image pipeline connection
             # *********************************************************************************************************
-            tmp_sat_roi = os.path.join(working_dir, "sat_roi.tif")
-            app_sat_roi = extract_roi(l_FilenameProvider.m_TOAImageFileName,
-                                      [VenusL1ImageFileReader.SATChannel-1],
-                                      tmp_sat_roi, write_output=False)
-            self._sat_pipeline.add_otb_app(app_sat_roi)
-
             tmp_sat_bin2vec = os.path.join(working_dir, "sat_bin2vec.tif")
-            param_sat_bin2vec = {"im": app_sat_roi.getoutput().get("out"),
+            param_sat_bin2vec = {"im": tmp_sat_roi,
                                    "out": tmp_sat_bin2vec,
                                    "nbcomp": VenusL1ImageFileReader.SATNumberOfComponentsPerPixel
                                    }
@@ -363,7 +367,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             app_sat_resample = resample(app_sat_bin2vec.getoutput().get("out"),
                                           self._dem.ALTList[0],
                                           tmp_sat_resample,
-                                          OtbResampleType.BCO, padradius=4.0, threshold=l_l2sat_thresholdvalue)
+                                          OtbResampleType.BCO, padradius=4.0, threshold=l_l2sat_thresholdvalue,write_output=True)
             self._l2sat = app_sat_resample.getoutput().get("out")
             self._sat_pipeline.add_otb_app(app_sat_resample)
 
@@ -409,23 +413,21 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol1_b1 = os.path.join(working_dir, "sol1_B1.tif")
             app_sol1_b1 = multiply_by_scalar(
                 l_FilenameProvider.m_SOLImageFileName+VenusL1ImageFileReader.SOL1ChannelB1, toaarea.spacing[0],
-                tmp_sol1_b1
-            )
+                tmp_sol1_b1,write_output=False)
             self._sol_pipeline.add_otb_app(app_sol1_b1)
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol1_b1.getoutput().get("out"), l_L1SOLSubsamplingFactor)
 
             tmp_sol1_b2 = os.path.join(working_dir, "sol1_B2.tif")
             app_sol1_b2 = multiply_by_scalar(
                 l_FilenameProvider.m_SOLImageFileName + VenusL1ImageFileReader.SOL1ChannelB2, (-1)*toaarea.spacing[1],
-                tmp_sol1_b2
-            )
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol1_b2.getoutput().get("out"),
-                                   l_L1SOLSubsamplingFactor)
+                tmp_sol1_b2,write_output=False)
             self._sol_pipeline.add_otb_app(app_sol1_b2)
             tmp_sol1_concat = os.path.join(working_dir, "sol1_concat.tif")
             param_sol1_concat = {"il": [app_sol1_b1.getoutput().get("out"), app_sol1_b2.getoutput().get("out")],
                                  "out": tmp_sol1_concat}
             app_sol1_concat = OtbAppHandler("ConcatenateImages", param_sol1_concat)
+            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol1_concat.getoutput().get("out"),
+                                   l_L1SOLSubsamplingFactor)
+
             self._sol_pipeline.add_otb_app(app_sol1_concat)
 
             tmp_sol1_resample = os.path.join(working_dir, "sol1.tif")
@@ -438,24 +440,20 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol2_b1 = os.path.join(working_dir, "sol2_B1.tif")
             app_sol2_b1 = multiply_by_scalar(
                 l_FilenameProvider.m_SOLImageFileName + VenusL1ImageFileReader.SOL2ChannelB1, toaarea.spacing[0],
-                tmp_sol2_b1
-            )
+                tmp_sol2_b1,write_output=False)
             self._sol_pipeline.add_otb_app(app_sol2_b1)
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol2_b1.getoutput().get("out"),
-                                   l_L1SOLSubsamplingFactor)
             tmp_sol2_b2 = os.path.join(working_dir, "sol2_B2.tif")
             app_sol2_b2 = multiply_by_scalar(
                 l_FilenameProvider.m_SOLImageFileName + VenusL1ImageFileReader.SOL2ChannelB2, (-1)*toaarea.spacing[1],
-                tmp_sol2_b2
-            )
+                tmp_sol2_b2,write_output=False)
             self._sol_pipeline.add_otb_app(app_sol2_b2)
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol2_b2.getoutput().get("out"),
-                                   l_L1SOLSubsamplingFactor)
 
             tmp_sol2_concat = os.path.join(working_dir, "sol2_concat.tif")
             param_sol2_concat = {"il": [app_sol2_b1.getoutput().get("out"), app_sol2_b2.getoutput().get("out")],
                                  "out": tmp_sol2_concat}
             app_sol2_concat = OtbAppHandler("ConcatenateImages", param_sol2_concat)
+            update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol2_concat.getoutput().get("out"),
+                              l_L1SOLSubsamplingFactor)
             self._sol_pipeline.add_otb_app(app_sol2_concat)
 
             tmp_sol2_resample = os.path.join(working_dir, "sol2.tif")
@@ -477,29 +475,25 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
 
             tmp_vieb5b1_mult = os.path.join(working_dir, "vie5b1_mult.tif")
             app_vieb5b1_mult = multiply_by_scalar(l_FilenameProvider.m_VIEImageFileName + VenusL1ImageFileReader.VIEB5ChannelB1,
-                                                  toaarea.spacing[0], tmp_vieb5b1_mult)
+                                                  toaarea.spacing[0], tmp_vieb5b1_mult,write_output=False)
             self._dtmvie_pipeline.add_otb_app(app_vieb5b1_mult)
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_vieb5b1_mult.getoutput().get("out"),
-                                   l_L1VIESubsamplingFactor)
 
             tmp_vieb5b2_mult = os.path.join(working_dir, "vie5b2_mult.tif")
             app_vieb5b2_mult = multiply_by_scalar(
                 l_FilenameProvider.m_VIEImageFileName + VenusL1ImageFileReader.VIEB5ChannelB2,
-                (-1) * toaarea.spacing[1], tmp_vieb5b2_mult)
+                (-1) * toaarea.spacing[1], tmp_vieb5b2_mult,write_output=False)
             self._dtmvie_pipeline.add_otb_app(app_vieb5b2_mult)
-            update_projection(l_FilenameProvider.m_TOAImageFileName, app_vieb5b2_mult.getoutput().get("out"),
-                                   l_L1VIESubsamplingFactor)
 
             tmp_vieb6b1_mult = os.path.join(working_dir, "vie6b1_mult.tif")
             app_vieb6b1_mult = multiply_by_scalar(
                 l_FilenameProvider.m_VIEImageFileName + VenusL1ImageFileReader.VIEB6ChannelB1,
-                toaarea.spacing[0], tmp_vieb6b1_mult)
+                toaarea.spacing[0], tmp_vieb6b1_mult,write_output=False)
             self._dtmvie_pipeline.add_otb_app(app_vieb6b1_mult)
 
             tmp_vieb6b2_mult = os.path.join(working_dir, "vie6b2_mult.tif")
             app_vieb6b2_mult = multiply_by_scalar(
                 l_FilenameProvider.m_VIEImageFileName + VenusL1ImageFileReader.VIEB6ChannelB2,
-                (-1) * toaarea.spacing[1], tmp_vieb6b2_mult)
+                (-1) * toaarea.spacing[1], tmp_vieb6b2_mult,write_output=False)
             self._dtmvie_pipeline.add_otb_app(app_vieb6b2_mult)
 
             tmp_dtmvie_concat = os.path.join(working_dir, "dtmvie_concat.tif")
@@ -509,6 +503,8 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                           app_vieb6b2_mult.getoutput().get("out")],
                                  "out": tmp_dtmvie_concat}
             app_dtmvie_concat = OtbAppHandler("ConcatenateImages", param_dtmvie_concat)
+            update_projection(l_FilenameProvider.m_TOAImageFileName, app_dtmvie_concat.getoutput().get("out"),
+                              l_L1VIESubsamplingFactor)
             self._dtmvie_pipeline.add_otb_app(app_dtmvie_concat)
 
             tmp_dtmvie_resample = os.path.join(working_dir, "dtmvie.tif")

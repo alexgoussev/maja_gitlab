@@ -30,7 +30,7 @@
  ************************************************************************************************************ 
  * HISTORIQUE                                                                                               *
  *                                                                                                          *
- * VERSION : 1.0.0 : FA : LAIG-FA-MAC-1988-CNES : 21 octobre 2016 : Correction qualite (code mort)          *
+ * VERSION : 5-1-0 : FA : LAIG-FA-MAC-145739-CS : 27 juin 2016 : Audit code - Supp de la macro ITK_EXPORT   *
  * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 11 mai 2010 : Creation                                                           
  *                                                                                                          *
  * FIN-HISTORIQUE                                                                                           *
@@ -38,112 +38,78 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsBinaryToVectorImageFilter_txx
-#define __vnsBinaryToVectorImageFilter_txx
+#ifndef __vnsMultiplyByScalarImageFilter_h
+#define __vnsMultiplyByScalarImageFilter_h
 
-#include "vnsBinaryToVectorImageFilter.h"
-
-#include "itkImageRegionIterator.h"
-#include "itkImageRegionConstIterator.h"
-#include "itkNumericTraits.h"
+#include "itkImageToImageFilter.h"
+#include "vnsMacro.h"
 
 namespace vns
 {
+/** \class  MultiplyByScalarToVectorImageFilter
+ * \brief Multiply each component of a vector image by a given scalar
+ *
+ *
+ * \author CS Systemes d'Information
+ *
+ * \sa ImageToImageFilter
+ * \sa MultiplyByScalarVectorImageFilter
+ *
+ *
+ */
+template <class TInputImage, class TOutputImage>
+class MultiplyByScalarVectorImageFilter : public itk::ImageToImageFilter<TInputImage,TOutputImage>
+{
+public:
+    /** Standard class typedefs. */
+    typedef MultiplyByScalarVectorImageFilter                              Self;
+    typedef itk::ImageToImageFilter<TInputImage,TOutputImage>      Superclass;
+    typedef itk::SmartPointer<Self>                                Pointer;
+    typedef itk::SmartPointer<const Self>                          ConstPointer;
 
+    /** Type macro */
+    itkNewMacro(Self);
+    /** Creation through object factory macro */
+    itkTypeMacro(MultiplyByScalarVectorImageFilter, ImageToImageFilter );
+
+    /** Some convenient typedefs. */
+    typedef typename Superclass::InputImageType   InputImageType;
+    typedef typename InputImageType::ConstPointer InputImageConstPointer;
+    typedef typename InputImageType::RegionType   RegionType;
+    typedef typename InputImageType::PixelType    InputImagePixelType;
+    typedef typename InputImageType::SizeType     SizeType;
+    typedef typename Superclass::OutputImageType  OutputImageType;
+    typedef typename OutputImageType::Pointer     OutputImagePointer;
+    typedef typename OutputImageType::PixelType   OutputImagePixelType;
+    typedef typename OutputImageType::InternalPixelType   OutputImageInternalPixelType;
+
+    itkSetMacro(Coeff, double);
+
+    virtual void GenerateOutputInformation();
+
+protected:
     /** Constructor */
-    template<class TInputImage, class TOutputImage>
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::BinaryToVectorImageFilter() : m_NumberOfComponentsPerPixel(1)
-        {
-        }
-
+    MultiplyByScalarVectorImageFilter();
     /** Destructor */
-    template<class TInputImage, class TOutputImage>
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::~BinaryToVectorImageFilter()
-        {
-        }
-
-    template<class TInputImage, class TOutputImage>
-        void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
-        {
-            // Call to the superclass implementation
-            Superclass::GenerateOutputInformation();
-
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
-
-            // initialize the number of channels of the output image
-            outputPtr->SetNumberOfComponentsPerPixel(m_NumberOfComponentsPerPixel);
-        }
-
+    virtual ~MultiplyByScalarVectorImageFilter();
     /** PrintSelf method */
-    template<class TInputImage, class TOutputImage>
-        void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::BeforeThreadedGenerateData()
-        {
-            if (m_NumberOfComponentsPerPixel > (sizeof(InputImagePixelType) * 8))
-            {
-                vnsExceptionBusinessMacro("The pixel type used to read the input image in not valid.\n"
-                        "Its size must be greater than the number of component extracted from the pixel.")
-            }
-            for (unsigned int i = 0; i < m_NumberOfComponentsPerPixel; i++)
-            {
-                m_BitWeight.push_back(static_cast<unsigned int> (vcl_pow(2., static_cast<double> (i))));
-            }
-        }
+    virtual void PrintSelf(std::ostream& os, itk::Indent indent) const;
 
-    template<class TInputImage, class TOutputImage>
-        void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateData(
-                const RegionType& outputRegionForThread, itk::ThreadIdType /*threadId*/)
-        {
-            // Grab the input and output
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
+    /** Multi-thread version GenerateData. */
+    void ThreadedGenerateData (const RegionType& outputRegionForThread, itk::ThreadIdType threadId);
 
-            // Define the iterators
-            itk::ImageRegionConstIterator<InputImageType> inputIt(inputPtr, outputRegionForThread);
-            itk::ImageRegionIterator<OutputImageType> outputIt(outputPtr, outputRegionForThread);
+private:
+    MultiplyByScalarVectorImageFilter(const Self&); //purposely not implemented
+    void operator=(const Self&); //purposely not implemented
 
+    /** Scalar factor top apply */
+    double m_Coeff;
 
-            // Iterator initialization
-            inputIt.GoToBegin();
-            outputIt.GoToBegin();
-
-
-            OutputImagePixelType outputVectorValue;
-            outputVectorValue.SetSize(m_NumberOfComponentsPerPixel);
-            outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
-            const unsigned int nbValue = outputVectorValue.GetSize();
-
-            // Pixel loop
-            while (inputIt.IsAtEnd() == false)
-            {
-                InputImagePixelType inputValue = inputIt.Get();
-                // Band loop
-                for (unsigned int j = 0 ; j < nbValue ; j++)
-                {
-                    // Set to one the bit to the associated band
-                    outputVectorValue[j] = static_cast<OutputImageInternalPixelType> ((inputValue
-                            & m_BitWeight[j]) >> j);
-
-                }
-                // Set the output pixel value
-                outputIt.Set(static_cast<OutputImagePixelType> (outputVectorValue));
-
-                ++inputIt;
-                ++outputIt;
-            }
-        }
-
-    /** PrintSelf method */
-    template<class TInputImage, class TOutputImage>
-        void
-        BinaryToVectorImageFilter<TInputImage, TOutputImage>::PrintSelf(std::ostream& os, itk::Indent indent) const
-        {
-            Superclass::PrintSelf(os, indent);
-        }
+};
 
 } // End namespace vns
+#ifndef VNS_MANUAL_INSTANTIATION
+#include "vnsMultiplyByScalarVectorImageFilter.txx"
+#endif
 
-#endif /* __vnsBinaryToVectorImageFilter_txx */
+#endif /* __vnsMultiplyByScalarVectorImageFilter_h */
