@@ -162,7 +162,7 @@ class L2ImageReaderBase(object):
                             }
         rcr_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rcr, write_output=True)
         self._coarse_pipeline.add_otb_app(rcr_scal_app)
-        self.dict_of_vals["RCRImage"] = rtc_scal_app.getoutput()["out"]
+        self.dict_of_vals["RCRImage"] = rcr_scal_app.getoutput()["out"]
         # ********************************************************************************************************/
         # * PXD Reader connection */
         # ********************************************************************************************************/
@@ -178,7 +178,7 @@ class L2ImageReaderBase(object):
             p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
             [0],
             tmp_was,
-            write_output=False)
+            write_output=True)
         self._coarse_pipeline.add_otb_app(was_extr_app)
         self.dict_of_vals["WASImage"] = was_extr_app.getoutput()["out"]
         # ********************************************************************************************************/
