@@ -391,7 +391,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         # ---------------------------------------------------------------------------------------------------
         # Write WAM
         LOGGER.debug("Write the PRIVATE WAM header file ...")
-        output_filename = p_L2PrivateImageFilenamesProvider.get_wam_header_filename()+":uint16"+  file_utils.get_extended_filename_write_image_file_standard()
+        output_filename = p_L2PrivateImageFilenamesProvider.get_wam_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_WAM_HDR)
         if not os.path.exists(current_header_filename):
             raise MajaExceptionPluginBase(
