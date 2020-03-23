@@ -196,7 +196,7 @@ class MajaCloudMaskComputation(MajaModule):
                                          "nominal.minpixelcorrelation": dict_of_input.get("L2COMM").get_value_f(
                                              "MinPixelCorrel"),
                                          "nominal.correlthreshold": float(
-                                             dict_of_input.get("L2COMM").get_value_f("MinPixelCorrel")) / 100.0,
+                                             dict_of_input.get("L2COMM").get_value_f("CorrelThreshold")) / 100.0,
                                          "nominal.ncorrel": dict_of_input.get("L2COMM").get_value_f("NCorrel"),
                                          "nominal.stolistofdates": dict_of_input.get("Params").get("StoListOfDates"),
                                          "reflvar": cloud_reflvar_filename + ":uint8",
@@ -316,7 +316,6 @@ class MajaCloudMaskComputation(MajaModule):
                         "cla": dict_of_output.get("CLA_Sub"),
                         "vie": dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),
                         "dtm": dict_of_input.get("DEM").ALC,
-                        "initmode": init_Mode,
                         "sol1.in": dict_of_input.get("L1Reader").get_value("SOL1Image"),
                         "sol1.h": grid_ref_alt.get_SOLH1(),
                         "solhref": grid_ref_alt.get_SOLHRef(),
@@ -333,6 +332,10 @@ class MajaCloudMaskComputation(MajaModule):
                         "nodata": dict_of_input.get("Params").get("RealL2NoData"),
                         "shadow": cloud_shadow_filename + ":uint8"
                         }
+
+        if dict_of_input.get("Params").get("InitMode"):
+            param_shadow["initmode"] = dict_of_input.get("Params").get("InitMode")
+
         # With alt shadows
         if dict_of_input.get("Params").get("CloudMaskingKnownCloudsAltitude"):
             param_shadow["algo"] = "withalt"
@@ -401,7 +404,6 @@ class MajaCloudMaskComputation(MajaModule):
                                  "l2shadvar": dict_of_input.get("L2Reader").get_value("VectorizedCLDSubOutput")[
                                      constants.CLOUD_MASK_SHADVAR],
                                  "l2sto": dict_of_input.get("L2Reader").get_value("STOImage"),
-                                 "initmode": init_Mode,
                                  "l2coarseres": dict_of_input.get(
                                      "Plugin").ConfigUserCamera.get_Business().get_L2CoarseResolution(),
                                  "shadbandtocr": shadowbandtocr_idx,
@@ -423,6 +425,8 @@ class MajaCloudMaskComputation(MajaModule):
                                  "jday": dict_of_input.get("Params").get("JDay"),
                                  "shadvar": cloud_shadvar_filename + ":uint8"
                                  }
+
+
                 shadvar_app = OtbAppHandler("CloudShadVar", param_shadvar, write_output=caching)
                 self._apps.add_otb_app(shadvar_app)
                 cloud_shadvar_image = shadvar_app.getoutput()["shadvar"]
@@ -582,10 +586,12 @@ class MajaCloudMaskComputation(MajaModule):
         #                    Bit 8 - Vide pour les autres
         cld_list = []
 
-        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_all_dilated_masked_image
+        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_sum_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL])
-        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_sum_dilated_masked_image
+
+        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_all_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS])
+
         dict_of_output[constants.CLOUD_MASK_SHADOWS] = cloud_shadow_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_SHADOWS])
         if compute_shadvar:
@@ -611,4 +617,7 @@ class MajaCloudMaskComputation(MajaModule):
         cld_list.append(dict_of_output[constants.CLOUD_MASK_CIRRUS])
 
         dict_of_output["CLDList"] = cld_list
+
+
+        LOGGER.debug(cld_list)
 
