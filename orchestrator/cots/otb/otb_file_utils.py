@@ -49,7 +49,7 @@ def otb_copy_file_to_directory(sourceFilename, destinationDir):
     return destinationFilename
 
 
-def otb_copy_file(source, dest, raise_exceptions=True):
+def otb_copy_image_to_file(source, dest, raise_exceptions=True):
     if not get_test_mode():
         if type(source).__name__ == "SwigPyObject":
             write_images([source], [dest])

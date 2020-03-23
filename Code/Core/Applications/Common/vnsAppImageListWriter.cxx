@@ -241,7 +241,7 @@ private:
 		}
 
 		//Setup and execute the multiwriter
-		l_multi_writer->SetNumberOfDivisionsStrippedStreaming(GetParameterInt("nblinesperstrip"));
+		l_multi_writer->SetNumberOfLinesStrippedStreaming(GetParameterInt("nblinesperstrip"));
 		l_multi_writer->Update();
 
 	}

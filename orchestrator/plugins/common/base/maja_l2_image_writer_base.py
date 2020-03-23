@@ -291,36 +291,36 @@ class L2ImageWriterBase(object):
             file_utils.create_directory(os.path.dirname(l2privateimagefilenames.get_rta_image_filename()))
 
             # Copy all data from private directory
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rta_image_filename(),
                 l2privateimagefilenames.get_rta_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rtc_image_filename(),
                 l2privateimagefilenames.get_rtc_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rcr_image_filename(),
                 l2privateimagefilenames.get_rcr_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_sto_image_filename(),
                 l2privateimagefilenames.get_sto_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_pxd_image_filename(),
                 l2privateimagefilenames.get_pxd_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_ndt_image_filename(),
                 l2privateimagefilenames.get_ndt_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_cld_image_filename(),
                 l2privateimagefilenames.get_cld_image_filename())
             #CLA can be optional
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_cla_image_filename(),
                 l2privateimagefilenames.get_cla_image_filename(),raise_exceptions=False)
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_wam_image_filename(),
                 l2privateimagefilenames.get_wam_image_filename())
             #LTC writing can be optional
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_ltc_image_filename(),
                 l2privateimagefilenames.get_ltc_image_filename(), raise_exceptions=False)
 
@@ -372,7 +372,7 @@ class L2ImageWriterBase(object):
             # START WRITING PXD Image file DATA
             # Create the writer
             # Initialize the writer filter
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._pxd,
                 p_L2PrivateImageFilenamesProvider.get_pxd_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())
@@ -428,7 +428,7 @@ class L2ImageWriterBase(object):
             # START WRITING NDT Image file DATA
             # Create the writer
             # Evol 4 - 1: NDT ecris sur 8 bits(et non 16  bits car seuilement un masque)
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._ndt,
                 p_L2PrivateImageFilenamesProvider.get_ndt_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())
@@ -436,7 +436,7 @@ class L2ImageWriterBase(object):
             # START WRITING LTC Image file DATA
             # Create the image list
             if p_WriteLTC:
-                otb_file_utils.otb_copy_file(self._ltc_image,
+                otb_file_utils.otb_copy_image_to_file(self._ltc_image,
                                              p_L2PrivateImageFilenamesProvider.get_ltc_image_filename())
 
             # START WRITING RTA Image file DATA
@@ -505,7 +505,7 @@ class L2ImageWriterBase(object):
         # LAIG - DM - MAC - 1691 - CNES: Write CLA only is available(only for VENUS - stereo)
         if self._cld_l2cla is not None:
 
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._cld_l2cla,
                 p_L2PrivateImageFilenamesProvider.get_cla_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())

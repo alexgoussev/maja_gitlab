@@ -76,7 +76,7 @@ class L2Processor(BaseProcessor):
         super(L2Processor, self).__init__(apphandler)
 
         # Get the thread value
-        self._nbThreads = 4  # self._apphandler.get_user_conf().get_Computing().get_NbThreads()
+        self._nbThreads = self._apphandler.get_nb_threads()
         os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(self._nbThreads)
 
         LOGGER.info("Using " + str(self._nbThreads) + " Threads")
@@ -102,7 +102,8 @@ class L2Processor(BaseProcessor):
             LOGGER.info("DEM found : " + dem_filename)
             dem = DEMBase()
             l_plugin = MAJAPluginProvider.create_with_unique_sat(sat, self._apphandler)
-            dem.initialize(dem_filename, self._apphandler.get_working_directory(), l_plugin.SnowMasking)
+            dem_working = self._apphandler.get_directory_manager().get_temporary_directory("DTMRead_",do_always_remove=False)
+            dem.initialize(dem_filename, dem_working, l_plugin.SnowMasking)
             self.DataDEMMap[sat] = dem
 
         # Init ozone files

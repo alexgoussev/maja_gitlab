@@ -71,7 +71,7 @@ class AppHandler:
 
         self._logLevel = ""
         self._processorName = AppHandler.L2INIT
-        self._nbThreads = 1
+        self._nbThreads = 4
         self._adminConfigSystemFileName = ""
         self._stylesheet = None
         self._userConf = None
@@ -401,7 +401,9 @@ class AppHandler:
         if args.EnableCleaningTemporaryDirectory:
             self._userConf.get_Computing().set_EnableCleaningTemporaryDirectory(True)
         if args.NbThreads is not None:
-            self._userConf.get_Computing().set_NbThreads(args.NbThreads)
+            self._nbThreads = args.NbThreads
+        else:
+            self._nbThreads = self._userConf.get_Computing().get_NbThreads()
 
         # Admin config
         if args.adminconf is not None:

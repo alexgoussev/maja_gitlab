@@ -34,6 +34,7 @@ from orchestrator.plugins.landsat8.maja_landsat8_plugin import MajaLandsat8Plugi
 from orchestrator.common.constants import ReadL1Mode
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math
+from orchestrator.cots.otb.algorithms.otb_apply_mask import apply_mask
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
@@ -95,7 +96,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             curL1Res = l_ListOfL1Resolution[l1res]
             dtm = self._dem.ALTList[l1res]
             tmp_constant_filename = os.path.join(working_dir, "PIX_Masks_const_{}.tif".format(curL1Res))
-            app = constant_image(dtm, 0, tmp_constant_filename, write_output=True)
+            app = constant_image(dtm, 0, tmp_constant_filename, write_output=False)
             self._l2piximagelist.append(app.getoutput().get("out"))
             self._pix_pipeline.add_otb_app(app)
 
@@ -105,7 +106,8 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                              "out": img_binaryqb,
                              "nbcomp": 16
                              }
-        app = OtbAppHandler("BinaryToVector", param_bintovec_qb, write_output=True)
+        app = OtbAppHandler("BinaryToVector", param_bintovec_qb, write_output=False)
+        self._toa_pipeline.add_otb_app(app)
         self._qbmask = app.getoutput().get("out")
         self._qb_pipeline.add_otb_app(app)
 
@@ -126,66 +128,74 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                 app_bandmath = band_math(
                     [self._header_handler.get_toa_image_filename_from_band_code(band), self._qbmask],
                     expression_bandmath,
-                    img_toaconverter
+                    img_toaconverter,write_output=False
                 )
                 self._toascalarlist.append(app_bandmath.getoutput().get("out"))
                 self._toa_pipeline.add_otb_app(app_bandmath)
             img_concatenate_toa = os.path.join(working_dir, "l1toa_{}.tif".format(l1res))
             param_concatenate_toa = {"il": self._toascalarlist,
                                  "out": img_concatenate_toa}
-            app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa)
+            app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa,write_output=True)
             self._l1toaimagelist.append(app_concatenate_toa.getoutput()["out"])
             self._toa_pipeline.add_otb_app(app_concatenate_toa)
+            self._toa_pipeline.free_otb_app()
+            self._qb_pipeline.free_otb_app()
 
-    def generate_toa_sub_image(self, realL1Nodata,  working):
+    def generate_toa_sub_image(self, working):
         dtm_coarse = self._dem.ALC
-        # For each band of the input product
-        for i, toa in enumerate(self._toascalarlist):
+        # For each res of the input L1 product
+        for i, toa in enumerate(self._l1toaimagelist):
             # undersampling at L2CoarseResolution
             toa_sub_image = os.path.join(working, "aot_sub_{}.tif".format(i))
             app_resample = resample(toa, dtm_coarse, toa_sub_image, OtbResampleType.LINEAR_WITH_RADIUS,
-                           write_output=True)
+                           write_output=False)
             self._toa_sub_pipeline.add_otb_app(app_resample)
-            img_toa_sub_bandmath = os.path.join(working, "aot_sub_bandmath_{}.tif".format(i))
-            app_bandmath = band_math(
-                [app_resample.getoutput().get("out"),self._edgsubmask],
-                "im2b1>"+str(self._toathresholdminvalue)+"?"+str(realL1Nodata)+":im1b1",
-                img_toa_sub_bandmath
-                )
-            self._toasublist.append(app_bandmath.getoutput().get("out"))
-
-        self._toa_sub_pipeline.add_otb_app(app_bandmath)
-        # end band loop
-
+            self._toasublist.append(app_resample.getoutput().get("out"))
+        # end res loop
+        #concat
         toa_sub_image = os.path.join(working, "aot_sub.tif")
         param_concatenate = {"il": self._toasublist,
                              "out": toa_sub_image
                              }
-        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate)
-        self._subtoaimage = app_concatenate.getoutput().get("out")
+        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
         self._toa_sub_pipeline.add_otb_app(app_concatenate)
+        #apply edg
+        #invert EDG for masking
+        out_edgsub_threshold = os.path.join(working, "edgsubthreshold.tif")
+        param_edgsub_threshold = {"im": self._edgsubmask,
+                                  "thresholdvalue": self._toathresholdminvalue,
+                                  "equalvalue": 1,
+                                  "outsidevalue": 0,
+                                  "out": out_edgsub_threshold + ":uint8"
+                                  }
+        app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold, write_output=False)
+        self._toa_sub_pipeline.add_otb_app(app_edgsub_threshold)
+        #apply mask to sub toa
+        tmp_l2subtoa = os.path.join(working, "toasub.tif")
+        app_l2subtoa = apply_mask(app_concatenate.getoutput().get("out"),
+                                  app_edgsub_threshold.getoutput().get("out"),
+                                  self._reall1nodata, tmp_l2subtoa, write_output=True)
 
-    def generate_l2_toa_images(self, l_ListOfL1Resolution, l_ListOfL2Resolution, working_dir):
+        self._subtoaimage = app_l2subtoa.getoutput().get("out")
+        self._toa_sub_pipeline.free_otb_app()
 
-        for l1res in range(len(l_ListOfL1Resolution)):
+    def generate_l2_toa_images(self, l_ListOfL2Resolution, working_dir):
+
+        for l1res in range(len(l_ListOfL2Resolution)):
             curL1Res = l_ListOfL2Resolution[l1res]
             dtm = self._dem.ALTList[l1res]
-            l_ListOfL1BandCode = self._plugin.BandsDefinitions.get_list_of_l1_band_code(curL1Res)
             l_ListOfL2BandCode = self._plugin.BandsDefinitions.get_list_of_l2_band_code(curL1Res)
             LOGGER.debug("Read the nb bands" + str(len(l_ListOfL2BandCode)) + " of the TOA images...")
-            l_l1bandidx = [self._plugin.BandsDefinitions.get_band_id_in_l2_coarse(b) for b in l_ListOfL1BandCode]
-
+            l_l1bandidx = [self._plugin.BandsDefinitions.get_band_id_in_l1(b) for b in l_ListOfL2BandCode]
             tmp_toa_resample = os.path.join(working_dir, "tmp_toa_resample.tif")
-            app_toa_resample = resample(self._l1toaimagelist[0], dtm, tmp_toa_resample, OtbResampleType.LINEAR_WITH_RADIUS,
-                           write_output=True)
+            app_toa_resample = resample(self._l1toaimagelist[l1res], dtm, tmp_toa_resample, OtbResampleType.LINEAR_WITH_RADIUS,
+                           write_output=False)
             self._l2toa_pipeline.add_otb_app(app_toa_resample)
-
-
-            # L2TOA
+            # L2TOA has less band than L1 so extract
             tmp_toa_roi = os.path.join(working_dir, "L2TOAImageList_{}.tif".format(curL1Res))
             l2toa_roi_app = extract_roi(app_toa_resample.getoutput().get("out"),
                                         l_l1bandidx,
-                                        tmp_toa_roi, write_output=True)
+                                        tmp_toa_roi, write_output=False)
             self._l2toa_pipeline.add_otb_app(l2toa_roi_app)
             self._l2toaimagelist.append(l2toa_roi_app.getoutput().get("out"))
 
@@ -199,13 +209,13 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                      "outsidevalue": 0,
                      "out": out_edg + ":uint8"
                      }
-        onebandequal_app = OtbAppHandler("OneBandEqualThreshold", param_edg)
+        onebandequal_app = OtbAppHandler("OneBandEqualThreshold", param_edg,write_output=False)
         self._edg_pipeline.add_otb_app(onebandequal_app)
         # Resample to coarse
         LOGGER.debug("Start IPEDGSub.")
         tmp_edg_sub_resample = os.path.join(working_dir, "tmp_edg_sub.tif")
         edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse, tmp_edg_sub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,write_output=False)
         self._edg_pipeline.add_otb_app(edg_sub_resample_app)
         # Threshold the output
         out_sub_edg = os.path.join(working_dir, "IPEDGSubOutput.tif")
@@ -215,7 +225,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                          "outsidevalue": 1,
                          "out": out_sub_edg + ":uint8"
                          }
-        onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg)
+        onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg,write_output=True)
         # Put in internal data
         self._edgsubmask = onebandequal_sub_app.getoutput().get("out")
         self._edg_pipeline.add_otb_app(onebandequal_sub_app)
@@ -229,86 +239,54 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
         # At L2 resolution
         l_NbL2Res = len(l_ListOfL2Resolution)
-        # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
-        out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
-        m_L2EDGThresholdImage = binary_threshold(self._edgsubmask,
-                                                 lower_threshold=0,
-                                                 inside_value=1000,
-                                                 outside_value=0,
-                                                 output_image=out_thresh + ":double",
-                                                 write_output=True).getoutput()["out"]  # //l_ThresholdImageFilter
         for r in range(l_NbL2Res):
             res_str = l_ListOfL2Resolution[r]
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            app = resample(m_L2EDGThresholdImage, self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR)
+            #threshold to 0.001 has the same result as multiplynig by 1000 and threshold to 1 after
+            app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling,
+                           OtbResampleType.LINEAR,threshold=0.001,write_output=False)
             self._edg_pipeline.add_otb_app(app)
+            self._l2edgmasklist.append(app.getoutput().get("out"))
 
-            # Set Threshold value to one because the expand filter interpolates values set to 0
-            # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
-            m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage2 = binary_threshold(out_ressampling,
-                                                      lower_threshold=1,
-                                                      inside_value=1,
-                                                      outside_value=0,
-                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8").getoutput()[
-                "out"]
-            self._l2edgmasklist.append(m_L2EDGThresholdImage2)
-
-    def generate_l2_sat_images(self, l_ListOfL1Resolution, l_ListOfL2Resolution, working_dir):
-        for l1res in range(len(l_ListOfL1Resolution)):
+    def generate_l2_sat_images(self, l_ListOfL2Resolution, working_dir):
+        for l1res in range(len(l_ListOfL2Resolution)):
             curL1Res = l_ListOfL2Resolution[l1res]
-            l_ListOfL1BandCode = self._plugin.BandsDefinitions.get_list_of_l1_band_code(curL1Res)
             l_ListOfL2BandCode = self._plugin.BandsDefinitions.get_list_of_l2_band_code(curL1Res)
-
+            dtm = self._dem.ALTList[0]
+            tmp_constant_sat_filename = os.path.join(working_dir, "SAT_constant_image_{}.tif".format(l1res))
+            app_constant_sat_app = constant_image(dtm, 0, tmp_constant_sat_filename, write_output=False)
+            self._sat_pipeline.add_otb_app(app_constant_sat_app)
             # ******************************************************************************************************
             # L2 SAT image pipeline connection
             # ******************************************************************************************************
-            for band in l_ListOfL1BandCode:
-                dtm = self._dem.ALTList[0]
-                tmp_constant_sat_filename = os.path.join(working_dir, "SAT_constant_image_{}.tif".format(band))
-                app_constant_sat_app = constant_image(dtm, 0, tmp_constant_sat_filename, write_output=False)
+            for band in l_ListOfL2BandCode:
                 self._satmasklist.append(app_constant_sat_app.getoutput().get("out"))
-                self._sat_pipeline.add_otb_app(app_constant_sat_app)
 
-            out_sat_concatenate = os.path.join(working_dir, "SATVectorImageList{}.tif".format(band))
+            out_sat_concatenate = os.path.join(working_dir, "SATVectorImageList{}.tif".format(l1res))
             param_concatenate_sat = {"il": self._satmasklist,
                                      "out": out_sat_concatenate}
-            concatenate_sat_app = OtbAppHandler("ConcatenateImages", param_concatenate_sat, write_output=True)
+            concatenate_sat_app = OtbAppHandler("ConcatenateImages", param_concatenate_sat, write_output=False)
             self._sat_pipeline.add_otb_app(concatenate_sat_app)
-            l_l1bandidx = [self._plugin.BandsDefinitions.get_band_id_in_l2_coarse(b) for b in l_ListOfL1BandCode]
             # L2SAT
-            tmp_sat_roi = os.path.join(working_dir, "L2SATImageList_{}.tif".format(curL1Res))
-            l2sat_roi_app = extract_roi(concatenate_sat_app.getoutput().get("out"),
-                                        l_l1bandidx,
-                                        tmp_sat_roi, write_output=True)
-            self._sat_pipeline.add_otb_app(l2sat_roi_app)
-            self._l2satmasklist.append(l2sat_roi_app.getoutput().get("out"))
+            self._l2satmasklist.append(concatenate_sat_app.getoutput().get("out"))
 
     def generate_sat_sub_image(self, l2comm, working):
+        # Sat are not provided on landsat 8 thus no need to resample or threshold anything, just create constant
+        # images at coarse resolution
         dtm_coarse = self._dem.ALC
-        # For each band of the input product
-        l_satthresholdminvalue = l2comm.get_value("SaturationThresholdSub")
-        l_satthresholdoutputvalue = 1
-        l_satthresholdinsideputvalue = 0
-        for i, sat in enumerate(self._satmasklist):
-            # undersampling at L2CoarseResolution
-            img_sat_sub = os.path.join(working, "sat_sub_{}.tif".format(i))
-            app_resample = resample(sat, dtm_coarse, img_sat_sub, OtbResampleType.LINEAR_WITH_RADIUS,
-                           write_output=True)
-            self._sat_sub_pipeline.add_otb_app(app_resample)
-            img_sat_sub_bandmath = os.path.join(working, "sat_sub_bandmath_{}.tif".format(i))
-            app_bandmath = band_math(
-                [app_resample.getoutput().get("out")],
-                "im1b1>"+str(l_satthresholdminvalue)+"?"+
-                str(l_satthresholdoutputvalue)+":"+str(l_satthresholdinsideputvalue),
-                img_sat_sub_bandmath
-                )
-            self._satsublist.append(app_bandmath.getoutput().get("out"))
 
-        self._sat_sub_pipeline.add_otb_app(app_bandmath)
+        l_ListOfCoarseBandCode = self._plugin.BandsDefinitions.get_list_of_band_id_in_l2_coarse()
+        tmp_constant_sat_filename = os.path.join(working, "SATSub_constant_image.tif")
+        app_constant_sat_app = constant_image(dtm_coarse, 0, tmp_constant_sat_filename, write_output=False)
+        self._sat_sub_pipeline.add_otb_app(app_constant_sat_app)
+        # ******************************************************************************************************
+        # Sub SAT image pipeline connection
+        # ******************************************************************************************************
+        for band in l_ListOfCoarseBandCode:
+            self._satsublist.append(app_constant_sat_app.getoutput().get("out"))
         # end band loop
-
+        #concatenate const image to have the vector image with coarse nb bands
         sat_sub_image = os.path.join(working, "sat_sub.tif")
         param_concatenate = {"il": self._satsublist,
                              "out": sat_sub_image
@@ -316,11 +294,12 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate)
         self._subsatimage = app_concatenate.getoutput().get("out")
         self._sat_sub_pipeline.add_otb_app(app_concatenate)
+        self._sat_sub_pipeline.free_otb_app()
 
-    def generate_cla_image(self, realL1Nodata, working_dir):
-        LOGGER.debug("Cloud Altitude (CLA) image doesn't exist. Replaced by constant 0 image. !")
+    def generate_cla_image(self,  working_dir):
+        LOGGER.debug("Cloud Altitude (CLA) image doesn't exist. Replaced by constant nodata image. !")
         cla_filename = os.path.join(working_dir, "cla_constant_sub.tif")
-        cla_image = constant_image(self._dem.ALC, realL1Nodata, cla_filename, write_output=True).getoutput()["out"]
+        cla_image = constant_image(self._dem.ALC, self._reall1nodata, cla_filename, write_output=True).getoutput()["out"]
         self._claimage = cla_image
 
     def generate_sol1_image(self, sol_h1, working_dir):
@@ -400,12 +379,12 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             # ************************************************************************************************
             # TOA image pipeline connection
             # ************************************************************************************************
-            self.generate_l2_toa_images(l_ListOfL1Resolution, l_ListOfL2Resolution, working_dir)
+            self.generate_l2_toa_images(l_ListOfL2Resolution, working_dir)
 
             # ************************************************************************************************
             # L2SAT image pipeline connection
             # ************************************************************************************************
-            self.generate_l2_sat_images(l_ListOfL1Resolution, l_ListOfL2Resolution, working_dir)
+            self.generate_l2_sat_images(l_ListOfL2Resolution, working_dir)
 
             # ************************************************************************************************
             # L2 EDG image pipeline connection
@@ -415,7 +394,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             # ************************************************************************************************
             # TOA Sub image pipeline connection
             # ************************************************************************************************
-            self.generate_toa_sub_image(self._reall1nodata, working_dir)
+            self.generate_toa_sub_image(working_dir)
 
             # *********************************.**************************************************************
             # SAT Sub image pipeline connection
@@ -425,7 +404,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             # ************************************************************************************************
             # CLA image pipeline connectio
             # ************************************************************************************************
-            self.generate_cla_image(self._reall1nodata, working_dir)
+            self.generate_cla_image(working_dir)
 
             # ************************************************************************************************
             # SOL1 image pipeline connectio

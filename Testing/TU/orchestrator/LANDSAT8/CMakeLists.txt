@@ -45,20 +45,20 @@ add_test(NAME pyTu${PREFIX}_L1ImageFileReader
           )
 
 
-add_test(NAME pyTu${PREFIX}_L1ImageReader_L1TOA
+add_test(NAME pyTu${PREFIX}_L1ImageReader_L1TOACirrus
           COMMAND ${TEST_DRIVER}
          --compare-image ${EPSILON_4}
          ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/l1toa_0.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/l1toa_0.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L1TOACirrusImage.tif
          Execute
          )
 
 
-add_test(NAME pyTu${PREFIX}_L1ImageReader_L1PIX
+add_test(NAME pyTu${PREFIX}_L1ImageReader_L2PIX
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/PIX_Masks_const_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/PIX_Masks_const_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2PIXImageList_R1.tif
           Execute
           )
 
@@ -67,7 +67,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2SAT
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/L2SATImageList_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2SATImageList_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2SATMaskList_R1.tif
           Execute
           )
 
@@ -94,7 +94,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2EDG
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/IPEDGMaskL2_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPEDGMaskL2_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2EDGOutputList_R1.tif
           Execute
           )
 
@@ -103,7 +103,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_TOASub
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/aot_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/aot_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPTOASubOutput.tif
           Execute
           )
 
@@ -112,7 +112,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SATSub
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sat_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sat_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPSATSubOutput.tif
           Execute
           )
 
@@ -121,7 +121,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_CLA
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/cla_constant_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/cla_constant_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/CLAImage.tif
           Execute
           )
 
@@ -130,7 +130,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL1
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sol1_concat.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sol1_concat.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/SOL1Image.tif
           Execute
           )
 
@@ -139,7 +139,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_VIE
           COMMAND ${TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/vie_concat.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/vie_concat.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/ShadowVIEImage.tif
           Execute
           )
 

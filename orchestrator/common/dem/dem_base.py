@@ -82,7 +82,7 @@ class DEMBase(object):
         list_of_file = os.listdir(file_dbldir)
         nbresol = 0
         for f in list_of_file:
-            if "_ALT" in f:
+            if "_ALT" in f and os.path.splitext(f)[1]=="TIF":
                 nbresol = nbresol + 1
         LOGGER.info("Nb resolution found " + str(nbresol))
         self.initialize_res_list(nbresol)

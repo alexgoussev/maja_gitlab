@@ -438,7 +438,8 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 # START WRITING PIX Image file DATA
                 if "PIXImages" in self._l1_image_info.MuscateData:
                     LOGGER.debug("The L1 product have 'Aberrant_Pixels' masks. There are writed in the L2 out product...")
-                    otb_file_utils.otb_copy_file(self._l2piximagelist[resol], l_BaseL2FullMASKSFilename + "_PIX_" + l_grpSuffix + ".tif")
+                    otb_file_utils.otb_copy_image_to_file(self._l2piximagelist[resol],
+                                                          l_BaseL2FullMASKSFilename + "_PIX_" + l_grpSuffix + ".tif")
                 else:
                     LOGGER.debug("No PIX node detected to write")
 
@@ -476,7 +477,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     LOGGER.debug("DFP Masks not available.")
 
                 # START WRITING EDG Image file DATA
-                otb_file_utils.otb_copy_file(self._l2edgimagelist[resol], l_BaseL2FullMASKSFilename + "_EDG_" +
+                otb_file_utils.otb_copy_image_to_file(self._l2edgimagelist[resol], l_BaseL2FullMASKSFilename + "_EDG_" +
                                                                             l_grpSuffix + ".tif")
 
                 # START WRITING CLM (CLD) Image file DATA
