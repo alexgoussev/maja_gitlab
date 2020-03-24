@@ -107,11 +107,14 @@ class MajaVenusL1ImageInformations(L1ImageInformationsBase):
         self.LevelType = filenamekey[1]
         self.FileClass = xml_tools.get_xml_string_value(rootNode, "//File_Class")
         self.Site = xml_tools.get_xml_string_value(rootNode, "//Instance_Id/Nick_Name")
-        #self.ProductDate = xml_tools.get_xml_string_value(rootNode, "//Instance_Id/Acquisition_Date")
         self.ReferenceSiteDefinitionId = xml_tools.get_xml_string_value(rootNode, "//Reference_SiteDefinition_Id")
         l_AcquisitionDateTime = xml_tools.get_xml_string_value(rootNode, "//Product_Information/Acquisition_Date_Time")
         self.ProductDate = date_utils.get_datetime_from_utc(l_AcquisitionDateTime)
+        self.ProductDateStr = self.ProductDate.strftime('%Y%m%d')
+        LOGGER.debug("Product Date: " + self.ProductDateStr)
+
         self.ProductId = xml_tools.get_xml_string_value(rootNode, "//Fixed_Header/File_Name")
+
 
         genDate = xml_tools.get_xml_string_value(rootNode, "//Processing_Information/Date_Time")
         genDate = genDate[4:]

@@ -89,6 +89,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
 
         l_DatePDV = lASCIIHandler.get_date_pdv()
         self.ProductDate = date_utils.get_datetime_from_utc(l_DatePDV)
+        self.ProductDateStr = self.ProductDate.strftime('%Y%m%d')
+        LOGGER.debug("Product Date: " + self.ProductDateStr)
         self.ReferenceSiteDefinitionId = "UNKNOWN"
         self.ProductId = lASCIIHandler.get_product_id()
         LOGGER.debug("ProductID: "+self.ProductId)
