@@ -178,7 +178,7 @@ namespace vns
                 // Generate the shadow mask with the shadow map (previously generated)
                 this->GetIPCLDSubInput()->UpdateOutputInformation();
                 m_ShadowMaskProjectionFilter->SetSize(this->GetIPCLDSubInput()->GetLargestPossibleRegion().GetSize());
-                m_ShadowMaskProjectionFilter->SetSpacing(this->GetIPCLDSubInput()->GetSpacing());
+                m_ShadowMaskProjectionFilter->SetSpacing(this->GetIPCLDSubInput()->GetSignedSpacing());
                 m_ShadowMaskProjectionFilter->SetOrigin(this->GetIPCLDSubInput()->GetOrigin());
 
                 // Persistent filter
