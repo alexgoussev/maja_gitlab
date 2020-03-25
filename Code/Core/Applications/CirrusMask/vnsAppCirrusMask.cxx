@@ -110,7 +110,6 @@ private:
 		SetDescription("CirrusMask algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CirrusMask");
 		SetDocLongDescription("This application computes the cirrus mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

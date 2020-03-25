@@ -89,7 +89,6 @@ private:
 		SetDescription("Generate the pressure data from DTM.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("PressureGeneration");
 		SetDocLongDescription("This application computes the pressure from the dtm");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

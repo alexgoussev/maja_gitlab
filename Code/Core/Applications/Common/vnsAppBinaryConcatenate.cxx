@@ -81,7 +81,6 @@ private:
 		SetDescription("BinaryConcatenate algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("BinaryToImage");
 		SetDocLongDescription("This application concatenate each image of a vector image into one");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

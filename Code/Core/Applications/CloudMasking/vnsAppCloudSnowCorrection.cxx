@@ -82,7 +82,6 @@ private:
 		SetDescription("Cloud Snow Correction algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudSnowCorrection");
 		SetDocLongDescription("This application computes the cloud SnowCorrection on the reflectance mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

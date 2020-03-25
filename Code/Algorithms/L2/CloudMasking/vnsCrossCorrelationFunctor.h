@@ -227,7 +227,7 @@ namespace vns
                                     // Compute the correlation coefficient :
                                     // c = (sum((Ai-<A>)(Bi-<B>))/N.sqrt(1/N²*sum(Ai-<A>)²*sum(Bi-<B>)²))
                                     crossCorrel = crossCorrel + (static_cast<TOutputPixel> (itA.GetPixel(pos)[m_CorrelBandA])
-                                    - meanA) * (valueB - meanB) / (count * vcl_sqrt(static_cast<double> (varA * varB)));
+                                    - meanA) * (valueB - meanB) / (count * std::sqrt(static_cast<double> (varA * varB)));
                                 }
                             }
                         }

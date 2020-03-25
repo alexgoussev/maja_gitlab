@@ -86,7 +86,6 @@ private:
 		SetDescription("IncidenceAngle algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("IncidenceAngle");
 		SetDocLongDescription("This application computes the incidence angle");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

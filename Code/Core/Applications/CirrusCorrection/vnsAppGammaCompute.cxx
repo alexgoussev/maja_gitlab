@@ -137,7 +137,6 @@ private:
 		SetDescription("GammaCompute algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("GammaComputeApp");
 		SetDocLongDescription("This application computes the gamma");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

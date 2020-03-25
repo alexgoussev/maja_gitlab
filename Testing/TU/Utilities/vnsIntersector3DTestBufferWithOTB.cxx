@@ -161,7 +161,7 @@ vnsIntersector3DTestBufferWithOTB(int argc, char * argv[])
     if (bValid)
     {
         flux << std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
-        std::cout << std::setprecision(3) << "Resultat : " << std::setprecision(3) << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
+        std::cout << "Resultat : " << std::setprecision(3) << PointR[0] << ", " << PointR[1] << ", " << std::fixed << PointR[2] << std::endl;
         if (PointR[2] > Point[2])
         {
             flux << "Le point fourni en entree est cache !!!" << std::endl;

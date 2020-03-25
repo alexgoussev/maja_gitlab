@@ -94,7 +94,6 @@ private:
 		SetDescription("Generate the EnvCorrection.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("EnvCorrection");
 		SetDocLongDescription("This application computes the EnvCorrection");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

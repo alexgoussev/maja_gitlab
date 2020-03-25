@@ -90,7 +90,6 @@ private:
 		SetDescription("AngleListToImage algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("AngleListToImage");
 		SetDocLongDescription("This application compute angle grid from angle list");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -102,7 +101,7 @@ private:
 		SetParameterDescription("dtm", "Image used as reference grid");
 		AddParameter(ParameterType_InputFilename,  "angles",   "XML Angle Files");
 		SetParameterDescription("angles", "XML Angle Files");
-		AddParameter(ParameterType_Empty,"extrapol","extrapol");
+		AddParameter(ParameterType_Bool,"extrapol","extrapol");
 
 
 		AddParameter(ParameterType_OutputImage, "out", "image");

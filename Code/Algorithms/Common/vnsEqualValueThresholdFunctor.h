@@ -146,7 +146,7 @@ namespace vns
                 OutputPixelType m_OutsideValue;
                 /** Output image dimension declaration
                  * Fixed at one. No set accessor. Keep this Get to be able to call it with an
-                 * otbUnaryFunctorImageFilter and thus generate a VectorImage with only  band.
+                 * otbFunctorImageFilter and thus generate a VectorImage with only  band.
                  */
                 unsigned int m_OutputSize;
 

@@ -56,4 +56,5 @@ set(SYSTEM_DLLS
   libXrandr.so*
   libutil.so*
   libcrypt.so*
+  libcrypto.so*
   )

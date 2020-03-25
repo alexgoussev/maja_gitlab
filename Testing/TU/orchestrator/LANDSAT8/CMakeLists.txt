@@ -26,6 +26,7 @@
 
 
 set(TEST_DRIVER ${CMAKE_INSTALL_PREFIX}/bin/otbTestDriver.sh)
+set(VNS_TEST_DRIVER ${MAJA_BINARY_DIR}/bin/vnsTestMainLauncher.sh)
 SET(PREFIX "Landsat8")
 
 add_test(NAME pyTu${PREFIX}_L1ImageInfo
@@ -46,101 +47,123 @@ add_test(NAME pyTu${PREFIX}_L1ImageFileReader
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L1TOA
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
          --compare-image ${EPSILON_4}
          ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/l1toa_0.tif
          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/l1toa_0.tif
-         Execute
+         "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
          )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L1PIX
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/PIX_Masks_const_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/PIX_Masks_const_R1.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2SAT
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/L2SATImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2SATImageList_R1.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2TOA
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/L2TOAImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2TOAImageList_R1.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_EDGSub
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/IPEDGSubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPEDGSubOutput.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2EDG
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/IPEDGMaskL2_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPEDGMaskL2_R1.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_TOASub
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/aot_sub.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/aot_sub.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_SATSub
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sat_sub.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sat_sub.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_CLA
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/cla_constant_sub.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/cla_constant_sub.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL1
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sol1_concat.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sol1_concat.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_VIE
-          COMMAND ${TEST_DRIVER}
+          COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/vie_concat.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/vie_concat.tif
-          Execute
+          "--output-directory"
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
+          ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
 
 

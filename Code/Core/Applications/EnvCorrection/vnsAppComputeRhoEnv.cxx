@@ -104,7 +104,6 @@ private:
 		SetDescription("Generate the RhoEnv.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ComputeRhoEnv");
 		SetDocLongDescription("This application computes the RhoEnv");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

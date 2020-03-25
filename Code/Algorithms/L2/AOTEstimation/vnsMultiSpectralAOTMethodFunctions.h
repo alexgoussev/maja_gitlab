@@ -98,7 +98,6 @@ namespace vns
 
 
             typedef otb::Functor::NDVI<InternalPixelType,
-                                       InternalPixelType,
                                        InternalPixelType>   NDVIFunctorType;
 
             typedef std::vector<double> DoubleVectType;

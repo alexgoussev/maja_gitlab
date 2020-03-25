@@ -84,7 +84,7 @@ namespace Functor
       {
         TOutput outPix;
     
-        if( vcl_abs( static_cast<double>(M) - static_cast<double>(m_BackgroundValue) ) < CONST_EPSILON )
+        if( std::abs( static_cast<double>(M) - static_cast<double>(m_BackgroundValue) ) < CONST_EPSILON )
           {
            outPix = m_ReplaceValue;
           }

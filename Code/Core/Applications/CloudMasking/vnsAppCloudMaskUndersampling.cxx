@@ -98,7 +98,6 @@ private:
 		SetDescription("CloudMaskUndersampling algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudMaskUndersampling");
 		SetDocLongDescription("This application resample the cloud according to the dtm");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

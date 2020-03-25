@@ -45,7 +45,7 @@
 #include "otbVectorImage.h"
 #include "otbImageFileWriter.h"
 
-#include "otbUnaryFunctorImageFilter.h"
+#include "otbFunctorImageFilter.h"
 
 int
 vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
@@ -74,7 +74,7 @@ vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
 
     typedef vns::Functor::ThresholdVectorImageFunctor<InputImageType::PixelType, OutputImageType::PixelType> FunctorType;
 
-    typedef otb::UnaryFunctorImageFilter<InputImageType, OutputImageType, FunctorType> ImageFilterType;
+    typedef otb::FunctorImageFilter<FunctorType> ImageFilterType;
 
     /** Parameters definition */
     PixelType lThresholdValue = static_cast<double>(atoi(argv[3]));
@@ -98,11 +98,11 @@ vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
     // Get image information ( number of bands, dimension, ...)
     reader->GenerateOutputInformation();
     // Set the size of the output image ( because the Unary Functor calls GetOutputSize() )
-    filter->GetFunctor().SetOutputSize(reader->GetOutput()->GetNumberOfComponentsPerPixel());
+    filter->GetModifiableFunctor().SetOutputSize(reader->GetOutput()->GetNumberOfComponentsPerPixel());
 
-    filter->GetFunctor().SetThresholdValue(lThresholdValue);
-    filter->GetFunctor().SetInsideValue(lInsideValue);
-    filter->GetFunctor().SetOutputValue(lOutputValue);
+    filter->GetModifiableFunctor().SetThresholdValue(lThresholdValue);
+    filter->GetModifiableFunctor().SetInsideValue(lInsideValue);
+    filter->GetModifiableFunctor().SetOutputValue(lOutputValue);
 
     filter->SetInput(reader->GetOutput());
     writer->SetInput(filter->GetOutput());

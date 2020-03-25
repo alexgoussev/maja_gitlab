@@ -62,108 +62,115 @@ namespace vns
     {
     public:
       typedef ThresholdVectorImageFunctor<TInputPixel, TOutputPixel>
-	ThresholdVectorImageFunctorType;
-		
+  ThresholdVectorImageFunctorType;
+    
     ThresholdVectorImageFunctor(void) : m_ThresholdValue (0), m_InsideValue(0), m_OutputValue(1), m_OutputSize(1)
-	{
-	}
-                
-		
+  {
+  }
+         
+    
       virtual ~ThresholdVectorImageFunctor(void)
-	{
-	}
+  {
+  }
                 
-		
+    
       typedef TInputPixel InputPixelType;
       typedef TOutputPixel OutputPixelType;
       typedef typename InputPixelType::ValueType  InputInternalPixelType;
       typedef typename OutputPixelType::ValueType OutputInternalPixelType;
-		
+    
       /** Get the threshold value */
       InputInternalPixelType
 
-	GetThresholdValue(void)
+  GetThresholdValue(void)
       {
-	return m_ThresholdValue;
+  return m_ThresholdValue;
       }
       /** Set the threshold value */
       void
-	SetThresholdValue(InputInternalPixelType val)
+  SetThresholdValue(InputInternalPixelType val)
       {
-	m_ThresholdValue = val;
+  m_ThresholdValue = val;
       }
       
       /** Get the inside value set to the output mask*/
       OutputInternalPixelType
-	GetInsideValue(void)
+  GetInsideValue(void)
       {
-	return m_InsideValue;
+  return m_InsideValue;
       }
       /** Set the inside value set to the output mask */
       void
-	SetInsideValue(OutputInternalPixelType val)
+  SetInsideValue(OutputInternalPixelType val)
       {
-	m_InsideValue = val;
+  m_InsideValue = val;
       }
       
       /** Get the output value set to the output mask*/
       OutputInternalPixelType
-	GetOutputValue(void)
+  GetOutputValue(void)
       {
-	return m_OutputValue;
+  return m_OutputValue;
       }
       /** Set the output value set to the output mask */
       void
-	SetOutputValue(OutputInternalPixelType val)
+  SetOutputValue(OutputInternalPixelType val)
       {
-	m_OutputValue = val;
+  m_OutputValue = val;
       }
       
       /** Get the output size of the output mask*/
       unsigned int
-	GetOutputSize(void)
+  GetOutputSize(void)
       {
-	return m_OutputSize;
+  return m_OutputSize;
       }
       /** Set the output size of the output mask */
       void
-	SetOutputSize(unsigned int val)
+  SetOutputSize(unsigned int val)
       {
-	m_OutputSize = val;
+  m_OutputSize = val;
       }
+
+  size_t OutputSize(const std::array<size_t, 1>&) const
+  {
+    return m_OutputSize;
+  }
       
       inline OutputPixelType
-	operator()(InputPixelType inPix) const
-	{
-	  OutputPixelType outPix;
-	  const unsigned int l_size = inPix.Size();
-	  // Set output pixel dimension
-	  outPix.SetSize(l_size);
+  operator()(InputPixelType inPix) const
+  {
+    OutputPixelType outPix;
+    const unsigned int l_size = inPix.Size();
+    // Set output pixel dimension
+    outPix.SetSize(l_size);
 
-	  // Set the inside value to the pixel of the output mask for all bands
-	  outPix.Fill(m_InsideValue);
+    // Set the inside value to the pixel of the output mask for all bands
+    outPix.Fill(m_InsideValue);
 
-	  // Band Loop
-	  for (unsigned int bd = 0; bd < l_size; bd++)
-	    {
-	      if ( vcl_abs(inPix[bd]) > m_ThresholdValue)
-		{
-		  outPix[bd] = m_OutputValue;
-		}
-	    }
+    // Band Loop
+    for (unsigned int bd = 0; bd < l_size; bd++)
+      {
+        if ( vcl_abs(inPix[bd]) > m_ThresholdValue)
+    {
+      outPix[bd] = m_OutputValue;
+    }
+      }
 
-	  return outPix;
-	}
+    return outPix;
+  }
 
-    protected:
+    /** Output image dimension declaration */
+    unsigned int m_OutputSize;
+    //protected:
       /** Threshold value declaration */
       InputInternalPixelType m_ThresholdValue;
       /** Mask inside value declaration */
       OutputInternalPixelType m_InsideValue;
       /** Mask output value declaration */
       OutputInternalPixelType m_OutputValue;
-      /** Output image dimension declaration */
-      unsigned int m_OutputSize;
+      
+      
 
     };
 

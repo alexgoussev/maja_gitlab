@@ -176,9 +176,12 @@ namespace vns
                 const double RsurfSimBlue = static_cast<double>(m_SlopeMS * redInterpValue[lRedBand]) + m_YInterceptMS;
 
                 // Compute NDVI indice to correct multi spectral weight
-                const InternalPixelType lrTOA_NDVI1 = IPTOACSubPixel[m_NDVIAOTBand1];
-                const InternalPixelType lrTOA_NDVI2 = IPTOACSubPixel[m_NDVIAOTBand2];
-                InternalPixelType lNDVIValue = lNDVIFunctor(lrTOA_NDVI2, lrTOA_NDVI1);
+                itk::VariableLengthVector<double> v(2);
+                v[0] = IPTOACSubPixel[m_NDVIAOTBand2];
+                v[1] = IPTOACSubPixel[m_NDVIAOTBand1];
+                lNDVIFunctor.SetBandIndex(CommonBandNames::RED, 1);
+                lNDVIFunctor.SetBandIndex(CommonBandNames::NIR, 2);
+                InternalPixelType lNDVIValue = lNDVIFunctor(v);
 
                 if (lNDVIValue < static_cast<InternalPixelType>(0))
                 {

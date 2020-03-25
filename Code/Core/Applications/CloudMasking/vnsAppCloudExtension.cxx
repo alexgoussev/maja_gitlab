@@ -130,7 +130,6 @@ private:
 		SetDescription("Cloud Extension algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudExtension");
 		SetDocLongDescription("This application computes the cloud extension for the product");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

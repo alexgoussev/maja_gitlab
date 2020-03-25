@@ -97,8 +97,8 @@ namespace vns
                     const double l_zenRad = zen * otb::CONST_PI_180;
                     const double l_aziRad = azi * otb::CONST_PI_180;
 
-                    outPix[0] = static_cast<OutputValueType> (vcl_tan(l_zenRad) * vcl_sin(l_aziRad));
-                    outPix[1] = static_cast<OutputValueType> (vcl_tan(l_zenRad) * vcl_cos(l_aziRad));
+                    outPix[0] = static_cast<OutputValueType> (std::tan(l_zenRad) * std::sin(l_aziRad));
+                    outPix[1] = static_cast<OutputValueType> (std::tan(l_zenRad) * std::cos(l_aziRad));
 
                     return outPix;
                 }

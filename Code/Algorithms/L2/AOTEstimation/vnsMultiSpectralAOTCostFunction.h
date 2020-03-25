@@ -112,7 +112,7 @@ namespace vns
             typedef typename Superclass::DerivativeType DerivativeType;
             typedef typename Superclass::MeasureType MeasureType;
 
-            typedef otb::Functor::NDVI<InternalPixelType, InternalPixelType, InternalPixelType> NDVIFunctorType;
+            typedef otb::Functor::NDVI<InternalPixelType, InternalPixelType> NDVIFunctorType;
 
             /* Neighborhood Iterator related type */
             typedef itk::ConstNeighborhoodIterator<InputImageType> NeighborhoodIteratorType;

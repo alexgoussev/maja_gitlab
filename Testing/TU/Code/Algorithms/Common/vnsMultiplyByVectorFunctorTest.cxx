@@ -45,7 +45,7 @@
 #include "otbVectorImage.h"
 #include "otbImageFileWriter.h"
 
-#include "otbUnaryFunctorImageFilter.h"
+#include "otbFunctorImageFilter.h"
 
 int
 vnsMultiplyByVectorFunctorTest(int argc, char * argv[])
@@ -77,7 +77,7 @@ vnsMultiplyByVectorFunctorTest(int argc, char * argv[])
 
     typedef vns::Functor::MultiplyByVectorFunctor<InputImageType::PixelType, OutputImageType::PixelType> FunctorType;
 
-    typedef otb::UnaryFunctorImageFilter<InputImageType, OutputImageType, FunctorType> ImageFilterType;
+    typedef otb::FunctorImageFilter<FunctorType> ImageFilterType;
 
     /** Parameters definition */
     typedef FunctorType::CoefsVectorType CoefsVectorType;
@@ -103,9 +103,9 @@ vnsMultiplyByVectorFunctorTest(int argc, char * argv[])
     }
 
     // Set the size of the output image ( because the Unary Functor calls GetOutputSize() )
-    filter->GetFunctor().SetOutputSize(nbBands);
+    filter->GetModifiableFunctor().SetOutputSize(nbBands);
 
-    filter->GetFunctor().SetCoefs(coefs);
+    filter->GetModifiableFunctor().SetCoefs(coefs);
     filter->SetInput(reader->GetOutput());
     writer->SetInput(filter->GetOutput());
 

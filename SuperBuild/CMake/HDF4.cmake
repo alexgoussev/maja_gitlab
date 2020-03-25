@@ -17,8 +17,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(HDF4_URL "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.5/src/hdf-4.2.5.tar.gz")
-set(HDF4_URL_MD5 7241a34b722d29d8561da0947c06069f)
+set(HDF4_URL "http://support.hdfgroup.org/ftp/HDF/HDF_Current/src/hdf-4.2.13.tar.gz")
+set(HDF4_URL_MD5 a6aa950b3fce5162b96496d8ea0b82bf)
 set(HDF4_DEPENDS ZLIB JPEG)
 build_projects(HDF4_DEPENDS)
 set(HDF4_CONFIG_ARGS

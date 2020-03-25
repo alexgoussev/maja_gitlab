@@ -581,7 +581,7 @@ namespace vns
                 {
                     RealType stdv = streamFirstOrderSquareComponentAccumulator / static_cast<double>(totalValidPixelsPerBand);
                     stdv -= vcl_pow(streamFirstOrderComponentAccumulator / static_cast<double>(totalValidPixelsPerBand),2);
-                    this->GetComponentStandardDeviationOutput()->Set(static_cast<RealType>(vcl_sqrt(vcl_abs(stdv)))); //(nbPixels * numberOfComponent));
+                    this->GetComponentStandardDeviationOutput()->Set(static_cast<RealType>(std::sqrt(vcl_abs(stdv)))); //(nbPixels * numberOfComponent));
                 }
                 // Per Band case
 
@@ -606,7 +606,7 @@ namespace vns
                         {
                             RealType stdvPix = streamFirstOrderSquareAccumulator[j] / static_cast<RealType>(nbValidPixelsPerBand[j]);
                             stdvPix -= static_cast<RealType>(vcl_pow(streamFirstOrderAccumulator[j] / static_cast<double>(nbValidPixelsPerBand[j]),2));
-                            stdvPix = static_cast<RealType>(vcl_sqrt(vcl_abs(stdvPix)));
+                            stdvPix = static_cast<RealType>(std::sqrt(vcl_abs(stdvPix)));
                             l_Stdv[j] = stdvPix;
                         }
                     }

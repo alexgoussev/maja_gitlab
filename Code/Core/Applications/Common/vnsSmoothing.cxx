@@ -102,7 +102,6 @@ private:
     SetName("SmoothingBis");
     SetDescription("Apply a smoothing filter to an image");
     Loggers::GetInstance()->Initialize(GetName());
-    SetDocName("SmoothingBis");
     SetDocLongDescription("This application applies smoothing filter to an image."
       " Either gaussian, mean, or anisotropic diffusion are available.");
     SetDocLimitations("None");

@@ -110,7 +110,6 @@ private:
 		SetDescription("Resampling algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("resampling");
 		SetDocLongDescription("This application resample the image according to the dtm");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

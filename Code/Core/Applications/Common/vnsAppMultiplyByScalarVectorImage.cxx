@@ -77,7 +77,6 @@ private:
 		SetDescription("Multiply by scalar algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("MultiplyByScalar");
 		SetDocLongDescription("This application multiply each image of a vector image by a factor");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

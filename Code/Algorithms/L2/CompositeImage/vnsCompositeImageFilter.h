@@ -395,6 +395,12 @@ namespace vns
 
         /** Init mode parameter */
         bool m_InitMode;
+        /** Hotspot flag parameter */
+        bool m_HotspotFlag;
+        /** Cirrus flag parameter */
+        bool m_CirrusFlag;
+        /** Rain flag parameter */
+        bool m_RainFlag;
 
         /** Real L2 No_Data parameter */
         RealNoDataType m_RealL2NoData;
@@ -418,12 +424,7 @@ namespace vns
         /** Maximum age for reflectancein the composite image */
         unsigned short m_MaxAge;
 
-        /** Hotspot flag parameter */
-        bool m_HotspotFlag;
-        /** Cirrus flag parameter */
-        bool m_CirrusFlag;
-        /** Rain flag parameter */
-        bool m_RainFlag;
+
 
         /** Acquisition date in julian days */
         short m_JDay;

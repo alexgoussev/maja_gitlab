@@ -156,7 +156,6 @@ private:
 		SetDescription("Cloud shadvar algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudShadVar");
 		SetDocLongDescription("This application computes the cloud shadow variation mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -192,7 +191,7 @@ private:
 		AddParameter(ParameterType_InputImage,  "l2sto",   "L2 STO");
 		SetParameterDescription("l2sto", "L2 STO");
 		//Set parameters
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		AddParameter(ParameterType_Int,  "l2coarseres","l2coarseres");
 		AddParameter(ParameterType_Int,  "shadbandtocr","ShadBandTOCR");
 		AddParameter(ParameterType_Int,  "shadbandrcr","ShadBandRCR");

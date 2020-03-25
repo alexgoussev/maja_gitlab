@@ -74,7 +74,6 @@ private:
 		SetDescription("DirectionnalCorrection algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("DirectionnalCorrection");
 		SetDocLongDescription("This application computes the directional correction coeffs");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

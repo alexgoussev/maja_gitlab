@@ -136,7 +136,6 @@ private:
 		SetDescription("WaterVaporPostPro algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("WaterVaporPostPro");
 		SetDocLongDescription("This application computes the WaterVaporPostPro");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

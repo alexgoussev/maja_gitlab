@@ -398,7 +398,7 @@ PersistentStreamingConditionalStatisticsImageFilter<TInputImage, TInputMask, TPr
 					- (streamFirstOrderAccumulator * streamFirstOrderAccumulator) / static_cast<double>(nbValidPixels));
 			l_Variance /= static_cast<double>(nbValidPixels); // - 1);
 			this->GetVarianceOutput()->Set(l_Variance);
-			this->GetStandardDeviationOutput()->Set(vcl_sqrt(vcl_abs(l_Variance)));
+			this->GetStandardDeviationOutput()->Set(std::sqrt(vcl_abs(l_Variance)));
 
 		}
 

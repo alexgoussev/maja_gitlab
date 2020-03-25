@@ -100,7 +100,6 @@ private:
 		SetDescription("Composite algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("Composite");
 		SetDocLongDescription("This application computes the composite for the product");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -149,13 +148,13 @@ private:
 
 		//Set parameters
 		// Init mode parameter accessors
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		// cirrus flag parameter accessors
-		AddParameter(ParameterType_Empty,  "cirrusflag","CirrusFlag");
+		AddParameter(ParameterType_Bool,  "cirrusflag","CirrusFlag");
 		// Hotspot flag parameter accessors
-		AddParameter(ParameterType_Empty,  "hotspotflag","HotSpotFlag");
+		AddParameter(ParameterType_Bool,  "hotspotflag","HotSpotFlag");
 		// rain flag parameter accessors
-		AddParameter(ParameterType_Empty,  "rainflag","RainFlag");
+		AddParameter(ParameterType_Bool,  "rainflag","RainFlag");
 		AddParameter(ParameterType_StringList, "bandlist", "Composite Band List");
 		MandatoryOff("bandlist");
 		AddParameter(ParameterType_Int, "stobandnumber", "StoBandNumber");
@@ -226,10 +225,10 @@ private:
         InputMaskPointer l_L2NDT;
 
 		//Get parameters
-		const bool l_InitMode = IsParameterEnabled("initmode");
-		const bool l_RainFlag = IsParameterEnabled("rainflag");
-		const bool l_CirrusFlag = IsParameterEnabled("cirrusflag");
-		const bool l_HotspotFlag = IsParameterEnabled("hotspotflag");
+		const bool l_InitMode = GetParameterInt("initmode");
+		const bool l_RainFlag = GetParameterInt("rainflag");
+		const bool l_CirrusFlag = GetParameterInt("cirrusflag");
+		const bool l_HotspotFlag = GetParameterInt("hotspotflag");
 		/** Real L2 No_Data parameter */
 		const RealNoDataType l_RealL2NoData = GetParameterFloat("reall2nodata");
 		/** L2 No_Data parameter */

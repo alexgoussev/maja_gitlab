@@ -133,7 +133,6 @@ private:
 		SetDescription("CirrusCorrectionApply algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CirrusCorrectionApplyApp");
 		SetDocLongDescription("This application apply the cirrus correction");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

@@ -230,7 +230,12 @@ namespace vns
             p_IPTWAIt.Set(static_cast<OutputImagePixelType>(1));
 
             // Compute NDVI indice
-            const InputImageInternalPixelType l_NDVIValue = m_NDVIFunctor(p_IPTOCRIt.Get()[m_RedBandTOCR], p_IPTOCRIt.Get()[m_NIRBandTOCR]);
+            itk::VariableLengthVector<double> v(2);
+            v[0] = p_IPTOCRIt.Get()[m_RedBandTOCR];
+            v[1] = p_IPTOCRIt.Get()[m_NIRBandTOCR];
+            m_NDVIFunctor.SetBandIndex(CommonBandNames::RED, 1);
+            m_NDVIFunctor.SetBandIndex(CommonBandNames::NIR, 2);
+            const InputImageInternalPixelType l_NDVIValue = m_NDVIFunctor(v);
 
             // A pixel is declared as "possible water" if :
             // - it is dark and not located within a topographic shadow

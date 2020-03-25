@@ -90,7 +90,6 @@ private:
 		SetDescription("Round the image to the closest int value.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("OneBandEqualThreshold");
 		SetDocLongDescription("If one band equal threshold the band equal value");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

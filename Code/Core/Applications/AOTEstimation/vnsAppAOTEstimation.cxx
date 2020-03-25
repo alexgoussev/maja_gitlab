@@ -220,7 +220,6 @@ private:
 		SetDescription("Generate the AOTEstimation.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("AOTEstimation");
 		SetDocLongDescription("This application computes the AOT");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -264,7 +263,7 @@ private:
 		SetParameterDescription("lutimage", "Lut image");
 		AddParameter(ParameterType_InputImage,  "cld",   "CLD image");
 		SetParameterDescription("cld", "CLD image at coarse");
-		AddParameter(ParameterType_Empty, "init","init mode");
+		AddParameter(ParameterType_Bool, "init","init mode");
 
 		//Choose the mode
 		AddParameter(ParameterType_Choice,"mode", "compute mode");
@@ -615,7 +614,8 @@ private:
 		}
 
 		//Commons params
-		const bool l_InitMode = IsParameterEnabled("init");
+		const bool l_InitMode = GetParameterInt("init");
+		vnsLogDebugMacro("========init: " << l_InitMode);
 		unsigned int l_MinSamplingInterval = lAOTParamsXMLHandler->GetSamplingIntervalMin();
 		vnsLogDebugDoubleValueMacro(l_MinSamplingInterval);
 		unsigned int l_MaxSamplingInterval = lAOTParamsXMLHandler->GetSamplingIntervalMax();
@@ -657,6 +657,7 @@ private:
 
 		if (l_InitMode == false)
 		{
+		    vnsLogDebugMacro("====== init False");
 			if (!HasValue("l2ndt") || !HasValue("l2rta") || !HasValue("l2rtc")
 					|| !HasValue("l2pxd"))
 			{

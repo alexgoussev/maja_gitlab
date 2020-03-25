@@ -87,7 +87,6 @@ private:
 		SetDescription("MultiImagesExtractROI.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("MultiImagesExtractROI");
 		SetDocLongDescription("This application extract multiple images from multiple images");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
