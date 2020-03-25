@@ -102,7 +102,6 @@ private:
 		Loggers::GetInstance()->Initialize(GetName());
 
 		// Documentation
-		SetDocName("DTMProcessing");
 		SetDocLongDescription("This application computes the hidden and shadows using solar angles and DTM");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

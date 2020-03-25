@@ -88,7 +88,6 @@ private:
 		SetDescription("ConcatenatePerZone algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ConcatenatePerZone");
 		SetDocLongDescription("This application concatenate images according to the zone in the mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

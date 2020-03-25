@@ -219,7 +219,7 @@ namespace vns
 
             // Compute the ratio 1 / (cos(ThetaS) + cos(ThetaV)) for all the pixels
             // before processing the pixel loop
-            const double lCosThetaS(vcl_cos(m_ThetaS));
+            const double lCosThetaS(std::cos(m_ThetaS));
             // Check if cos(ThetaS) is different from 0
             if (vnsEqualsDoubleMacro(lCosThetaS,0.0) == true)
             {
@@ -245,8 +245,8 @@ namespace vns
             double lInvCosThetaSCosThetaV[lNbOfBands];
             for (i = 0; i < lNbOfBands; i++)
             {
-                lCosThetaV[i] = vcl_cos(m_ThetaV[i]);
-                lSinThetaV[i] = vcl_sin(m_ThetaV[i]);
+                lCosThetaV[i] = std::cos(m_ThetaV[i]);
+                lSinThetaV[i] = std::sin(m_ThetaV[i]);
                 const double lDenom = lCosThetaS + lCosThetaV[i];
                 if (vnsEqualsDoubleMacro(lDenom,0.0) == true)
                 {
@@ -270,8 +270,8 @@ namespace vns
                     {
                         const double lA = lAIt.Get();
                         const double lS = lSIt.Get();
-                        const double lCosS = vcl_cos(lS);
-                        const double lSinS = vcl_sin(lS);
+                        const double lCosS = std::cos(lS);
+                        const double lSinS = std::sin(lS);
 
                         // Correction of direct illumination of the visible ground fraction and of BRDF effect ground
                         // Kondratiev approximation for fraction of visible ground
@@ -315,7 +315,7 @@ namespace vns
                             {
                                 // Compute exitence angle
                                 double lExitenceAngle = lCosThetaV[i] * lCosS;
-                                lExitenceAngle = lExitenceAngle + lSinThetaV[i] * lSinS * vcl_cos(m_PhiV[i] - lA);
+                                lExitenceAngle = lExitenceAngle + lSinThetaV[i] * lSinS * std::cos(m_PhiV[i] - lA);
 
                                 if (lExitenceAngle < m_MinCosE)
                                 {

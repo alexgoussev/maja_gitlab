@@ -55,7 +55,7 @@
 #include "otbObjectList.h"
 #include "otbImageFileReader.h"
 
-#include "otbUnaryFunctorImageFilter.h"
+#include "otbFunctorImageFilter.h"
 #include "vnsPressureFunctor.h"
 #include "vnsWaterAmountImageGenerator.h"
 #include "vnsTOACorrectionImageFilter.h"

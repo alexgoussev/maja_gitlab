@@ -100,7 +100,6 @@ private:
 		SetDescription("Generate the water amount.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("WaterAmount");
 		SetDocLongDescription("This application computes the water amount");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

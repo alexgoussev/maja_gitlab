@@ -119,7 +119,7 @@ namespace vns
 
             typedef itk::ImageRegionIterator<OutputImageType> OutputMaskIterator;
 
-            typedef otb::Functor::NDVI<InputImageInternalPixelType, InputImageInternalPixelType, InputImageInternalPixelType> NDVIFunctorType;
+            typedef otb::Functor::NDVI<InputImageInternalPixelType, InputImageInternalPixelType> NDVIFunctorType;
 
             // Init mode parameter accessors
             itkSetMacro(InitMode, bool)

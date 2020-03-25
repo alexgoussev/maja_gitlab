@@ -79,9 +79,9 @@ namespace vns
             // Compute the PhiV in radian
             const double l_PhiVRad = m_PhiV.at(i) * otb::CONST_PI_180;
             l_SunglintDistance.push_back(
-            vcl_acos(
-            vcl_sin(l_ThetaSRad) * vcl_sin(l_ThetaVRad) * vcl_cos(l_PhiSRad - l_PhiVRad + otb::CONST_PI)
-            + vcl_cos(l_ThetaSRad) * vcl_cos(l_ThetaVRad)) * otb::CONST_180_PI);
+            std::acos(
+            std::sin(l_ThetaSRad) * std::sin(l_ThetaVRad) * std::cos(l_PhiSRad - l_PhiVRad + otb::CONST_PI)
+            + std::cos(l_ThetaSRad) * std::cos(l_ThetaVRad)) * otb::CONST_180_PI);
 
             //vnsLogDebugMacro("l_SunglintDistance[" << i << "] = "<< l_SunglintDistance.at(i));
         }
@@ -111,9 +111,9 @@ namespace vns
             // Compute the PhiV in radian
         	const double l_PhiVRad = m_PhiV.at(i) * otb::CONST_PI_180;
             l_HotSpotDistance.push_back(
-            vcl_acos(
-            vcl_sin(l_ThetaSRad) * vcl_sin(l_ThetaVRad) * vcl_cos(l_PhiSRad - l_PhiVRad)
-            + vcl_cos(l_ThetaSRad) * vcl_cos(l_ThetaVRad)) * otb::CONST_180_PI);
+            std::acos(
+            std::sin(l_ThetaSRad) * std::sin(l_ThetaVRad) * std::cos(l_PhiSRad - l_PhiVRad)
+            + std::cos(l_ThetaSRad) * std::cos(l_ThetaVRad)) * otb::CONST_180_PI);
         }
 
         // return the Hotspot distance

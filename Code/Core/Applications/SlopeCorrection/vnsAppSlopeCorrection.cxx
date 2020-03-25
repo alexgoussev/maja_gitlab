@@ -113,7 +113,6 @@ private:
 		SetDescription("Generate the Transmission.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("SlopeCorrection");
 		SetDocLongDescription("This application computes the SlopeCorrection");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

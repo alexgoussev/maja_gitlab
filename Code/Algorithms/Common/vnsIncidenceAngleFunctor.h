@@ -85,8 +85,8 @@ namespace vns
 
                 virtual void SetThetaS( double ThetaSlope )
                 {
-                    m_CosThetaS = vcl_cos( ThetaSlope );
-                    m_SinThetaS = vcl_sin( ThetaSlope );
+                    m_CosThetaS = std::cos( ThetaSlope );
+                    m_SinThetaS = std::sin( ThetaSlope );
                 }
 
 
@@ -95,8 +95,8 @@ namespace vns
                 {
                     const double dAspect = double(inAspect);
                     const double dSlope  = double(inSlope);
-                    OutputPixelType lIncidenceAngle = m_CosThetaS * vcl_cos( dSlope );
-                    lIncidenceAngle = lIncidenceAngle + m_SinThetaS * vcl_sin( dSlope ) * vcl_cos( m_PhiS - dAspect );
+                    OutputPixelType lIncidenceAngle = m_CosThetaS * std::cos( dSlope );
+                    lIncidenceAngle = lIncidenceAngle + m_SinThetaS * std::sin( dSlope ) * std::cos( m_PhiS - dAspect );
                     return lIncidenceAngle;
                 }
 

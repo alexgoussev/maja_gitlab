@@ -193,7 +193,7 @@ namespace vns
                 		vnsExceptionBusinessMacro(
                 				"vnsSnowMaskDeterminationImageFilter : divide by 0, correctedIncidenceAngle = " << correctedIncidenceAngle << " (maybe m_MinCosI is not set?)");
                 	}
-                	correctionCoef = vcl_cos( m_ThetaS ) / correctedIncidenceAngle;
+                	correctionCoef = std::cos( m_ThetaS ) / correctedIncidenceAngle;
                 }
 
                 //compute NDSI

@@ -133,7 +133,6 @@ private:
 		SetDescription("Generate the ScatteringCorrection.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ScatteringCorrection");
 		SetDocLongDescription("This application computes the ScatteringCorrection");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

@@ -116,7 +116,6 @@ private:
 		SetDescription("Generate the Transmission.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ComputeTransmission");
 		SetDocLongDescription("This application computes the ComputeTransmission");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

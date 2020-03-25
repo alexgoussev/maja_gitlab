@@ -17,8 +17,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(BOOST_URL "http://downloads.sourceforge.net/project/boost/boost/1.60.0/boost_1_60_0.tar.bz2")
-set(BOOST_URL_MD5 65a840e1a0b13a558ff19eeb2c4f0cbe)
+set(BOOST_URL "http://downloads.sourceforge.net/project/boost/boost/1.69.0/boost_1_69_0.tar.bz2")
+set(BOOST_URL_MD5 a1332494397bf48332cb152abfefcec2)
 set(BOOST_DEPENDS)
 set(BOOST_AUTOCONF_BUILD 1)
 build_projects(BOOST_DEPENDS)

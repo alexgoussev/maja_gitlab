@@ -83,7 +83,6 @@ private:
 		SetDescription("Change certain values for other in the input.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ChangeValues");
 		SetDocLongDescription("This application changes some value for others as specified");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

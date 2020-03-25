@@ -86,7 +86,6 @@ private:
 		SetDescription("Do the gap filling on an image.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("GapFilling");
 		SetDocLongDescription("This application do the gap filling on an image");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -101,7 +100,7 @@ private:
 		AddParameter(ParameterType_Float, "reall2nodata","");
 		AddParameter(ParameterType_Float, "mean","");
 		AddParameter(ParameterType_Float, "defaultvalue","");
-		AddParameter(ParameterType_Empty, "hasvalidpixels","");
+		AddParameter(ParameterType_Bool, "hasvalidpixels","");
 		AddParameter(ParameterType_OutputImage, "out", "Out image");
 		SetParameterDescription("out", "Gapfilled image");
 		SetParameterOutputImagePixelType("out", ImagePixelType_double);
@@ -134,7 +133,7 @@ private:
 		m_GapFillingImageFilter->SetInitWindowRadius(GetParameterInt("initwindowsradius"));
 		m_GapFillingImageFilter->SetMaxWindowRadius(GetParameterInt("maxwindowsradius"));
 		m_GapFillingImageFilter->SetNoData(GetParameterFloat("reall2nodata"));
-		m_GapFillingImageFilter->SetHasValidPixel(IsParameterEnabled("hasvalidpixels"));
+		m_GapFillingImageFilter->SetHasValidPixel(GetParameterInt("hasvalidpixels"));
 		SetParameterOutputImage<OutputImageType>("out",m_GapFillingImageFilter->GetOutputFilledImage());
 		SetParameterOutputImage<OutputMaskType>("outmask",m_GapFillingImageFilter->GetOutputMask());
 	}

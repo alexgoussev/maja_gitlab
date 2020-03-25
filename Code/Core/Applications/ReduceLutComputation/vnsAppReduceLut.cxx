@@ -45,7 +45,7 @@
 #include "vnsVectorLookUpTableExtractor.h"
 #include "vnsDirectionalCorrectionCompute.h"
 #include "vnsMultiplyByVectorFunctor.h"
-#include "otbUnaryFunctorImageFilter.h"
+#include "itkUnaryFunctorImageFilter.h"
 #include "vnsLookUpTableFileReader.h"
 #include "itkImageFileWriter.h"
 #include "vnsAtomicRegistry.h"
@@ -90,7 +90,7 @@ public:
 	typedef LookUpTableFileReader<LutType> LookUpTableReaderType;
 	typedef LookUpTableReaderType::Pointer LookUpTableReaderPointer;
 	typedef vns::Functor::MultiplyByVectorFunctor<ReducedLutType::PixelType, ReducedLutType::PixelType> FunctorType;
-	typedef otb::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
+	typedef itk::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
 	typedef MultiplyByVectorFilterType::Pointer MultiplyByVectorFilterPointerType;
 	//Extract LUT filter
 	typedef VectorLookUpTableExtractor<LutType,ReducedLutType> VectorLookUpTableExtractorType;
@@ -107,7 +107,6 @@ private:
 		SetDescription("Generate the reduce lut 3D from a 6D lut.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ReduceLut");
 		SetDocLongDescription("This application computes the reduced lut in 3D from a 6D lut");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

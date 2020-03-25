@@ -125,7 +125,6 @@ private:
 		SetDescription("Generate the TDIR TDIF And Albedo for the environment correction.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("InterpolateForEnvCorr");
 		SetDocLongDescription("This application computes the TDIR TDIF And Albedo for the environment correction");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

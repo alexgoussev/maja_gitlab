@@ -50,7 +50,7 @@
 #include "otbVectorImage.h"
 #include "otbImageFileWriter.h"
 #include "vnsDirectionalCorrectionCompute.h"
-#include "otbUnaryFunctorImageFilter.h"
+#include "itkUnaryFunctorImageFilter.h"
 #include "vnsCAMSFileHandler.h"
 #include "vnsNaryApplyProportionsFunctor.h"
 #include "vnsNaryFunctorImageFilter.h"
@@ -137,7 +137,7 @@ namespace vns
 
         //Multiply functor
         typedef vns::Functor::MultiplyByVectorFunctor<ReducedLutType::PixelType, ReducedLutType::PixelType> FunctorType;
-        typedef otb::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
+        typedef itk::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
         typedef MultiplyByVectorFilterType::Pointer MultiplyByVectorFilterPointerType;
 
 

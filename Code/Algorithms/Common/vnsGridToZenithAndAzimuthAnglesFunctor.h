@@ -95,7 +95,7 @@ namespace vns
                     if (vnsDifferentDoubleMacro(dv_y, 0.0) == true)
                     {
                         // Computes phi
-                        phi = vcl_atan(dv_x / dv_y);
+                        phi = std::atan(dv_x / dv_y);
                         if (dv_y < 0.)
                         {
                             phi = phi + otb::CONST_PI;
@@ -105,7 +105,7 @@ namespace vns
                             phi = phi + otb::CONST_2PI;
                         }
                         // Computes theta
-                        theta = vcl_atan(dv_y / vcl_cos(phi));
+                        theta = std::atan(dv_y / std::cos(phi));
                         // Set the output pixel value
                         outPix[0] = static_cast<OutputValueType> (theta);
                         outPix[1] = static_cast<OutputValueType> (phi);
@@ -130,7 +130,7 @@ namespace vns
                                 phi = phi + otb::CONST_2PI;
                             }
                             // Computes theta
-                            theta = vcl_atan(vcl_abs(dv_x));
+                            theta = std::atan(vcl_abs(dv_x));
 
                             // Set the output pixel value
                             outPix[0] = static_cast<OutputValueType> (theta);

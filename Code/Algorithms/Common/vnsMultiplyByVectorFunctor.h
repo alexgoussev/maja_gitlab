@@ -60,6 +60,7 @@ namespace vns
                 typedef MultiplyByVectorFunctor<TInputPixel, TOutputPixel>
                         MultiplyByVectorFunctorType;
 
+
                 MultiplyByVectorFunctor() : m_OutputSize(0)
                 {
                 }
@@ -97,6 +98,11 @@ namespace vns
                 SetOutputSize(unsigned int val)
                 {
                     m_OutputSize = val;
+                }
+
+                size_t OutputSize(const std::array<size_t, 1>&) const
+                {
+                  return m_OutputSize;
                 }
 
                 inline OutputPixelType

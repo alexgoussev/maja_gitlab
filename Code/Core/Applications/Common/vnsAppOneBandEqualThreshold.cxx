@@ -40,7 +40,7 @@
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
 #include "vnsOneBandEqualThresholdFunctor.h"
-#include "otbUnaryFunctorImageFilter.h"
+#include "otbFunctorImageFilter.h"
 #include <string>
 
 namespace vns
@@ -81,7 +81,6 @@ private:
 		SetDescription("If one band equal threshold the band equal value.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("OneBandEqualThreshold");
 		SetDocLongDescription("If one band equal threshold the band equal value");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

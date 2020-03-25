@@ -88,7 +88,6 @@ private:
 		SetDescription("ImageListWriter.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ImageListWriter");
 		SetDocLongDescription("This application write a list of image to files, this is for in memory python use");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

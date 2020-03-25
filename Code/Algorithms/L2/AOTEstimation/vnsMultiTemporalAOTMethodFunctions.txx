@@ -324,7 +324,7 @@ namespace vns
                 itExtTOACSTDEV++;
             }
 
-            lStdDevTOAC = vcl_sqrt((lStdDevTOAC / (countSTDEV - 1))); //vcl_pow((lStdDevTOAC / (countSTDEV-1)), 0.5);
+            lStdDevTOAC = std::sqrt((lStdDevTOAC / (countSTDEV - 1))); //vcl_pow((lStdDevTOAC / (countSTDEV-1)), 0.5);
 
             bool res = false;
             if (lStdDevTOAC > pMinStdDevThreshold)

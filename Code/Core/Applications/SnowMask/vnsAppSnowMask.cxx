@@ -115,7 +115,6 @@ private:
 		SetDescription("SnowMask algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("SnowMask");
 		SetDocLongDescription("This application computes the snow mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

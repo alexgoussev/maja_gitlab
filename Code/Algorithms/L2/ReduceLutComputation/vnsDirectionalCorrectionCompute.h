@@ -68,60 +68,60 @@ namespace vns
 
             //function delta
             inline double delta() const {
-                return vcl_sqrt(vcl_tan(m_theta_s)*vcl_tan(m_theta_s) +
-                        vcl_tan(m_theta_v)*vcl_tan(m_theta_v) -
-                        2*vcl_tan(m_theta_s)*vcl_tan(m_theta_v)*vcl_cos(m_phi));
+                return std::sqrt(std::tan(m_theta_s)*std::tan(m_theta_s) +
+                        std::tan(m_theta_v)*std::tan(m_theta_v) -
+                        2*std::tan(m_theta_s)*std::tan(m_theta_v)*std::cos(m_phi));
             }
 
             //Air Mass
             inline double masse() const {
-                return (1/vcl_cos(m_theta_s)+1/vcl_cos(m_theta_v));
+                return (1/std::cos(m_theta_s)+1/std::cos(m_theta_v));
             }
 
             //Function xsi
             inline double cos_xsi() const {
-                return ( vcl_cos(m_theta_s)*vcl_cos(m_theta_v) +
-                        vcl_sin(m_theta_s)*vcl_sin(m_theta_v)*vcl_cos(m_phi) );
+                return ( std::cos(m_theta_s)*std::cos(m_theta_v) +
+                        std::sin(m_theta_s)*std::sin(m_theta_v)*std::cos(m_phi) );
             }
 
             //sin xsi
             inline double sin_xsi() const {
                 double x=this->cos_xsi();
-                return vcl_sqrt(1 - x*x);
+                return std::sqrt(1 - x*x);
             }
             //xsi
             inline double xsi() const {
-                return vcl_acos(this->cos_xsi());
+                return std::acos(this->cos_xsi());
             }
 
             //Function tan
             inline double cos_t() const {
-                double trig=vcl_tan(m_theta_s)*vcl_tan(m_theta_v)*vcl_sin(m_phi);
+                double trig=std::tan(m_theta_s)*std::tan(m_theta_v)*std::sin(m_phi);
                 double d = this->delta();
                 double coef=1; //Coef=1 looks good, but Bréon et Vermote use Coef=2
-                double cos_t=std::min(std::max(coef/this->masse()*vcl_sqrt(d*d + trig*trig),-1.0),1.0);
+                double cos_t=std::min(std::max(coef/this->masse()*std::sqrt(d*d + trig*trig),-1.0),1.0);
                 return cos_t;
             }
 
             inline double sin_t() const {
                 const double x=this->cos_t();
-                return vcl_sqrt(1 - x*x);
+                return std::sqrt(1 - x*x);
             }
 
             inline double t() const {
-                return vcl_acos(this->cos_t());
+                return std::acos(this->cos_t());
             }
 
             //function FV Ross_Thick,  V stands for Volume
             double FV() const {
                 const double FV=this->masse()/otb::CONST_PI*(this->t() - this->sin_t()*this->cos_t() - otb::CONST_PI) +
-                        (1+this->cos_xsi())/2/vcl_cos(m_theta_s)/vcl_cos(m_theta_v);
+                        (1+this->cos_xsi())/2/std::cos(m_theta_s)/std::cos(m_theta_v);
                 return FV;
             }
 
             //function FR  Li-Sparse, R stands for Roughness
             double FR() const {
-                const double A=1/(vcl_cos(m_theta_s)+vcl_cos(m_theta_v));
+                const double A=1/(std::cos(m_theta_s)+std::cos(m_theta_v));
                 const double FR=4/3./otb::CONST_PI*A*((otb::CONST_PI/2- this->xsi())
                         *this->cos_xsi()+this->sin_xsi())*(1+1/(1+this->xsi()/m_xsi_0)) - 1./3;
                 return FR;

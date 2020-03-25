@@ -122,7 +122,6 @@ private:
 		SetDescription("WaterMask algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("WaterMask");
 		SetDocLongDescription("This application computes the Water mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -154,9 +153,9 @@ private:
 
 		//Set parameters
 		// Init mode parameter accessors
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		// Sunglint flag parameter accessors
-		AddParameter(ParameterType_Empty,  "sunglintflag","SunglintFlag");
+		AddParameter(ParameterType_Bool,  "sunglintflag","SunglintFlag");
 		// Red band index accessors for the TOCR
 		AddParameter(ParameterType_Int, "redbandtocr", "Red Band Index in RCR");
 		// NIR band index accessors for TOCR

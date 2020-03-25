@@ -127,7 +127,6 @@ private:
 		SetDescription("Cloud Reflectance algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudReflectance");
 		SetDocLongDescription("This application computes the cloud reflectance mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -163,7 +162,7 @@ private:
 
 		//Set parameters
 		// Init mode parameter accessors
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		// cirrus flag parameter accessors
 		AddParameter(ParameterType_Int,  "foregroundvalue","ForegroundValue");
 		AddParameter(ParameterType_Int,  "bluebandtocr","BlueBandTOCR");
@@ -268,8 +267,7 @@ private:
 		InputMaskPointer l_IPSNW = ITK_NULLPTR;
 
 		//Get parameters
-		const bool l_InitMode = IsParameterEnabled("initmode");
-		vnsLogInfoMacro("InitMode: "<<GetParameterEmpty("initmode"));
+		const bool l_InitMode = GetParameterInt("initmode");
 		vnsLogInfoMacro("InitMode: "<<Utilities::BoolToLowerString(l_InitMode));
 		const unsigned int m_ForegroundValue = GetParameterInt("foregroundvalue");
 		const unsigned int m_BlueBandTOCR = GetParameterInt("bluebandtocr");

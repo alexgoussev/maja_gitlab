@@ -139,7 +139,7 @@ namespace vns
                 SetThetaS(const double & thetaS)
                 {
                     m_ThetaS = thetaS;
-                    m_InvCosThetaS = 1. / vcl_cos(m_ThetaS * otb::CONST_PI_180);
+                    m_InvCosThetaS = 1. / std::cos(m_ThetaS * otb::CONST_PI_180);
                     const unsigned int size = m_InvCosThetaV.size();
                     if (m_AirMass.size() != size)
                     {
@@ -174,7 +174,7 @@ namespace vns
                     m_AirMass.clear();
                     for (unsigned int i = 0; i < size; i++)
                     {
-                        double val = (1. / vcl_cos(m_ThetaV[i] * otb::CONST_PI_180));
+                        double val = (1. / std::cos(m_ThetaV[i] * otb::CONST_PI_180));
                     m_InvCosThetaV.push_back(val);
                     m_AirMass.push_back(m_InvCosThetaS + val);
                 }

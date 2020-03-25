@@ -203,7 +203,7 @@ namespace vns
 
             typedef typename itk::ZeroFluxNeumannBoundaryCondition<AOTImageType> AOTZeroFluxNeumannBCType;
 
-            typedef otb::Functor::NDVI<InternalPixelType, InternalPixelType, InternalPixelType> NDVIFunctorType;
+            typedef otb::Functor::NDVI<InternalPixelType, InternalPixelType> NDVIFunctorType;
 
             typedef vns::MultiSpectralAOTCostFunction<InputImageType, InputDTMType, LUTType> AOTCostFunctionType;
 

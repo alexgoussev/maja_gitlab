@@ -1,6 +1,6 @@
-diff -burN boost_1_60_0.orig/CMakeLists.txt boost_1_60_0/CMakeLists.txt
---- boost_1_60_0.orig/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
-+++ boost_1_60_0/CMakeLists.txt	2017-11-24 13:17:41.000000000 +0100
+diff -burN boost_1_69_0.orig/CMakeLists.txt boost_1_69_0/CMakeLists.txt
+--- boost_1_69_0.orig/CMakeLists.txt	1970-01-01 01:00:00.000000000 +0100
++++ boost_1_69_0/CMakeLists.txt	2017-11-24 13:17:41.000000000 +0100
 @@ -0,0 +1,35 @@
 +cmake_minimum_required(VERSION 2.8)
 +project(CMAKE-BOOST)

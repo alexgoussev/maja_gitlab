@@ -94,7 +94,6 @@ private:
 		SetDescription("Generate the RayleighCorrection.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("RayleighCorrection");
 		SetDocLongDescription("This application computes the RayleighCorrection");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

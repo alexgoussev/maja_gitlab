@@ -84,7 +84,6 @@ private:
 		SetDescription("Stats algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("Stats");
 		SetDocLongDescription("This application computes the Solar angle");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

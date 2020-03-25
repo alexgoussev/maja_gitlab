@@ -144,7 +144,6 @@ private:
 		SetDescription("Cloud shadow algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudShadow");
 		SetDocLongDescription("This application computes the cloud shadow mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -176,7 +175,7 @@ private:
 		MandatoryOff("l2ndt");
 
 		//Set parameters
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		AddParameter(ParameterType_Group, "sol1", "SOL1 parameters");
 		AddParameter(ParameterType_InputImage,  "sol1.in",   "SOL1 image");
 		SetParameterDescription("sol1.in", "Image used as solar angle 1");
@@ -200,7 +199,7 @@ private:
 
 		//With alt spec
 		AddChoice("algo.withalt","With altitude");
-		AddParameter(ParameterType_Empty,"algo.withalt.refinement","refinement");
+		AddParameter(ParameterType_Bool,"algo.withalt.refinement","refinement");
 
 		AddParameter(ParameterType_Float, "algo.withalt.absnbpixthresh","absnbpixthresh");
 		MandatoryOff("algo.withalt.absnbpixthresh");
@@ -280,7 +279,7 @@ private:
 		const short m_DeltaHMax = static_cast<short>(this->GetParameterInt("deltahmax"));
 		const short m_DeltaHMin = static_cast<short>(this->GetParameterInt("deltahmin"));
 		const short m_DeltaHStep = static_cast<short>(this->GetParameterInt("deltahstep"));
-		const bool m_InitMode = IsParameterEnabled("initmode");
+		const bool m_InitMode = GetParameterInt("initmode");
 		const unsigned int m_ShadowBandTOCR = GetParameterInt("shadbandtocr");
 		const unsigned int m_ShadowBandRCR = GetParameterInt("shadbandrcr");
 		const double m_VIEHRef = GetParameterFloat("viehref");

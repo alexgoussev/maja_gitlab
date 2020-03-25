@@ -123,7 +123,6 @@ private:
     SetName("RescaleIntensity");
     SetDescription("Rescale the image between two given values.");
     Loggers::GetInstance()->Initialize(GetName());
-    SetDocName("RescaleIntensity Image");
     SetDocLongDescription("This application scales the given image pixel intensity between two given values.\n"
                                   "By default min (resp. max) value is set to 0 (resp. 255).\n"
                                   "Input minimum and maximum values is automatically computed for all image bands.");

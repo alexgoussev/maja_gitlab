@@ -116,7 +116,6 @@ private:
 		SetDescription("Generate the darkest pixel aot.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("DarkestPixelAOT");
 		SetDocLongDescription("This application computes the darkest pixel aot");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -145,7 +144,7 @@ private:
 		AddParameter(ParameterType_String,  "lutimage",   "Lut image");
 		SetParameterDescription("lutimage", "Lut image");
 
-		AddParameter(ParameterType_Empty, "init","init mode");
+		AddParameter(ParameterType_Bool, "init","init mode");
 		AddParameter(ParameterType_Int, "darkestchanneltoac","darkestchanneltoac");
 		AddParameter(ParameterType_Float, "thresholddarkpixel","thresholddarkpixel");
 		AddParameter(ParameterType_Float, "darksurfacereflectance","darksurfacereflectance");
@@ -184,7 +183,7 @@ private:
 
 
 		//GetParams
-		const bool l_InitMode = IsParameterEnabled("init");
+		const bool l_InitMode = GetParameterInt("init");
 		const unsigned int l_DarkestChannelTOAC = GetParameterInt("darkestchanneltoac");
 		const double l_ThresholdDarkPixel = GetParameterFloat("thresholddarkpixel");
 		const double l_DarkSurfaceReflectance = GetParameterFloat("darksurfacereflectance");

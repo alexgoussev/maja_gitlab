@@ -81,7 +81,6 @@ private:
 		SetDescription("BinaryToVector algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("BinaryToVector");
 		SetDocLongDescription("This application separate each bit plan into a vector image");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

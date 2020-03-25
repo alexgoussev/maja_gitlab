@@ -89,7 +89,6 @@ private:
 		SetDescription("LutExtractChannels algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("LutExtractChannels");
 		SetDocLongDescription("This application extract channels from a mha lut file");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

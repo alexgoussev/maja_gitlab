@@ -79,7 +79,6 @@ private:
 		SetDescription("OzoneExtractor algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("OzoneExtractor");
 		SetDocLongDescription("This application extract the ozone value from a meteo file");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

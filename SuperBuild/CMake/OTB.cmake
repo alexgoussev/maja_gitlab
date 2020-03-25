@@ -17,8 +17,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(OTB_URL "https://www.orfeo-toolbox.org/packages/archives/OTB/OTB-6.6.0.tar.gz")
-set(OTB_URL_MD5 0c5cf6ab4d41db83489eb2dd05a833b1)
+set(OTB_URL "https://www.orfeo-toolbox.org/packages/archives/OTB/OTB-7.0.0.tar.gz")
+set(OTB_URL_MD5 314b985d112dab6d407dd6d35bccc790    )
 
 set(OTB_DEPENDS GDAL ITK OPENJPEG GEOTIFF OSSIM TINYXML MUPARSER BOOST SWIG NUMPY PYTHON)
 build_projects(OTB_DEPENDS)
@@ -45,6 +45,10 @@ ExternalProject_Add(OTB
   -DOTBGroup_Core:BOOL=OFF
   -DOTBGroup_IO:BOOL=ON
   -DModule_OTBIndices:BOOL=ON
+  -DModule_OTBAppImageUtils:BOOL=ON
+  -DModule_OTBAppMathParser:BOOL=ON
+  -DModule_OTBAppMorphology:BOOL=ON
+  -DModule_OTBAppProjection:BOOL=ON
   -DModule_OTBStreaming:BOOL=ON
   -DModule_OTBStatistics:BOOL=ON
   -DModule_OTBConvolution:BOOL=ON

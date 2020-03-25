@@ -103,6 +103,7 @@ namespace vns
                 if (IsSaturatedPixel == false)
                 {
                     // Discard pixels for which the red reflectance and the NDVI are greater than thresholds
+
                     const InternalPixelType lrTOA_RED = pIPTOACSubPix[pRedChannel];
                     InternalPixelType l_NDVIValue;
 
@@ -111,9 +112,14 @@ namespace vns
                     {
                         const InternalPixelType lrTOA_NDVI1 = pIPTOACSubPix[pNDVIAOTBand1];
                         const InternalPixelType lrTOA_NDVI2 = pIPTOACSubPix[pNDVIAOTBand2];
+                        itk::VariableLengthVector<InternalPixelType> v(2);
+                        v[0] = lrTOA_NDVI2 ;
+                        v[1] = lrTOA_NDVI1 ;
 
+                        lNDVIFunctor.SetBandIndex(CommonBandNames::RED, 1);
+                        lNDVIFunctor.SetBandIndex(CommonBandNames::NIR, 2);
                         // Compute NDVI indice
-                        l_NDVIValue = lNDVIFunctor(lrTOA_NDVI2, lrTOA_NDVI1);
+                        l_NDVIValue = lNDVIFunctor(v);
 
                         // Discard pixels for which NDVI < m_NDVIThreshold
                         if (l_NDVIValue >= pNDVIThreshold)
