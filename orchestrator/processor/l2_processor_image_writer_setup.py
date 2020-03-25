@@ -41,7 +41,7 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
     l_EnvCorOption = in_global_dict["Params"]["EnvCorOption"]
 
     p_OutputL2ImageFileWriter.set_dtm(in_global_dict["DEM"])
-    p_OutputL2ImageFileWriter.set_current_plugin_base(in_global_dict.get("Plugin"))
+    p_OutputL2ImageFileWriter.set_current_plugin_base(p_OutputL2ImageFileWriter.plugin)
     p_OutputL2ImageFileWriter.set_copy_private_from_l2_input_to_l2_output(l_CopyPrivateFromL2InputToL2Output)
     p_OutputL2ImageFileWriter.set_write_l2_products(l_WriteL2Products)
     p_OutputL2ImageFileWriter.set_output_directory(in_global_dict["Params"]["L2OutputDirectory"])

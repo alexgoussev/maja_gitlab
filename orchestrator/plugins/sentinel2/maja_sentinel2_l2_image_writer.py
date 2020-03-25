@@ -27,12 +27,15 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.earth_explorer.maja_earth_explorer_l2_image_file_writer import \
     EarthExplorerL2ImageFileWriter
+from orchestrator.plugins.sentinel2.maja_sentinel2_plugin import MajaSentinel2Plugin
 
 
 class MajaSentinel2L2ImageWriter(EarthExplorerL2ImageFileWriter):
 
     def __init__(self):
         super(MajaSentinel2L2ImageWriter, self).__init__()
+        self.plugin = MajaSentinel2Plugin()
+
 
     def can_write(self, plugin_name):
         return plugin_name == "SENTINEL2"
