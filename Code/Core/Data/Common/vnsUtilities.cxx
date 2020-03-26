@@ -502,6 +502,18 @@ namespace vns
         return lstring;
     }
 
+    unsigned char
+    Utilities::AsUnsignedChar(const std::string & value)
+    {
+        // ---------------------------------------------------------------------------------------------
+        // Convert the band index integer value in string
+        std::stringstream oss;
+        unsigned char lint(0);
+        oss << value;
+        oss >> lint;
+        return lint;
+    }
+
     int
     Utilities::AsInt(const std::string & value)
     {
@@ -860,6 +872,18 @@ namespace vns
         	}
         	return l_outlist;
         }
+
+    Utilities::ListOfUInt8
+	Utilities::StringListAsUnsignedChar(const ListOfStrings& list)
+    {
+    	ListOfUInt8 l_outlist;
+    	ListOfStrings::const_iterator itConst = list.begin();
+    	for (;itConst != list.end(); ++itConst)
+    	{
+    		l_outlist.push_back(AsUnsignedChar(*itConst));
+    	}
+    	return l_outlist;
+    }
 
     std::string
     Utilities::JoinFilenames(const std::string& filename1, const std::string& filename2)

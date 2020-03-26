@@ -118,6 +118,7 @@ namespace vns
         typedef std::vector<ListOfIntegers> ListOfListOfIntegers;
         typedef std::vector<unsigned int> ListOfUIntegers;
         typedef std::vector<ListOfUIntegers> ListOfListOfUIntegers;
+        typedef std::vector<unsigned char> ListOfUInt8;
 
         /** AOT method */
         typedef enum
@@ -207,6 +208,9 @@ namespace vns
         static std::string
         AsString(const unsigned long & value);
 
+        static unsigned char
+		AsUnsignedChar(const std::string & value);
+
         static int
         AsInt(const std::string & value);
 
@@ -269,6 +273,9 @@ namespace vns
 
         static ListOfDoubles
 		StringListAsDouble(const ListOfStrings& list);
+
+        static ListOfUInt8
+		StringListAsUnsignedChar(const ListOfStrings& list);
 
         static std::string
         JoinFilenames(const std::string& filename1, const std::string& filename2);

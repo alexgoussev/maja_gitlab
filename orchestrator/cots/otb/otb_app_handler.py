@@ -28,6 +28,7 @@ It defines classes_and_methods
 from .otb_cots import MajaOtbCots
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.maja_utils import get_test_mode
+import time
 LOGGER = configure_logger(__name__)
 
 
@@ -58,9 +59,10 @@ class OtbAppHandler:
         del(self._c1)
 
     def _run(self):
+        start_time = time.time()
         LOGGER.debug("Running : " + self._app_name)
         self._c1.run(self._write_output)
-        LOGGER.debug("Finished : " + self._app_name)
+        LOGGER.debug("Finished : " + self._app_name + " in "+time.strftime("%M:%S", time.gmtime(time.time()-start_time)))
 
     def _post(self):
         LOGGER.debug("Running : " + self._app_name)

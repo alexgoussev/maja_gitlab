@@ -80,6 +80,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
 
         # Store the apps
         self._pipeline = OtbPipelineManager()
+        self._subedg_pipeline = OtbPipelineManager()
 
     def get_l1_toa_cirrus_image(self):
         """
@@ -156,12 +157,13 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         dtm_coarse = self._dem.ALC
 
         # For each band of the input product
+        tmp_sub_toa_pipe = OtbPipelineManager()
         for i, toa in enumerate(self._toa_scalar_list):
             # undersampling at L2CoarseResolution
             toa_sub_image = os.path.join(working, "aot_sub_{}.tif".format(i))
             app = resample(toa, dtm_coarse, toa_sub_image, OtbResampleType.LINEAR_WITH_RADIUS, write_output=False)
             self._toa_sub_list.append(app.getoutput()["out"])
-            self._pipeline.add_otb_app(app)
+            tmp_sub_toa_pipe.add_otb_app(app)
         # end band loop
 
         # *******************************************************************************************************
@@ -173,6 +175,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                              }
         OtbAppHandler("ConcatenateImages", param_concatenate)
         self._sub_toa = toa_sub_image
+        tmp_sub_toa_pipe.free_otb_app()
 
     def rasterize_gml_masks(self, l1Resolution, l2res, l2Area, projectionRef, l1Band, satFilename, defectFilename,
                           zoneFilename, boundingBox, gdalRasterizeMaskCmd, gdalRasterizeDetCmd,
@@ -691,17 +694,12 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                                                                outside_value=1,
                                                                output_image=out_thresh_0 + ":uint8",
                                                                lower_threshold=1,
-                                                               write_output=True)
+                                                               write_output=False)
 
         # Concatenate the zone image and the nodata one
-        out_or_0 = os.path.join(working_dir, "IPEDGOrFilter1SubMask_0.tif")
-        band_math_or_b1 = band_math_or([out_binary_threshold_ipedg_image_b1.getoutput()["out"],
-                                        self._nodatamasksublist[0]], output_image=out_or_0 + ":uint8")
-
-        m_OrFilter2List.append(band_math_or_b1.getoutput()["out"])
-
+        m_OrFilter2List.append(out_binary_threshold_ipedg_image_b1.getoutput()["out"])
+        m_OrFilter2List.append(self._nodatamasksublist[0])
         l_NbBand = len(self._zonemasksublist)
-
         # band loop
         for l_band in range(l_NbBand - 1):
             out_thresh_1 = os.path.join(working_dir, "IPEDGThreshFilter1SubMask_{}.tif".format(l_band + 1))
@@ -710,20 +708,17 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                                                                 inside_value=0,
                                                                 outside_value=1,
                                                                 output_image=out_thresh_1 + ":uint8",
-                                                                write_output=True)
+                                                                write_output=False)
+            self._subedg_pipeline.add_otb_app(out_binary_threshold_ipedg_image)
+            m_OrFilter2List.append(out_binary_threshold_ipedg_image.getoutput().get("out"))
+            m_OrFilter2List.append(self._nodatamasksublist[l_band+1])
 
-            out_or_1 = os.path.join(working_dir, "IPEDGOrFilter1SubMask_{}.tif".format(l_band + 1))
-            band_math_or_result = band_math_or([out_binary_threshold_ipedg_image.getoutput()["out"],
-                                                self._nodatamasksublist[l_band + 1]], output_image=out_or_1 + ":uint8")
-            m_OrFilter1List.append(out_or_1)
-
-            out_or_2 = os.path.join(working_dir, "IPEDGOrFilter2SubMask_{}.tif".format(l_band + 1))
-            band_math_or_result = band_math_or([out_or_1, m_OrFilter1List[l_band]], output_image=out_or_2 + ":uint8")
-            m_OrFilter2List.append(out_or_2)
-
+        #OR filter
+        out_edg = os.path.join(working_dir, "IPEDGubMask.tif")
+        or_edg_sub_app = band_math_or(m_OrFilter2List,out_edg, write_output=True)
         # Allocation of 7 Go in S2 MUSCATE case
-        self._edgsubmask = m_OrFilter2List[len(m_OrFilter2List) - 1]
-
+        self._edgsubmask = or_edg_sub_app.getoutput().get("out")
+        self._subedg_pipeline.free_otb_app()
         LOGGER.debug("Start IPEDGSub done.")
 
         # *******************************************************************************************************
@@ -740,28 +735,31 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             res_str = l_ListOfL2Resolution[r]
             # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
             out_thresh = os.path.join(working_dir, "EDGThreshL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage = binary_threshold(self._edgsubmask,
+            m_L2EDGThreshold_app = binary_threshold(self._edgsubmask,
                                                      lower_threshold=0,
                                                      inside_value=0,
                                                      outside_value=1000,
                                                      output_image=out_thresh + ":uint8",
-                                                     write_output=True).getoutput()["out"]  # //l_ThresholdImageFilter
-
+                                                     write_output=False)
+            self._pipeline.add_otb_app(m_L2EDGThreshold_app)
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            resample(m_L2EDGThresholdImage, self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR)
+            resamp_app = resample(m_L2EDGThreshold_app.getoutput().get("out"), self._dem.ALTList[r], out_ressampling,
+                     OtbResampleType.LINEAR, write_output=False)
+            self._pipeline.add_otb_app(resamp_app)
 
             # Set Threshold value to one because the expand filter interpolates values set to 0
             # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
             m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage2 = binary_threshold(
-                out_ressampling,
+            m_L2EDGThresholdImageApp2 = binary_threshold(
+                resamp_app.getoutput().get("out"),
                 lower_threshold=0.,
                 inside_value=0,
                 outside_value=1,
                 output_image=m_L2EDGThresholdImage2_out +
-                ":uint8").getoutput()["out"]
-            self._l2edgmasklist.append(m_L2EDGThresholdImage2)
+                ":uint8",write_output=False)
+            self._pipeline.add_otb_app(m_L2EDGThresholdImageApp2)
+            self._l2edgmasklist.append(m_L2EDGThresholdImageApp2.getoutput().get("out"))
 
     def generate_l2_toa_images(self, working_dir):
         """

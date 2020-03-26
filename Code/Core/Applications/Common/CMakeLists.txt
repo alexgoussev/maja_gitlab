@@ -66,6 +66,11 @@ OTB_CREATE_APPLICATION(NAME           ConcatenatePerZone
                        SOURCES        vnsAppConcatenatePerZone.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)   
                        
+OTB_CREATE_APPLICATION(NAME           DispatchZonesToVector
+                       SOURCES        vnsAppDispatchZonesToVector.cxx
+                       LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)   
+
+
 OTB_CREATE_APPLICATION(NAME           AngleListToImage
                        SOURCES        vnsAppAngleListToImage.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO ${MAJA_LIBRARY_PREFIXNAME}AlgorithmsCommon)       

@@ -128,12 +128,12 @@ def disk_space_used(workingdirectory):
     try:
         p = subprocess.Popen("/usr/bin/du -sk %s" % workingdirectory, shell=True, stdout=subprocess.PIPE)
         out = p.stdout.read()
-        resultinkoctets = out.split()
+        resultinkoctets = out.decode().split()
         p.wait()
         resultinmoctets = float(resultinkoctets[0]) / 1024.0
 
     except Exception as e:
-        strerror = str(e).split("\n")
+        strerror = str(e).decode().split("\n")
         raise DiskSpaceUsedException(strerror[0])
 
     return resultinmoctets
@@ -153,7 +153,7 @@ def memory_used_by_process_and_children_processes(idprocess):
             tot_mem_mo_sum += tot_mem_tmp
 
     except Exception as e:
-        strerror = str(e).split("\n")
+        strerror = str(e).decode().split("\n")
         raise MemoryUsedByProcessException(strerror[0])
 
     return tot_mem_mo_sum
@@ -172,7 +172,7 @@ def memory_used_by_children_processes(idprocess):
                 tot_mem_tmp = memory_used_by_process2(procnum)
                 tot_mem_mo_sum += tot_mem_tmp
     except Exception as e:
-        strerror = str(e).split("\n")
+        strerror = str(e).decode().split("\n")
         raise MemoryUsedByProcessException(strerror[0])
     return tot_mem_mo_sum
 
@@ -186,13 +186,13 @@ def memory_used_by_process(idprocess):
         tot_mem = 0
 
         for l in fd:
-            flds = l.split()
+            flds = l.decode().split()
 
             # All malloc()ed memory goes into anonymous memory blocks.
             # Hence I am considering only anonymous memory chunks, which will have only 5 columns in the output.
             if len(flds) > 5:
                 continue
-            mem_start, mem_end = flds[0].split('-')
+            mem_start, mem_end = flds[0].decode().split('-')
             mem_start = int('0x' + mem_start, 16)
             mem_end = int('0x' + mem_end, 16)
             tot_mem = tot_mem + mem_end - mem_start
@@ -218,7 +218,7 @@ def memory_used_by_process2(idprocess):
         statinfo = statfile.read()
         statfile.close()
         i = statinfo.index("VmHWM:")
-        lsthwm = statinfo[i:].split(None, 3)
+        lsthwm = statinfo[i:].decode().split(None, 3)
         if len(lsthwm) < 3:
             tot_mem_mo = 0  # error bad formatting
         else:
@@ -232,7 +232,7 @@ def memory_used_by_process2(idprocess):
 def elapsed_time(idprocess, pov):
     p = subprocess.Popen("/bin/ps jhS %s" % idprocess, shell=True, stdout=subprocess.PIPE)
     out = p.stdout.read()
-    elements = out.split()
+    elements = out.decode().split()
     p.wait()
     return elements[pov]
 
@@ -241,7 +241,7 @@ def user_elapsed_time(idprocess):
     try:
         res = elapsed_time(idprocess, 8)
     except Exception as e:
-        strerror = str(e).split("\n")
+        strerror = str(e).decode().split("\n")
         raise IOError(strerror[0])
     return res
 
@@ -268,7 +268,7 @@ def obtain_subprocesses_from_main_process(idprocess):
     finalprocesslist = list()
     p = subprocess.Popen("ps -ef | grep " + str(idprocess), shell=True, stdout=subprocess.PIPE)
     out = p.communicate()[0]
-    args = out.split("\n")
+    args = out.decode().split("\n")
     # On recupere les processus dans un tableau
     for i in range(len(args) - 1):
         argsfinal.append(args[i].split())
