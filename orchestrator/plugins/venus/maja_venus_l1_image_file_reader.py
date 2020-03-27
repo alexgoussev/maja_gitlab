@@ -525,7 +525,8 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                    "out": tmp_shadowvie_concat}
             app_shadowvie_concat = OtbAppHandler("ConcatenateImages", param_shadowvie_concat)
             self._shadowvie_pipeline.add_otb_app(app_shadowvie_concat)
-
+            update_projection(l_FilenameProvider.m_TOAImageFileName, app_shadowvie_concat.getoutput().get("out"),
+                              l_L1VIESubsamplingFactor)
             tmp_shadowvie_resample = os.path.join(working_dir, "shadowvie.tif")
             app_shadowvie_resample = resample(app_shadowvie_concat.getoutput().get("out"),
                                            self._dem.ALC,
@@ -533,8 +534,6 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                            OtbResampleType.LINEAR, padradius=4.0)
             self._shadowvie = app_shadowvie_resample.getoutput().get("out")
             self._shadowvie_pipeline.add_otb_app(app_shadowvie_resample)
-
-
 
             # Fill the datas
             self.dict_of_vals[
