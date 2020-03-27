@@ -122,7 +122,35 @@ maja_test_application(NAME apTvConcatenatePerZone
                      ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvConcatenatePerZone.tif
 
                     )
+                    
+maja_test_application(NAME apTvDispatchZonesToVectorNoWeight
+                     APP DispatchZonesToVector
+                     OPTIONS
+                     -il ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D06.tif ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D09.tif
+                     -outvals 6 9
+                     -nbcomp 3
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorNoWeight.tif
 
+                     VALID --compare-image 0.0
+                     ${MAJADATA_TVA_BASELINE}/apTvDispatchZonesToVectorNoWeight.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorNoWeight.tif
+
+                    )
+
+maja_test_application(NAME apTvDispatchZonesToVectorWeight
+                     APP DispatchZonesToVector
+                     OPTIONS
+                     -il ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D06.tif ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D09.tif
+                     -outvals 6 9
+                     -nbcomp 3
+                     -outindexes 1 2 3 0 1 2
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorWeight.tif
+
+                     VALID --compare-image 0.0
+                     ${MAJADATA_TVA_BASELINE}/apTvDispatchZonesToVectorWeight.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorWeight.tif
+
+                    )
 
 maja_test_application(NAME apTvIncidenceAngle
                      APP IncidenceAngle

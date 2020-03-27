@@ -179,12 +179,10 @@ void DispatchZoneVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateD
 					for (unsigned int j = 0; j < nbValue; j++) {
 						if (outputVectorValue[j] < m_ImageOutputValueList[i]) {
 							// Set to one the bit to the associated band
-							const bool isSet = ((naryInputArray[i] & m_BitWeights[i][j]) >> j) == 1;
+							const bool isSet = (naryInputArray[i] & m_BitWeights[i][j]) != 0;
 							if (isSet)
 							{
 								outputVectorValue[j] = static_cast<OutputImageInternalPixelType>(m_ImageOutputValueList[i]);
-								//if (outputVectorValue[j] > 15)
-								//	std::cout<<"isSet "<<outputVectorValue[j]<<std::endl;
 							}
 						}
 					}

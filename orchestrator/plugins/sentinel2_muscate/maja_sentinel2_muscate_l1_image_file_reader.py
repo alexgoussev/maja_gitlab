@@ -265,10 +265,9 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
 
             # Detectors FootPrint Masks Generation
             # Get all the detectors files realted to this resolution
-
-
             # Test if they all refers to the same files
             tmp_res_det_filenames = None
+            all_same_det_for_bands = True
             for l_BandIdxL1 in range(len(listOfL1Bands)):
                 # Get the L1 band index associated to the L2 band code
                 l_StrBandIdL1 = listOfL1Bands[l_BandIdxL1]
@@ -280,25 +279,63 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 l_bandDetFnames = zoneMaskFileNames[l1BandIdx]
                 if tmp_res_det_filenames is not None:
                     if len(tmp_res_det_filenames) != len(l_bandDetFnames):
-                        raise MajaDataException("Product with not all the same detectors for bands are not supported")
+                        all_same_det_for_bands = False
+                        break
                 else:
                     tmp_res_det_filenames = l_bandDetFnames
-            l_ListOfZone = self.m_headerHandler.get_list_of_zones(listOfL1Bands[0])
-            nbDetector = len(l_ListOfZone)
+            #Construct file and det number list
             tmp_list_of_detf_filenames = []
             tmp_list_of_detf_num = []
-            # For each detector of the current band
-            for det in range(nbDetector):
-                tmp_list_of_detf_filenames.append(tmp_res_det_filenames[l_ListOfZone[det]])
-                tmp_list_of_detf_num.append(str(int(l_ListOfZone[det])))
+            tmp_list_of_band_idx = []
+            if all_same_det_for_bands:
+                l_ListOfZone = self.m_headerHandler.get_list_of_zones(listOfL1Bands[0])
+                nbDetector = len(l_ListOfZone)
+                # For each detector of the current band
+                for det in range(nbDetector):
+                    tmp_list_of_detf_filenames.append(tmp_res_det_filenames[l_ListOfZone[det]])
+                    tmp_list_of_detf_num.append(str(int(l_ListOfZone[det])))
+            else:
+                #some bands are not in all det rare case
+                tmp_det_info_map = {}
+                for l_BandIdxL1 in range(len(listOfL1Bands)):
+                    # Get the L1 band index associated to the L2 band code
+                    l_StrBandIdL1 = listOfL1Bands[l_BandIdxL1]
+                    l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l_StrBandIdL1)
+                    LOGGER.debug(
+                        "Sentinel2MuscateL1ImageFileReader::GenerateMaskRasters: CurrentResol = %s, reading the "
+                        "BandId L1 (associated) <%s> with index <%s>.", curL1Res, l_StrBandIdL1,
+                        l1BandIdx)
+                    # Detectors FootPrint Masks
+                    l_bandDetFnames = zoneMaskFileNames[l1BandIdx]
+                    l_ListOfZone = self.m_headerHandler.get_list_of_zones(l_StrBandIdL1)
+                    nbDetector = len(l_ListOfZone)
+                    # For each detector of the current band
+                    for det in range(nbDetector):
+                        det_num = l_ListOfZone[det]
+                        if det_num not in tmp_det_info_map.keys():
+                            tmp_det_info_map[det_num] = (zoneMaskFileNames[l1BandIdx][det_num], [0] * len(listOfL1Bands))
+                        tmp_det_info_map[det_num][1][l_BandIdxL1] = \
+                            self.m_headerHandler.get_l1_dtf_image_index(l1BandIdx, det_num)[0]
+                #once the info map is done
+                for det in tmp_det_info_map.keys():
+                    det_info = tmp_det_info_map[det]
+                    tmp_list_of_detf_filenames.append(det_info[0])
+                    tmp_list_of_detf_num.append(str(int(det)))
+                    for x in det_info[1]:
+                        tmp_list_of_band_idx.append(str(x))
+            #create params
             detf_mask = os.path.join(
-                working, "L1_DETF_Masks_{}.tif".format(curL1Res))
+                 working, "L1_DETF_Masks_{}.tif".format(curL1Res))
             param_dispacth_zone = {
-                "il": tmp_list_of_detf_filenames,
-                "out": detf_mask+':uint8',
-                "nbcomp": len(listOfL1Bands),
-                "outvals": tmp_list_of_detf_num
-            }
+                 "il": tmp_list_of_detf_filenames,
+                 "out": detf_mask+':uint8',
+                 "nbcomp": len(listOfL1Bands),
+                 "outvals": tmp_list_of_detf_num
+                }
+            #handle not all det/band case
+            if not all_same_det_for_bands:
+                param_dispacth_zone["outindexes"] = tmp_list_of_band_idx
+            #Call the app
             dispatch_app = OtbAppHandler("DispatchZonesToVector",param_dispacth_zone,write_output=True)
             #This is the L2 output
             if curL1Res in l_ListOfL2Resolution:

@@ -96,6 +96,8 @@ private:
 		AddParameter(ParameterType_OutputImage, "out", "vectorimage");
 		AddParameter(ParameterType_Int,"nbcomp","Component per pixels");
 		AddParameter(ParameterType_StringList, "outvals","values to put in each input image");
+		AddParameter(ParameterType_StringList, "outindexes","index of input bit to the output bands");
+		MandatoryOff("outindexes");
 		SetParameterDescription("out","output image");
 		SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
 
@@ -128,13 +130,43 @@ private:
 		//Construct the bitweights for detectors/band conversion
 		std::vector<std::vector<unsigned char> > m_BitWeights;
 		std::vector<unsigned char> m_BitWeight;
-		for (unsigned int i = 0; i < this->GetParameterInt("nbcomp"); i++)
-        {
-            m_BitWeight.push_back(static_cast<unsigned char> (vcl_pow(2., static_cast<double> (i))));
-        }
-		for (unsigned int i = 0; i < l_in_images->Size(); i++)
+		std::vector<unsigned int> l_out_idx;
+		if(HasValue("outindexes"))
 		{
-			m_BitWeights.push_back(m_BitWeight);
+			l_out_idx= vns::Utilities::StringListAsUnsigned(this->GetParameterStringList("outindexes"));
+			if (l_out_idx.size() != this->GetParameterInt("nbcomp")*l_in_images->Size())
+			{
+				vnsExceptionBusinessMacro("Not the correction number of bit->band indexes, must be nbcomp*nbImages");
+			}
+			for (unsigned int j = 0; j < l_in_images->Size(); j++)
+			{
+				for (unsigned int i = 0; i < this->GetParameterInt("nbcomp"); i++)
+				{
+					if (l_out_idx[j*this->GetParameterInt("nbcomp")+i] == 0)
+					{
+						m_BitWeight.push_back(0);
+					}
+					else
+					{
+						m_BitWeight.push_back(
+							static_cast<unsigned char> (
+									vcl_pow(2., static_cast<double> (l_out_idx[j*this->GetParameterInt("nbcomp")+i]-1))));
+					}
+				}
+				m_BitWeights.push_back(m_BitWeight);
+				m_BitWeight.clear();
+			}
+		}
+		else
+		{
+			for (unsigned int i = 0; i < this->GetParameterInt("nbcomp"); i++)
+			{
+				m_BitWeight.push_back(static_cast<unsigned char> (vcl_pow(2., static_cast<double> (i))));
+			}
+			for (unsigned int i = 0; i < l_in_images->Size(); i++)
+			{
+				m_BitWeights.push_back(m_BitWeight);
+			}
 		}
 		m_vector->SetBitWeights(m_BitWeights);
 		SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
