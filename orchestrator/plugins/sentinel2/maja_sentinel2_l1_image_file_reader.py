@@ -368,7 +368,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                      self._plugin.GDAL_RASTERIZE_GML_MASK_ADDITIONAL_COMMAND_LINE_PARAMETERS,
                                      self._plugin.GDAL_RASTERIZE_GML_DETECTOR_ADDITIONAL_COMMAND_LINE_PARAMETERS,
                                      self._plugin.GDAL_RASTERIZE_GML_NODATA_ADDITIONAL_COMMAND_LINE_PARAMETERS,
-                                     working_dir)
+                                     l_NbBand,working_dir)
 
             LOGGER.debug("Start IPVIE SubSampling done.")
             # To check mean angle values
