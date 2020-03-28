@@ -435,7 +435,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
 
     def get_viewing_grids(self, band, l2CoarseArea, projectionRef, vieHRef, satFilename, zoneFilename, nodataFilename,
                         listOfZone, boundingBox, viewing_angles, gdalRasterizeMaskCmd,
-                        gdalRasterizeDetCmd, gdalRasterizeNdtCmd, working):
+                        gdalRasterizeDetCmd, gdalRasterizeNdtCmd, nbCoarseBands, working):
         """
 
         :param band: int
@@ -639,11 +639,11 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             l_ViewingAngleMeanDeg = (l_ViewingAngleMean[0] * 180.0 / math.pi, l_ViewingAngleMean[1] * 180.0 / math.pi)
             # Add a vector to mean maps
             if l_zone not in self._meanZenithMap:
-                self._meanZenithMap[listOfZone[d]] = []
+                self._meanZenithMap[listOfZone[d]] = ["0"] * nbCoarseBands
             if l_zone not in self._meanAzimuthMap:
-                self._meanAzimuthMap[listOfZone[d]] = []
-            self._meanZenithMap[listOfZone[d]].append(str(l_ViewingAngleMeanDeg[0]))
-            self._meanAzimuthMap[listOfZone[d]].append(str(l_ViewingAngleMeanDeg[1]))
+                self._meanAzimuthMap[listOfZone[d]] = ["0"] * nbCoarseBands
+            self._meanZenithMap[listOfZone[d]][band] = str(l_ViewingAngleMeanDeg[0])
+            self._meanAzimuthMap[listOfZone[d]][band] = str(l_ViewingAngleMeanDeg[1])
             LOGGER.debug(" For BandId[" +
                          str(band) +
                          "], zone [" +
