@@ -137,8 +137,6 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                                  "out": img_concatenate_toa}
             app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa,write_output=True)
             self._l1toaimagelist.append(app_concatenate_toa.getoutput()["out"])
-            self._toa_pipeline.add_otb_app(app_concatenate_toa)
-            self._toa_pipeline.free_otb_app()
             self._qb_pipeline.free_otb_app()
 
     def generate_toa_sub_image(self, working):
@@ -178,6 +176,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
 
         self._subtoaimage = app_l2subtoa.getoutput().get("out")
         self._toa_sub_pipeline.free_otb_app()
+        self._toa_pipeline.free_otb_app()
 
     def generate_l2_toa_images(self, l_ListOfL2Resolution, working_dir):
 
@@ -216,7 +215,6 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         tmp_edg_sub_resample = os.path.join(working_dir, "tmp_edg_sub.tif")
         edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse, tmp_edg_sub_resample,
                                         OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,write_output=False)
-        self._edg_pipeline.add_otb_app(edg_sub_resample_app)
         # Threshold the output
         out_sub_edg = os.path.join(working_dir, "IPEDGSubOutput.tif")
         param_sub_edg = {"im": edg_sub_resample_app.getoutput().get("out"),
@@ -452,8 +450,14 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                 self.dict_of_vals["ShadowVIEImage"] = self._vieimage[0]
             if self._plugin.CirrusMasking:
                 l_CirrusBandCode = l2comm.get_value("CirrusBandCode")
-                l_CirrusBandIdx = self._plugin.BandsDefinitions.get_band_id_in_l2_coarse(l_CirrusBandCode)
-                self.dict_of_vals["L1TOACirrusImage"] = self._toascalarlist[l_CirrusBandIdx]
+                l_CirrusRes = self._plugin.BandsDefinitions.get_l1_resolution_for_band_code(l_CirrusBandCode)
+                l_CirrusBandIdx = self._plugin.BandsDefinitions.get_band_id_in_l1(l_CirrusBandCode)
+                tmp_toa_roi = os.path.join(working_dir, "L1TOACirrusImage.tif")
+                l2toa_roi_app = extract_roi(self._l1toaimagelist[0],
+                                            [l_CirrusBandIdx],
+                                            tmp_toa_roi, write_output=False)
+                self._l2toa_pipeline.add_otb_app(l2toa_roi_app)
+                self.dict_of_vals["L1TOACirrusImage"] = l2toa_roi_app.getoutput().get("out")
 
             self.dict_of_vals["L1TOAImageList"] = self._l1toaimagelist
 
