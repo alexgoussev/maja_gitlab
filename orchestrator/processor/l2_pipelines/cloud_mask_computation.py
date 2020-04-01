@@ -72,8 +72,8 @@ class MajaCloudMaskComputation(MajaModule):
         param_dilate = {"in": input,
                         "out": temp + ":uint8",
                         "structype": "ball",
-                        "structype.ball.xradius": radius,
-                        "structype.ball.yradius": radius,
+                        "xradius": radius,
+                        "yradius": radius,
                         "filter": "dilate"
                         }
         dilate_app = OtbAppHandler("BinaryMorphologicalOperation", param_dilate, write_output=caching)
@@ -586,10 +586,10 @@ class MajaCloudMaskComputation(MajaModule):
         #                    Bit 8 - Vide pour les autres
         cld_list = []
 
-        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_sum_dilated_masked_image
+        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_all_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL])
 
-        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_all_dilated_masked_image
+        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_sum_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS])
 
         dict_of_output[constants.CLOUD_MASK_SHADOWS] = cloud_shadow_dilated_masked_image
