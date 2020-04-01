@@ -67,48 +67,48 @@ class MajaMaskResampling(MajaModule):
             # ---------- Resample All to resolution ---------------
             cld_all_resampled = os.path.join(p_working, "cloud_all_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_ALL], dict_of_input.get("DEM").ALTList[p_res],
-                     cld_all_resampled, OtbResampleType.LINEAR))
+                     cld_all_resampled, OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_ALL + "_" + l_res] = cld_all_resampled
             # ---------- Resample All cloud to resolution ---------------
             cld_allclouds_resampled = os.path.join(p_working, "cloud_allclouds_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_ALL_CLOUDS], dict_of_input.get("DEM").ALTList[p_res],
-                     cld_allclouds_resampled, OtbResampleType.LINEAR))
+                     cld_allclouds_resampled, OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_ALL_CLOUDS + "_" + l_res] = cld_allclouds_resampled
             # ---------- Resample shadow to resolution ---------------
             cld_shadows_resampled = os.path.join(p_working, "cloud_shadows_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_SHADOWS], dict_of_input.get("DEM").ALTList[p_res],
-                     cld_shadows_resampled, OtbResampleType.LINEAR))
+                     cld_shadows_resampled, OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_SHADOWS + "_" + l_res] = cld_shadows_resampled
             # ---------- Resample shadvar to resolution ---------------
             cld_shadvar_resampled = os.path.join(p_working, "cloud_shadvar_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_SHADVAR], dict_of_input.get("DEM").ALTList[p_res],
-                     cld_shadvar_resampled, OtbResampleType.LINEAR))
+                     cld_shadvar_resampled, OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_SHADVAR + "_" + l_res] = cld_shadvar_resampled
             # ---------- Resample Refl cloud to resolution ---------------
             cld_refl_resampled = os.path.join(p_working, "cloud_refl_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_REFL], dict_of_input.get("DEM").ALTList[p_res], cld_refl_resampled,
-                     OtbResampleType.LINEAR))
+                     OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_REFL + "_" + l_res] = cld_refl_resampled
             # ---------- Resample ReflVar cloud to resolution ---------------
             cld_reflvar_resampled = os.path.join(p_working, "cloud_reflvar_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_REFL_VAR], dict_of_input.get("DEM").ALTList[p_res],
                      cld_reflvar_resampled,
-                     OtbResampleType.LINEAR))
+                     OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_REFL_VAR + "_" + l_res] = cld_reflvar_resampled
             # ---------- Resample Extension cloud to resolution ---------------
             cld_ext_resampled = os.path.join(p_working, "cloud_ext_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_EXTENSION], dict_of_input.get("DEM").ALTList[p_res], cld_ext_resampled,
-                     OtbResampleType.LINEAR))
+                     OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_EXTENSION + "_" + l_res] = cld_ext_resampled
             # ---------- Resample Alt to resolution ---------------
             cld_alt_resampled = os.path.join(p_working, "cloud_alt_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_ALT], dict_of_input.get("DEM").ALTList[p_res], cld_alt_resampled,
-                     OtbResampleType.LINEAR))
+                     OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_ALT + "_" + l_res] = cld_alt_resampled
             # ---------- Resample Cirrus cloud to resolution ---------------
             cld_cirrus_resampled = os.path.join(p_working, "cloud_cirrus_" + l_res + ".tif")
             self._apps.add_otb_app(resample(dict_of_output[CLOUD_MASK_CIRRUS], dict_of_input.get("DEM").ALTList[p_res], cld_cirrus_resampled,
-                     OtbResampleType.LINEAR))
+                     OtbResampleType.LINEAR, threshold=0.25))
             dict_of_output[CLOUD_MASK_CIRRUS + "_" + l_res] = cld_cirrus_resampled
 
             # APRES MEMORY IN CHAIN CORE ALGORITHMS : V 4-1-0
