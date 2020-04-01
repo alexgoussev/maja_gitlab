@@ -340,7 +340,7 @@ class MajaCloudMaskComputation(MajaModule):
         if dict_of_input.get("Params").get("CloudMaskingKnownCloudsAltitude"):
             param_shadow["algo"] = "withalt"
             param_shadow["ksigma"] = int(dict_of_input.get("L2COMM").get_value("KsigmaAltitude"))
-            param_shadow["l2cla"] = cloud_cla_filename
+            param_shadow["l2cla"] = cloud_cla_filename + ":int16"
             param_shadow["algo.withalt.absnbpixthresh"] = dict_of_input.get("L2COMM").get_value_f("AbsNbpixThreshold")
             param_shadow["algo.withalt.refinement"] = dict_of_input.get("L2COMM").get_value("RefinementOption")
             param_shadow["algo.withalt.threshdiffim"] = dict_of_input.get("L2COMM").get_value_f("ThresholdDiffImage")

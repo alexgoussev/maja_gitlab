@@ -60,8 +60,8 @@ class MajaCloudMaskUndersampling(MajaModule):
         param_resamp_cla = {"dtm": dict_of_input.get("DEM").ALC,
                             "im": l1_cla,
                             "nodata": dict_of_input.get("L1Info").RealL1NoData,
-                            "cla": cla_image,
-                            "clalt": clalt_image}
+                            "cla": cla_image + ":int16",
+                            "clalt": clalt_image + ":int16"}
         self._undersampling_app = OtbAppHandler("CloudMaskUndersampling", param_resamp_cla, write_output=caching)
         dict_of_output["CLA_Sub"] = self._undersampling_app.getoutput()["cla"]
         dict_of_output["CLALT_Sub"] = self._undersampling_app.getoutput()["clalt"]
