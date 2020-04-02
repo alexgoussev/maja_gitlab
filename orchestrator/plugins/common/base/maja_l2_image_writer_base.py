@@ -622,4 +622,15 @@ class L2ImageWriterBase(object):
                 inmax=[str(p_QuicklookMaxReflRedBand), str(p_QuicklookMaxReflGreenBand), str(p_QuicklookMaxReflBlueBand)]
             )
 
+            if (os.path.exists(filename + '.aux.xml')):
+                LOGGER.debug("Removing " + filename + '.aux.xml file')
+                os.remove(filename + '.aux.xml')
+
+
+
+
+
+
+
+
 
