@@ -51,6 +51,7 @@ ADD_SUBDIRECTORY(SlopeCorrection)
 ADD_SUBDIRECTORY(SnowMask)
 ADD_SUBDIRECTORY(WaterMask)
 ADD_SUBDIRECTORY(WaterVaporPostProcessing)
+ADD_SUBDIRECTORY(OTBApplications)
 
 
 
