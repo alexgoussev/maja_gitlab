@@ -214,14 +214,7 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
     def is_a_landsat8_l1product_by_checking_the_filename(p_filename):
         #p_filename: ex: < ... > _MTL.txt
         l_ShortFilename = os.path.basename(p_filename)
-        LOGGER.debug(
-            "Landsat8L1ImageInformationsProvider::IsALandsat8L1ProductByCheckingTheFilename l_ShortFilename: " +
-            l_ShortFilename)
         l_ShortDirectory = os.path.basename(os.path.dirname(p_filename))
-        LOGGER.debug(
-            "Landsat8L1ImageInformationsProvider::IsALandsat8L1ProductByCheckingTheFilename l_ShortDirectory: " +
-            l_ShortDirectory)
-
         #Filename evolution
         #Before Landsat Collection 1: LC8...
         #After Landsat Collection 1: LC08...

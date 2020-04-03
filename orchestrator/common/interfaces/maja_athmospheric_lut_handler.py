@@ -315,7 +315,7 @@ class AthmosphericLutHandler(object):
 
         # TOCR
         # build root node
-        new_lut_tocr = LUT(list(self.GIP_L2TOCR_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_tocr)
+        new_lut_tocr = LUT(self.GIP_L2TOCR_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_tocr)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -325,7 +325,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_tocr_filename)
         # DIFT
         # build root node
-        new_lut_dift = LUT(list(self.GIP_L2DIFT_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_dift)
+        new_lut_dift = LUT(self.GIP_L2DIFT_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_dift)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -335,7 +335,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_dift_filename)
         # DIRT
         # build root node
-        new_lut_dirt = LUT(list(self.GIP_L2DIRT_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_dirt)
+        new_lut_dirt = LUT(self.GIP_L2DIRT_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_dirt)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -345,7 +345,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_dirt_filename)
         # ALBD
         # build root node
-        new_lut_albd = LUT(list(self.GIP_L2ALBD_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_albd)
+        new_lut_albd = LUT(self.GIP_L2ALBD_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_albd)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')

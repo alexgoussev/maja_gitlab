@@ -107,7 +107,9 @@ class MajaModule(object):
     def create(module_name):
         creators = FactoryBase.get_registered(module_name)
         if len(creators) == 0:
+            print(FactoryBase.registry)
             raise MajaModuleException("No factory to create module : " + module_name)
+
         if len(creators) > 1:
             raise MajaModuleException("More than one factory to provide module : " + module_name)
         return creators[0]()

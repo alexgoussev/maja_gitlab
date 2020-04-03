@@ -122,8 +122,9 @@ private:
 		{
 			vnsExceptionDataMacro("Not the correct number of filenames for images");
 		}
-
+		vnsLogDebugMacro("Number of lines for writing: "<<GetParameterInt("nblinesperstrip"));
 		otb::MultiImageFileWriter::Pointer l_multi_writer = otb::MultiImageFileWriter::New();
+		l_multi_writer->SetNumberOfLinesStrippedStreaming(GetParameterInt("nblinesperstrip"));
 
 		for (unsigned int i = 0;i<GetNumberOfElementsInParameterInputImageList("il");i++ )
 		{
@@ -240,7 +241,7 @@ private:
 		}
 
 		//Setup and execute the multiwriter
-		l_multi_writer->SetNumberOfLinesStrippedStreaming(GetParameterInt("nblinesperstrip"));
+
 		l_multi_writer->Update();
 
 	}

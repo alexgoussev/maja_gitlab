@@ -56,7 +56,6 @@ import os
 import math
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.plugins.common.factory.maja_l2_header_writer_provider import L2HeaderWriterProvider
-from orchestrator.common.directory_manager import DirectoryManager
 
 
 LOGGER = configure_logger(__name__)
@@ -88,6 +87,7 @@ class L2Processor(BaseProcessor):
         LOGGER.info("Using " + str(self._ram) + " MB of RAM")
         # Set ram to use in otb apps
         OtbAppHandler.set_ram_to_use(self._ram)
+        os.environ["OTB_MAX_RAM_HINT"] = str(self._ram)
         self._validate_schemas = self._apphandler.get_user_conf().get_Processing().get_CheckXMLFilesWithSchema()
         LOGGER.info("Validating xml : " + str(self._validate_schemas))
 
@@ -655,7 +655,8 @@ class L2Processor(BaseProcessor):
                         if p_finalize_backward:
                             LOGGER.warning(
                                 "Last product in backward mode is cloudy. It will be considered as a valid product.")
-
+            #Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
             if not l_StopLevel2Processing:
                 if p_checking_conditional_clouds[0] or p_finalize_backward:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
@@ -676,7 +677,7 @@ class L2Processor(BaseProcessor):
                     if l_SnowBandAvailable:
                         snow_percentage_computation = MajaModule.create("SnowPercentage")
                         snow_percentage_computation.launch(global_input_dict, global_output_dict)
-                        l_module_list.append(snow_mask_computation)
+                        l_module_list.append(snow_percentage_computation)
                         l_SnowRate = global_output_dict["SnowRate"]
                     # == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
                     # IF INIT MODE(AOT ESTIMATION) AND MULTITEMPORAL METHOD
@@ -717,7 +718,8 @@ class L2Processor(BaseProcessor):
                     composite_computation = MajaModule.create("Composite")
                     composite_computation.launch(global_input_dict, global_output_dict)
                     l_module_list.append(composite_computation)
-
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
                 # =======================================================================
                 # IF ENVIRONMENT CORRECTION OPTION IS TRUE AND
                 # IF THE OPTION "WRITE L2 PRODUCT TO L2 RESOLUTION" IS TRUE
@@ -736,12 +738,16 @@ class L2Processor(BaseProcessor):
                     slope_correction = MajaModule.create("SlopeCorrection")
                     slope_correction.launch(global_input_dict, global_output_dict)
                     l_module_list.append(slope_correction)
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
                 if m_WriteL2ProductToL2Resolution:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
                     # START Water vapor post processing algo
                     water_vapor_post_processing_correction = MajaModule.create("WaterVaporPostProcessing")
                     water_vapor_post_processing_correction.launch(global_input_dict, global_output_dict)
                     l_module_list.append(water_vapor_post_processing_correction)
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
 
                 # *************************************************************************************************************
                 # ***** START WRITING DATA   *********************************************
@@ -771,6 +777,8 @@ class L2Processor(BaseProcessor):
                                                        l_WriteL2Products, l_CopyPrivateFromL2InputToL2Output,
                                                        l_IsDefaultAOT)
                 l_NumberOfStackImages = len(l_STOListOfStringDates)
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
 
             # Fin l_StopLevelProcessing Faux
         # Fin l_StopLevelProcessing Faux
@@ -830,7 +838,8 @@ class L2Processor(BaseProcessor):
         LOGGER.debug("  ->  self._productIsValid                     = " + str(self._productIsValid))
         LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(p_checking_conditional_clouds[0]))
         LOGGER.debug("  ->  use_cams_datas                       = " + str(l_UseCamsData))
-
+        # Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
         for mod in l_module_list:
             LOGGER.debug("Deleting module : "+mod.NAME)
             mod.cleanup()
@@ -840,6 +849,8 @@ class L2Processor(BaseProcessor):
         if self._apphandler.get_user_conf().get_Computing().get_EnableCleaningTemporaryDirectory():
             LOGGER.debug(self._apphandler.get_directory_manager())
             self._apphandler.get_directory_manager().clean()
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
 
     def scientific_processing(self):
         raise NotImplementedError

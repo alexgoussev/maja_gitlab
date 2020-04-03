@@ -187,6 +187,9 @@ class L2InitProcessor(L2Processor):
             raise MajaDriverException(
                 "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + self._l1product.PluginName + "' products ")
 
+        #Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
+
         # check conditional clouds ?
         checking_conditional_clouds = [True]
         LOGGER.info("Starting from L2InitProcessor, the main ScientificSingleProductProcessing() method...")
@@ -197,6 +200,7 @@ class L2InitProcessor(L2Processor):
                                                          None, l2_image_file_writer, checking_conditional_clouds)
 
         LOGGER.info("Ending ScientifiqProcessing")
+        LOGGER.info(self._apphandler.get_system_infos())
 
     def post_processing(self):
         LOGGER.info("Starting Postprocessing")

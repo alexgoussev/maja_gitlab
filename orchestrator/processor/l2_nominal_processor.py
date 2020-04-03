@@ -192,6 +192,9 @@ class L2NominalProcessor(L2Processor):
             l_OzoneAmountValue = float(l_GIPPL2COMMHandler.l2_comm_values["OzoneAmountDefaultValue"])
         LOGGER.info("The 'OzoneAmount' used is " + str(l_OzoneAmountValue))
 
+        # Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
+
         # check conditional clouds ?
         checking_conditional_clouds = [True]
         LOGGER.info("Starting from L2InitProcessor, the main ScientificSingleProductProcessing() method...")
@@ -200,8 +203,9 @@ class L2NominalProcessor(L2Processor):
                                                             False, True, True, self._l1product, l1_image_reader,
                                                             l_OzoneAmountValue, self._cams_status, l2_image_reader,
                                                             l2_image_file_writer, checking_conditional_clouds)
-
         LOGGER.info("Ending ScientifiqProcessing")
+        # Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
 
     def post_processing(self):
         LOGGER.info("Starting Postprocessing")

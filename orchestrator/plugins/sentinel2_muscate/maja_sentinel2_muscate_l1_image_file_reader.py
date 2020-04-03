@@ -31,11 +31,8 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.maja_exceptions import MajaDataException, MajaExceptionPluginSentinel2Muscate
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_resample import resample
-from orchestrator.cots.otb.algorithms.otb_band_math import band_math_or
-from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
-from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.cots.otb.algorithms.otb_angle_list_to_image import angle_list_to_image
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.plugins.common.sentinel2_base.maja_sentinel2_l1_image_file_reader_base import \
@@ -347,7 +344,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 tmp_zone_roi_app = extract_roi(dispatch_app.getoutput().get("out"),
                                               [self.m_headerHandler.get_l1_ndt_image_index(l1BandIdx) - 1],
                                               tmp_zone_roi, write_output=False)
-                self._subedg_pipeline.add_otb_app(tmp_ndt_roi_app)
+                self._subedg_pipeline.add_otb_app(tmp_zone_roi_app)
                 tmp_zone_with_nodata = os.path.join(working, "tmp_zone_with_nodata_{}".format(curL1Res))
                 masterExpr = "( im1b1 > 0 ) ? im1b1 : -10000"
                 param_bandmath_zone = {"il": [tmp_zone_roi_app.getoutput().get("out")],
@@ -381,7 +378,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 # Add to the official output
                 self._zonemasksublist[l1BandIdx] = zone_round_app.getoutput().get("out")
                 # Log current loop
-                LOGGER.debug("band loop: " + str(l_BandIdxL1 + 1) + " / " + str(nbL1Bands) + " (" + curL1Res + ")")
+                LOGGER.debug("band loop: " + str(l1BandIdx + 1) + " / " + str(nbL1Bands) + " (" + curL1Res + ")")
             # band loop
             LOGGER.debug("band loop: END")
             self._l2_detf_pipeline.free_otb_app()

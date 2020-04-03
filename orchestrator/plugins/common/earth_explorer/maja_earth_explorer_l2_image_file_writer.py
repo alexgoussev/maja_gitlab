@@ -29,6 +29,7 @@ import orchestrator.common.file_utils as file_utils
 from orchestrator.plugins.common.base.maja_l2_image_writer_base import L2ImageWriterBase
 from orchestrator.plugins.common.base.maja_l2_image_filenames_provider import L2ImageFilenamesProvider
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.common.logger.maja_logging import configure_logger
 import os
@@ -233,22 +234,29 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 # START WRITING SRE Image file DATA
                 # Caching the SRE image, before computing the QuickLook.
                 # Create the scalar image filter
+                sre_filename = p_L2ImageFilenamesProvider.get_sre_filenames()[
+                                   resol] + file_utils.get_extended_filename_write_image_file_standard()
                 param_scaled_sre = {
                     "im": self._sre_list[resol],
                     "coef": p_ReflectanceQuantificationValue,
-                    "out": p_L2ImageFilenamesProvider.get_sre_filenames()[resol] +
-                    file_utils.get_extended_filename_write_image_file_standard()}
-                OtbAppHandler("MultiplyByScalar", param_scaled_sre)
+                    "out": sre_filename}
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING FRE Image file DATA
                 if p_EnvCorOption:
+                    sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre, write_output=False)
+                    fre_filename = p_L2ImageFilenamesProvider.get_fre_filenames()[
+                                       resol] + file_utils.get_extended_filename_write_image_file_standard()
                     param_scaled_fre = {
                         "im": self._fre_list[resol],
                         "coef": p_ReflectanceQuantificationValue,
-                        "out": p_L2ImageFilenamesProvider.get_fre_filenames()[resol] +
-                        file_utils.get_extended_filename_write_image_file_standard()}
-                    OtbAppHandler("MultiplyByScalar", param_scaled_fre)
+                        "out": fre_filename}
+                    fre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_fre, write_output=False)
+                    #Write SRE and FRE simultaneously
+                    write_images([sre_scal_app.getoutput().get("out"),fre_scal_app.getoutput().get("out")],
+                                 [sre_filename,fre_filename])
+                else:
+                    sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre, write_output=True)
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING ATB Image file DATA

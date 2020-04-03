@@ -59,6 +59,7 @@ args = argParser.parse_args(sys.argv[1:])
 
 register_all()
 app_handler = AppHandler()
+app_handler._workingDirectory = args.output_dir
 app_handler._directory_manager = DirectoryManager(working_dir=args.output_dir)
 OtbAppHandler.set_ram_to_use(8048)
 
@@ -84,6 +85,10 @@ dem.initialize(dem_filename, dem_working, True)
 # Read L1 product
 l1_reader = L1ImageReaderProvider.create(l1product.PluginName, l1product, app_handler, l_gippl2commhandler, dem,
                              constants.ReadL1Mode.READ_L1_MODE_FOR_ALGORITHMS)
+
+LOGGER.info(app_handler.get_system_infos())
+print(app_handler.get_working_directory())
+
 
 LOGGER.info("L1 Reader Done ...")
 #Copy files to the output directory
@@ -162,5 +167,6 @@ if l1_reader.has_value("L1TOAImageList") and l1_reader.get_value("L1TOAImageList
         LOGGER.debug("toa image list test: " + str(l1_reader.get_value("L1TOAImageList")[i]) )
         otb_copy_image_to_file(l1_reader.get_value("L1TOAImageList")[i],
                                os.path.join(args.output_dir,"L1TOAImageList_R"+str(i+1)+".tif"))
+# Log system infos
 
 app_handler.get_directory_manager().clean(True)

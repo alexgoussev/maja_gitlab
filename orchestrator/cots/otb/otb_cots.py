@@ -54,6 +54,7 @@ class MajaOtbCots(MajaCots):
         # TODO: TBC
         self.outputs = {}
         self.otb_app = None
+        self._in_swig_py = None
 
     def run(self, write_output=True):
         if write_output:
@@ -91,6 +92,15 @@ class MajaOtbCots(MajaCots):
             self.otb_app.SetParameters(parameters_im)
             if not get_test_mode():
                 self.otb_app.UpdateParameters()
+            if type(parameters["in"]).__name__ == "SwigPyObject":
+                self._in_swig_py = parameters["in"]
+        if "im" in parameters:
+            if type(parameters["im"]).__name__ == "SwigPyObject":
+                self._in_swig_py = parameters["im"]
+        if "il" in parameters and len(parameters["il"]) > 0:
+            if type(parameters["il"][0]).__name__ == "SwigPyObject":
+                self._in_swig_py = parameters["il"][0]
+
 
         # remove flag if set to false
         parameters_clean = {}
@@ -143,5 +153,27 @@ class MajaOtbCots(MajaCots):
                             if not self.otb_app.GetParameterType(param) == otbApplication.ParameterType_Group:
                                 self.outputs[param] = copy.deepcopy(self.otb_app.GetParameterValue(param))
         if write_output:
-            del(self.otb_app)
+            if self._in_swig_py is not None and not get_test_mode():
+                parameters = {"in": self._in_swig_py,
+                              "startx": 0,
+                              "starty": 0,
+                              "sizex": 1,
+                              "sizey": 1,
+                              "out": "tmp.tif"}
+                otb_app = otbApplication.Registry.CreateApplication("ExtractROI")
+                if otb_app is None:
+                    raise MajaDriverException("No app ExtractROI found")
+                otb_app.Init()
+                otb_app.SetParameters(parameters)
+                otb_app.Execute()
+                otb_app2 = otbApplication.Registry.CreateApplication("Stats")
+                if otb_app2 is None:
+                    raise MajaDriverException("No app Stats found")
+                otb_app2.Init()
+                parameters2 = {"im": otb_app.GetParameterOutputImage("out")}
+                otb_app2.SetParameters(parameters2)
+                otb_app2.ExecuteAndWriteOutput()
+                del otb_app
+                del otb_app2
+            del self.otb_app
             self.otb_app = None

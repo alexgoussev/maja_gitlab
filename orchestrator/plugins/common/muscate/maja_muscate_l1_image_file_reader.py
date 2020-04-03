@@ -78,24 +78,11 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         self._l2_detf_pipeline = OtbPipelineManager()
         self._l2_zone_pipeline = OtbPipelineManager()
         self._l1toa_pipeline = OtbPipelineManager()
+        self._l2edg_pipeline = OtbPipelineManager()
         self._satmasksub_pipeline = OtbPipelineManager()
         self._satmask_pipeline = OtbPipelineManager()
         self._l2pix_pipeline = OtbPipelineManager()
         self._header_handler = None
-
-    def generate_l1_pix_mask(self, working_dir):
-        LOGGER.debug("MuscateL1ImageFileReader::GeneratePIXMask()")
-        # PIX image pipeline connection
-        # *********************************************************************************************************
-        l_BandsDefinitions = self._plugin.BandsDefinitions
-        l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
-        l_NbL2Res = len(l_ListOfL2Resolution)
-        for l2res in range(l_NbL2Res):
-            # Current resolution: "R1" or "R2"
-            curRes = l_ListOfL2Resolution[l2res]
-            dtm = self._dem.ALTList[l2res]
-            tmp_constant_filename = os.path.join(working_dir, "PIX_Masks_const.tif")
-            constant_image(dtm, 0, tmp_constant_filename, write_output=True)
 
     def generate_cla_image(self, realL1Nodata, working_dir):
         LOGGER.debug("MuscateL1ImageFileReader::GenerateCLAMask()")
@@ -183,8 +170,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                 toaFilename,
                 reflectanceMultiplicationValues[i],
                 output_image=l_ImageFilename,
-                write_output=False)
-            self._toa_pipeline.add_otb_app(app)
+                write_output=True)
             self._toa_scalar_list.append(app.getoutput()["out"])
 
         LOGGER.debug("Caching TOA images done ...")
@@ -220,8 +206,9 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            OtbAppHandler("ConcatenateImages", param_concatenate)
-            self._l2toaimagelist.append(out_concatenate)
+            concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+            self._toa_pipeline.add_otb_app(concat_app)
+            self._l2toaimagelist.append(concat_app.getoutput().get("out"))
 
     def generate_l1_toa_images(self, working_dir):
         """
@@ -239,14 +226,15 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
     def generate_toa_sub_images(self, working):
         dtm_coarse = self._dem.ALC
 
+        toa_sub_mini_pipe = OtbPipelineManager()
         # For each band of the input product
         for i, toa in enumerate(self._toa_scalar_list):
             # undersampling at L2CoarseResolution
             toa_sub_image = os.path.join(working, "aot_sub_{}.tif".format(i))
             app = resample(toa, dtm_coarse, toa_sub_image, OtbResampleType.LINEAR_WITH_RADIUS,
-                           write_output=True)
+                           write_output=False)
             self._toa_sub_list.append(app.getoutput()["out"])
-            self._toa_pipeline.add_otb_app(app)
+            toa_sub_mini_pipe.add_otb_app(app)
         # end band loop
 
         # *******************************************************************************************************
@@ -258,6 +246,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                              }
         OtbAppHandler("ConcatenateImages", param_concatenate)
         self._sub_toa = toa_sub_image
+        toa_sub_mini_pipe.free_otb_app()
 
     def generate_mask_rasters(self, p_ListOfTOABandCode, working):
         # Generate mask rasters by rasterizing the gml mask per L2 resolution per band
@@ -277,7 +266,6 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         # initialize the L2 Elements
         for l2res in range(l_NbL2Res):
             self._l2defectmasklist.append([])
-            self._l2satimagelist.append([])
             self._l2dfpimagelist.append(None)
 
         # Init the coarse elements
@@ -319,7 +307,8 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                 if curL1Res in l_ListOfL2Resolution:
                     tmp_constant_L2_filename = os.path.join(working, "Masks_const_.tif")
                     tmp_constant_L2_app = constant_image(self._dem.ALTList[l1res], 0, tmp_constant_L2_filename,
-                                                         write_output=True)
+                                                         write_output=False)
+                    self._l2_sat_pipeline.add_otb_app(tmp_constant_L2_app)
 
             # Get the list of band of the current resolution
             listOfL1Bands = l_BandsDefinitions.get_list_of_l1_band_code(curL1Res)
@@ -370,21 +359,23 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                             tmp_extract_sat_toi_app = extract_roi(
                                  sat_mask_app.getoutput()["out"], tmp_l2_band_idx_list,
                                     tmp_satmask_roi, write_output=False)
+                            self._satmask_pipeline.add_otb_app(tmp_extract_sat_toi_app)
                             resamp_l2_app = resample(
                                 tmp_extract_sat_toi_app.getoutput()["out"],
                                 self._dem.ALTList[l1res],
                                 tmp_sat_l2_resample,
                                 OtbResampleType.LINEAR_WITH_RADIUS,
                                 threshold=0.5,
-                                padradius=4)
+                                padradius=4,write_output=False)
+                            self._satmask_pipeline.add_otb_app(resamp_l2_app)
                             self._l2satmasklist[l_ListOfL2Resolution.index(
                                 curL1Res)] = resamp_l2_app.getoutput().get("out")
                         else:
                             resamp_l2_app = resample(sat_mask_app.getoutput()["out"], self._dem.ALTList[l1res],
                                                      tmp_sat_l2_resample,
                                                      OtbResampleType.LINEAR_WITH_RADIUS,
-                                                     threshold=0.25, padradius=4)
-
+                                                     threshold=0.25, padradius=4,write_output=False)
+                            self._satmask_pipeline.add_otb_app(resamp_l2_app)
                             self._l2satmasklist[l_ListOfL2Resolution.index(curL1Res)] = resamp_l2_app.getoutput()["out"]
 
                     tmp_l1_band_idx_list = []
@@ -394,11 +385,9 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                     tmp_sat_roi = os.path.join(working, "tmp_l1_extract_roi_sat_{}.tif".format(l1res))
                     tmp_sat_roi_app = extract_roi(
                         sat_mask_app.getoutput()["out"], tmp_l1_band_idx_list, tmp_sat_roi, write_output=False)
-                    tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1band))
+                    tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1res))
                     app_resample = resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
                                             OtbResampleType.LINEAR_WITH_RADIUS, write_output=True)
-
-                    self._satmasksub_pipeline.add_otb_app(app_resample)
                     self._satmasksublist[l1res] = app_resample.getoutput()["out"]
 
                 else:
@@ -440,13 +429,16 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                                               "nbcomp": nbL1Bands
                                               }
 
-                        dfp_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=True)
+                        dfp_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=False)
+                        self._l2_dfp_pipeline.add_otb_app(dfp_mask_app)
                         tmp_dfp_l2_resample = os.path.join(working, "tmp_dfp_resample_{}.tif".format(l1res))
                         resamp_l2_dfp_app = resample(dfp_mask_app.getoutput().get("out"), self._dem.ALTList[l1res],
                                                      tmp_dfp_l2_resample,
-                                                     OtbResampleType.LINEAR_WITH_RADIUS, threshold=0.25, padradius=4)
+                                                     OtbResampleType.LINEAR_WITH_RADIUS, threshold=0.25, padradius=4,
+                                                     write_output=False)
                         self._l2dfpimagelist[l_ListOfL2Resolution.index(
                             curL1Res)] = resamp_l2_dfp_app.getoutput().get("out")
+                        self._l2_dfp_pipeline.add_otb_app(resamp_l2_dfp_app)
                 else:
                     raise MajaExceptionPluginMuscate("Product format not supported : not the same file for band on PIX")
             else:
@@ -481,13 +473,13 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                      "outsidevalue": 0,
                      "out": out_edg + ":uint8"
                      }
-        onebandequal_app = OtbAppHandler("OneBandEqualThreshold", param_edg)
+        onebandequal_app = OtbAppHandler("OneBandEqualThreshold", param_edg,write_output=False)
 
         # Resample to coarse
         LOGGER.debug("Start IPEDGSub.")
         tmp_edg_sub_resample = os.path.join(working_dir, "tmp_edg_sub.tif")
         edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse, tmp_edg_sub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,write_output=False)
         # Threshold the output
         out_sub_edg = os.path.join(working_dir, "tmp_edg_sub_oneBandEqual.tif")
         param_sub_edg = {"im": edg_sub_resample_app.getoutput().get("out"),
@@ -499,6 +491,8 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg)
         # Put in internal data
         self._edgsubmask = onebandequal_sub_app.getoutput().get("out")
+        del onebandequal_app
+        del edg_sub_resample_app
         LOGGER.debug("Start IPEDGSub done.")
 
         # *******************************************************************************************************
@@ -512,27 +506,31 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         l_NbL2Res = len(l_ListOfL2Resolution)
         # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
         out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
-        m_L2EDGThresholdImage = binary_threshold(self._edgsubmask,
+        m_L2EDGThresholdApp = binary_threshold(self._edgsubmask,
                                                  lower_threshold=0,
                                                  inside_value=1000,
                                                  outside_value=0,
                                                  output_image=out_thresh + ":double",
-                                                 write_output=True).getoutput()["out"]  # //l_ThresholdImageFilter
+                                                 write_output=False)# //l_ThresholdImageFilter
+        self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp)
         for r in range(l_NbL2Res):
             res_str = l_ListOfL2Resolution[r]
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            resample(m_L2EDGThresholdImage, self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR)
+            resamp_app = resample(m_L2EDGThresholdApp.getoutput().get("out"),
+                                  self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR,write_output=False)
+            self._l2edg_pipeline.add_otb_app(resamp_app)
             # Set Threshold value to one because the expand filter interpolates values set to 0
             # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
             m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImage2 = binary_threshold(out_ressampling,
+            m_L2EDGThresholdApp2 = binary_threshold(resamp_app.getoutput().get("out"),
                                                       lower_threshold=1,
                                                       inside_value=1,
                                                       outside_value=0,
-                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8").getoutput()[
-                "out"]
-            self._l2edgmasklist.append(m_L2EDGThresholdImage2)
+                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8",
+                                                    write_output=False)
+            self._l2edgmasklist.append(m_L2EDGThresholdApp2.getoutput().get("out"))
+            self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp2)
 
     def read(self, product_info, app_handler, l2comm, dem, pReadL1Mode):
         """product_info,plugin, l2comm,mode
@@ -605,7 +603,6 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
 
         l_ProjectionRef = self._dem.ProjRef
         self.generate_toa(l_ListOfTOAImageFileNames, l_reflectanceMultiplicationValues, working_dir)  # string
-        self.generate_l1_pix_mask(working_dir)
         if pReadL1Mode == ReadL1Mode.READ_L1_MODE_FOR_ALGORITHMS:
             # --------------------------------------
             # Get information of areas (footprint) of the product (Origin, Spacing and Size for L2 and L2Coarse resolution)

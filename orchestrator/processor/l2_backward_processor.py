@@ -192,6 +192,8 @@ class L2BackwardProcessor(L2Processor):
                 raise MajaDriverException(
                     "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
 
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
             # Compute the Single product
             # ----------------------------------------------------------------
             self.single_product_processing(
@@ -222,6 +224,9 @@ class L2BackwardProcessor(L2Processor):
 
             # Decrement the input L1 index product
             l_IndexOfL1Product = l_IndexOfL1Product - 1
+
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
 
         # Check the Init mode
         # ----------------------------------------------------------------
@@ -312,6 +317,8 @@ class L2BackwardProcessor(L2Processor):
                 if not l2_image_file_writer.can_write(l_InputL1ProductInfo.PluginName):
                     raise MajaDriverException(
                         "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
                 # Compute the L2 temporary product
                 # ----------------------------------------------------------------
                 self.single_product_processing(
@@ -335,6 +342,9 @@ class L2BackwardProcessor(L2Processor):
                 # Decrement Index of L1 image input
                 # ----------------------------------------------------------------
                 l_IndexOfL1Product = l_IndexOfL1Product - 1
+
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
 
             # Finalize the product
             # Compute the last L2 product
@@ -407,6 +417,8 @@ class L2BackwardProcessor(L2Processor):
                 raise MajaDriverException(
                     "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
 
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
             self.single_product_processing(
                 l_InitMode,
                 l_BackwardMode,
@@ -427,6 +439,8 @@ class L2BackwardProcessor(L2Processor):
                 "L1ImageInformationProvider initialized during backward but no associated valid L2 product.")
 
         LOGGER.info("L2BackwardProcessor::ScientificProcessing() done.")
+        # Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
 
     def single_product_processing(self, initmode, backwardmode, p_finalize_backward, p_L1ImageInformationsProvider,
                                 p_InputL1ImageFileReader, p_write_earthexplorer_headers, p_write_temporary_l2_product,

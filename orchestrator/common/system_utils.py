@@ -127,13 +127,12 @@ class MemoryUsedByProcessException(IOError):
 def disk_space_used(workingdirectory):
     try:
         p = subprocess.Popen("/usr/bin/du -sk %s" % workingdirectory, shell=True, stdout=subprocess.PIPE)
-        out = p.stdout.read()
-        resultinkoctets = out.decode().split()
         p.wait()
+        out = p.stdout.read()
+        resultinkoctets = out.split()
         resultinmoctets = float(resultinkoctets[0]) / 1024.0
-
     except Exception as e:
-        strerror = str(e).decode().split("\n")
+        strerror = str(e).split("\n")
         raise DiskSpaceUsedException(strerror[0])
 
     return resultinmoctets
@@ -218,7 +217,7 @@ def memory_used_by_process2(idprocess):
         statinfo = statfile.read()
         statfile.close()
         i = statinfo.index("VmHWM:")
-        lsthwm = statinfo[i:].decode().split(None, 3)
+        lsthwm = statinfo[i:].split()
         if len(lsthwm) < 3:
             tot_mem_mo = 0  # error bad formatting
         else:
@@ -227,6 +226,27 @@ def memory_used_by_process2(idprocess):
         tot_mem_mo = 0
 
     return tot_mem_mo / (1024.0 * 1024.0)
+
+
+def memory_used_by_process_current(idprocess):
+    _scale = {'kB': 1024.0, 'mB': 1024.0 * 1024.0,
+              'KB': 1024.0, 'MB': 1024.0 * 1024.0}
+
+    try:
+        statfile = open("/proc/" + str(idprocess) + "/status")
+        statinfo = statfile.read()
+        statfile.close()
+        i = statinfo.index("VmRSS:")
+        lsthwm = statinfo[i:].split()
+        if len(lsthwm) < 3:
+            tot_mem_mo = 0  # error bad formatting
+        else:
+            tot_mem_mo = float(float(lsthwm[1]) * _scale[lsthwm[2]])
+    except Exception:
+        tot_mem_mo = 0
+
+    return tot_mem_mo / (1024.0 * 1024.0)
+
 
 
 def elapsed_time(idprocess, pov):

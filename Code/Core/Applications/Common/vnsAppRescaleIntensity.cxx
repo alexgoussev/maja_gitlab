@@ -172,8 +172,9 @@ private:
   {
     FloatVectorImageType::Pointer inImage = GetParameterImage("in");
 
-    otbAppLogDEBUG( << "Starting Min/Max computation" )
 
+    if (!HasValue("inmin") || !HasValue("inmax"))
+    otbAppLogDEBUG( << "Starting Min/Max computation" )
     m_MinMaxFilter = MinMaxFilterType::New();
     m_MinMaxFilter->SetInput( inImage );
     m_MinMaxFilter->GetStreamer()->SetAutomaticAdaptativeStreaming(GetParameterInt("ram"));

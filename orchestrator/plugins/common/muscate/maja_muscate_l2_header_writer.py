@@ -1214,8 +1214,8 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
         l_JpiXMLFileHandler.set_string_value("//Min", int(self.dem.ALT_Min))
         l_JpiXMLFileHandler.set_string_value("//Max", int(self.dem.ALT_Max))
         # ---------------------------------------------------------------------------------------------
-        l_JpiXMLFileHandler.set_string_value("//Average", f"{self.dem.ALT_Mean:.6}")
-        l_JpiXMLFileHandler.set_string_value("//Standard_Deviation", f"{self.dem.ALT_Stdv:.6}")
+        l_JpiXMLFileHandler.set_string_value("//Average", f"{self.dem.ALT_Mean:.6f}")
+        l_JpiXMLFileHandler.set_string_value("//Standard_Deviation", f"{self.dem.ALT_Stdv:.6f}")
         # Write the cirrus correction flag if plugin has it
         if self.l1_plugin.CirrusMasking:
             l_JpiXMLFileHandler.set_value_of("ProcessingFlagsAndModesCirrusCorrection", self.cirruscorrection)

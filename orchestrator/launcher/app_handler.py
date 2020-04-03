@@ -38,7 +38,8 @@ from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.maja_exceptions import MajaProcessingError
 from orchestrator.common.directory_manager import DirectoryManager
 from orchestrator.common import version
-import logging
+from orchestrator.common.system_utils import memory_used_by_process2,disk_space_used
+import logging,time
 
 LOGGER = configure_logger(__name__)
 
@@ -80,6 +81,7 @@ class AppHandler:
         self._tile_id = None
         self._validate_schemas = False
         self._directory_manager = DirectoryManager(self._workingDirectory)
+        self._start_time = time.time()
 
     def get_stylesheet(self):
         return self._stylesheet
@@ -137,6 +139,12 @@ class AppHandler:
 
     def get_validate_schemas(self):
         return self._validate_schemas
+
+    def get_system_infos(self):
+        return "System infos : RAM max : " + str(int(memory_used_by_process2(os.getpid()))) + " MB, DiskUsage : " + str(
+            int(disk_space_used(self._workingDirectory))) + " MB, Elapsed time: " + time.strftime("%M min %S seconds",
+                                                                                                  time.gmtime(
+                                                                                                      time.time() - self._start_time))
 
     def initialize(self):
         maja_description = """ ./maja [options] \n\n
@@ -276,8 +284,7 @@ class AppHandler:
         parser.add_argument(
             "--NbThreads",
             type=int,
-            help="UserConfigSystem overloads value for the parameter 'NbThreads'",
-            default=1)
+            help="UserConfigSystem overloads value for the parameter 'NbThreads'")
         parser.add_argument(
             "--CheckXMLFilesWithSchema",
             help="UserConfigSystem overloads value for the parameter 'CheckXMLFilesWithSchema'",
@@ -453,7 +460,6 @@ class AppHandler:
 
         LOGGER.info("Processor is %s", self._processorName)
 
-        self._nbThreads = args.NbThreads
         LOGGER.info("Number of theads %i", self._nbThreads)
 
     def get_admin_conf_camera_filename(self, plugin_name):

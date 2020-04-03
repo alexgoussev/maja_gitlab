@@ -28,7 +28,8 @@ It defines classes_and_methods
 from .otb_cots import MajaOtbCots
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.maja_utils import get_test_mode
-import time
+from orchestrator.common.system_utils import memory_used_by_process2,memory_used_by_process_current
+import time,os
 LOGGER = configure_logger(__name__)
 
 
@@ -56,18 +57,26 @@ class OtbAppHandler:
     def __del__(self):
         if self._c1.otb_app is not None:
             LOGGER.debug("Destructing : "+self._app_name)
+            if "out" in self._c1.otb_app.GetParametersKeys():
+                LOGGER.debug("Out: ")
+                LOGGER.debug(self._c1.otb_app.GetParameterValue("out"))
         del(self._c1)
 
     def _run(self):
         start_time = time.time()
         LOGGER.debug("Running : " + self._app_name)
         self._c1.run(self._write_output)
-        LOGGER.debug("Finished : " + self._app_name + " in "+time.strftime("%M:%S", time.gmtime(time.time()-start_time)))
+        LOGGER.debug("Finished : " + self._app_name +
+                     " ,Time: "+time.strftime("%M min %S seconds", time.gmtime(time.time()-start_time)) +
+                     " ,RAM current : " + str(int(memory_used_by_process_current(os.getpid()))) + " MB" +
+                     " ,RAM max : "+ str(int(memory_used_by_process2(os.getpid())))+" MB")
 
     def _post(self):
         LOGGER.debug("Running : " + self._app_name)
         self._c1.post(self._write_output)
-        LOGGER.debug("Finished : " + self._app_name)
+        LOGGER.debug("Finished : " + self._app_name +
+                     " ,RAM current : " + str(int(memory_used_by_process_current(os.getpid()))) + " MB" +
+                     " ,RAM max : " + str(int(memory_used_by_process2(os.getpid()))) + " MB")
 
     def getoutput(self):
         return self._c1.outputs

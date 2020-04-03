@@ -138,6 +138,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa,write_output=True)
             self._l1toaimagelist.append(app_concatenate_toa.getoutput()["out"])
             self._qb_pipeline.free_otb_app()
+            self._toa_pipeline.free_otb_app()
 
     def generate_toa_sub_image(self, working):
         dtm_coarse = self._dem.ALC
@@ -173,10 +174,8 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         app_l2subtoa = apply_mask(app_concatenate.getoutput().get("out"),
                                   app_edgsub_threshold.getoutput().get("out"),
                                   self._reall1nodata, tmp_l2subtoa, write_output=True)
-
         self._subtoaimage = app_l2subtoa.getoutput().get("out")
         self._toa_sub_pipeline.free_otb_app()
-        self._toa_pipeline.free_otb_app()
 
     def generate_l2_toa_images(self, l_ListOfL2Resolution, working_dir):
 
@@ -226,7 +225,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg,write_output=True)
         # Put in internal data
         self._edgsubmask = onebandequal_sub_app.getoutput().get("out")
-        self._edg_pipeline.add_otb_app(onebandequal_sub_app)
+
         LOGGER.debug("Start IPEDGSub done.")
 
         # *******************************************************************************************************

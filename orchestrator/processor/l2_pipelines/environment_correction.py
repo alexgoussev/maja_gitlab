@@ -29,7 +29,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
-from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
 import os
@@ -52,6 +52,10 @@ class MajaEnvCorr(MajaModule):
                                  "L2DIRT", "L2DIFT", "L2ALBD", "Params.RealL2NoData"]
         self.out_keys_to_check = ["TOC_sub", "AOT_Sub"]
         self.out_keys_provided = ["SRE_List"]
+        self._l2_pipeline = OtbPipelineManager()
+
+    def __del__(self):
+        self._l2_pipeline.free_otb_app()
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Environment Correction start")
@@ -94,7 +98,6 @@ class MajaEnvCorr(MajaModule):
         l_nbRes = len(bands_definition.ListOfL2Resolution)
         sre_list = []
         for r in range(0, l_nbRes):
-            l2_pipeline = OtbPipelineManager()
             l_res = bands_definition.ListOfL2Resolution[r]
             l_l2bandcodes = bands_definition.get_list_of_l2_band_code(l_res)
             l_l2bandidx = [bands_definition.get_band_id_in_l2_coarse(b) for b in l_l2bandcodes]
@@ -104,19 +107,18 @@ class MajaEnvCorr(MajaModule):
             rhoenvl2_filename= os.path.join(env_working, "rhoenv_extract_" + l_res + ".tif")
             # Extract tdif
             tdifl2_image_app = extract_roi(tdif_image, l_l2bandidx, tdifl2_filename, write_output=False)
-            l2_pipeline.add_otb_app(tdifl2_image_app)
+            self._l2_pipeline.add_otb_app(tdifl2_image_app)
             # Extract tdir
             tdirl2_image_app = extract_roi(tdir_image, l_l2bandidx, tdirl2_filename, write_output=False)
-            l2_pipeline.add_otb_app(tdirl2_image_app)
+            self._l2_pipeline.add_otb_app(tdirl2_image_app)
             # Extract albd
             albdl2_image_app = extract_roi(albd_image, l_l2bandidx, albdl2_filename, write_output=False)
-            l2_pipeline.add_otb_app(albdl2_image_app)
+            self._l2_pipeline.add_otb_app(albdl2_image_app)
             # Extract rhoenv_sub
-            rhoenvl2_image_app = extract_roi(rhoenv_sub_image, l_l2bandidx, rhoenvl2_filename, write_output=False)
-            l2_pipeline.add_otb_app(rhoenvl2_image_app)
+            rhoenvl2_image_app = extract_roi(computerho_app.getoutput().get("rhoenv"), l_l2bandidx, rhoenvl2_filename, write_output=False)
+            self._l2_pipeline.add_otb_app(rhoenvl2_image_app)
             rhoenv_image = os.path.join(env_working, "rhoenv_" + l_res + ".tif")
             sre_image = os.path.join(env_working, "sre_" + l_res + ".tif")
-
             # Compute env correction
             param_envcorr = {"tdir": tdirl2_image_app.getoutput()["out"],
                              "tdif": tdifl2_image_app.getoutput()["out"],
@@ -130,12 +132,11 @@ class MajaEnvCorr(MajaModule):
                              "rhoenv": rhoenv_image
                              }
             envcorr_app = OtbAppHandler("EnvCorrection", param_envcorr, write_output=False)
-            l2_pipeline.add_otb_app(envcorr_app)
-            write_images([envcorr_app.getoutput().get("sre"), envcorr_app.getoutput().get("rhoenv")],
-                         [sre_image, rhoenv_image])
-            dict_of_output["SRE_" + l_res] = sre_image
-            dict_of_output["RhoEnv_" + l_res] = rhoenv_image
-            sre_list.append(sre_image)
-            l2_pipeline.free_otb_app()
+            self._l2_pipeline.add_otb_app(envcorr_app)
+            #write_images([envcorr_app.getoutput().get("sre"), envcorr_app.getoutput().get("rhoenv")],
+            #             [sre_image, rhoenv_image])
+            dict_of_output["SRE_" + l_res] = envcorr_app.getoutput().get("sre")
+            dict_of_output["RhoEnv_" + l_res] = envcorr_app.getoutput().get("rhoenv")
+            sre_list.append(envcorr_app.getoutput().get("sre"))
         dict_of_output["SRE_List"] = sre_list
 
