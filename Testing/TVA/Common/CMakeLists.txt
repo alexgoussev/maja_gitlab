@@ -200,3 +200,54 @@ maja_test_application(NAME apTvImageListWriter
                      ${MAJADATA_TVA_INPUT}/Common/GomaApres.tif
                      ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvMultiImageFileWriter2.tif
                    )
+
+
+
+maja_test_application(NAME apTvRoundImage
+                     APP RoundImage
+                     OPTIONS
+                     -im ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif?&bands=1
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundImage.tif int16
+                     VALID --compare-image ${NOTOL}
+                     ${MAJADATA_TVA_BASELINE}/apTvRoundImage.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundImage.tif
+                    )
+
+
+maja_test_application(NAME apTvRoundVectorImage
+                     APP RoundVectorImage
+                     OPTIONS
+                     -im ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif?&bands=1,2
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundVectorImage.tif uint8
+                     VALID --compare-image ${NOTOL}
+                     ${MAJADATA_TVA_BASELINE}/apTvRoundVectorImage.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundVectorImage.tif
+                    )
+
+
+maja_test_application(NAME apTvRescaleIntensity
+                     APP RescaleIntensity
+                     OPTIONS
+                     -in ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif?&bands=1
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRescaleIntensity.tif uint8
+                     -outmin 25
+                     -outmax 245
+                     VALID --compare-image ${NOTOL}
+                     ${MAJADATA_TVA_BASELINE}/apTvRescaleIntensity.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRescaleIntensity.tif
+                    )
+
+
+maja_test_application(NAME apTvOneBandEqualThreshold
+                     APP OneBandEqualThreshold
+                     OPTIONS
+                     -im ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvOneBandEqualThreshold.tif uint8
+                     -thresholdvalue 0
+                     -equalvalue 255
+                     -outsidevalue 0
+                     VALID --compare-image ${NOTOL}
+                     ${MAJADATA_TVA_BASELINE}/apTvOneBandEqualThreshold.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvOneBandEqualThreshold.tif
+                    )
+
