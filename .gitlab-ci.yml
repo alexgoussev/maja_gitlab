@@ -1,0 +1,36 @@
+
+variables:
+  BUILD_ENV_REGISTRY: $CI_REGISTRY/maja/maja-build-env
+
+stages:
+  - prepare
+  - build
+
+prepare-centos7:
+  stage: prepare
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  tags:
+    - docker
+  before_script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
+           > /kaniko/.docker/config.json
+    - sed -i "s,^FROM maja-build-env,FROM $BUILD_ENV_REGISTRY/maja-env-centos:7," SuperBuild/Dockerfile
+  script:
+    - /kaniko/executor --cleanup
+                       --verbosity warn
+                       --dockerfile $CI_PROJECT_DIR/SuperBuild/Dockerfile
+                       --context $CI_PROJECT_DIR
+                       --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+
+
+build-centos7:
+  stage: build
+  image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+  tags:
+    - docker
+  script:
+    - echo "Hello MAJA"
+    - ls /opt
+
