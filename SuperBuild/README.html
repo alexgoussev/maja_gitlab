@@ -19,10 +19,9 @@ To build MAJA (+COTS) with default configuration, you can follow below steps.</p
 cmake /MAJA_SHARED_FOLDER/Logiciel/MAJA/SuperBuild \
 -DMAJADATA_SOURCE_DIR=/MAJA_SHARED_FOLDER/MAJA-Data \
 -DMAJA_TEST_OUTPUT_ROOT=/MAJA_SHARED_FOLDER/$(hostname <span class="hljs-operator">-s</span>) \
--DMAJA_VALIDATION_SRC_DIR=/MAJA_SHARED_FOLDER/Logiciel/MAJA-Validation \
 -DDOWNLOAD_DIR=/MAJA_SHARED_FOLDER/superbuild-archives
 </code></pre>
-<p>Default values are set for <code>MAJADATA_SOURCE_DIR, DMAJA_TEST_OUTPUT_ROOT, MAJA_VALIDATION_SRC_DIR, DOWNLOAD_DIR</code>. This is to ease building for developers and users. one has to make sure these directories exists and serve their purpose. So on your host machine, download directory must be a copy of <code>/MAJA_SHARED_FOLDER/superbuild-archives</code>. A typical configure command with default values is a simple one liner!
+<p>Default values are set for <code>MAJADATA_SOURCE_DIR, DMAJA_TEST_OUTPUT_ROOT, DOWNLOAD_DIR</code>. This is to ease building for developers and users. one has to make sure these directories exists and serve their purpose. So on your host machine, download directory must be a copy of <code>/MAJA_SHARED_FOLDER/superbuild-archives</code>. A typical configure command with default values is a simple one liner!
 <code>cd ~/projects/maja/build &amp;&amp; cmake /MAJA_SHARED_FOLDER/Logiciel/MAJA/SuperBuild</code>
 Default install prefix is set to <code>/opt/maja/&lt;MAJA_VERSION&gt;</code>. To install to a different directory, one can set cmake's <code>CMAKE_INSTALL_PREFIX</code> variable.
 For example <code>cmake -DCMAKE_INSTALL_PREFIX=$HOME/local</code></p>

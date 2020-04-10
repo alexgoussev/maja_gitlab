@@ -46,7 +46,7 @@ if [ -f "$OUT_DIR/CMakeLists.txt" ]; then
     echo "mkdir $OUT_DIR/test_build"
     echo "cd $OUT_DIR/test_build"
     echo "cmake .. -DENABLE_TVA=ON -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
-    echo "cmake .. -DENABLE_TV=ON -DTEST_CAMERA=VENUS -DTEST_ONLY=CHAIN -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
+    echo "cmake .. -DENABLE_TV=ON -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
 fi
 
 rm -f  "$OUT_DIR/make_symlinks"

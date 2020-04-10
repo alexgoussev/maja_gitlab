@@ -109,7 +109,6 @@ else()
 endif()
 
 FOREACH(spectral_camera ${MAJA_LIST_OF_SPECTRAL_CAMERA_AVAILABLE})
-  MESSAGE(STATUS "  ${spectral_camera}: ${PLUGIN_${spectral_camera}}")
   list(APPEND MAJA_LIST_OF_SPECTRAL_CAMERA "${spectral_camera}")
 endforeach(spectral_camera)
 message (STATUS "List of spectral camera set: ${MAJA_LIST_OF_SPECTRAL_CAMERA}")
