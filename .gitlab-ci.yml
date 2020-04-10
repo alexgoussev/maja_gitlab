@@ -34,4 +34,5 @@ build-centos7:
   script:
     - echo "Hello MAJA"
     - ls /opt
+    - which g++
 
