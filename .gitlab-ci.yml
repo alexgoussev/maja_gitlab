@@ -18,17 +18,20 @@ prepare-centos7:
            > /kaniko/.docker/config.json
     - sed -i "s,^FROM maja-build-env,FROM $BUILD_ENV_REGISTRY/maja-env-centos:7," SuperBuild/Dockerfile
   script:
-    - /kaniko/executor --cleanup
-                       --cache=true
-                       --verbosity warn
-                       --dockerfile $CI_PROJECT_DIR/SuperBuild/Dockerfile
-                       --context $CI_PROJECT_DIR
-                       --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+    - echo Do nothing
+    #~ - /kaniko/executor --cleanup
+                       #~ --cache=true
+                       #~ --verbosity warn
+                       #~ --dockerfile $CI_PROJECT_DIR/SuperBuild/Dockerfile
+                       #~ --context $CI_PROJECT_DIR
+                       #~ --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
 
 
 build-centos7:
   stage: build
-  image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+  image:
+    name: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+    entrypoint: ["scl", "enable", "devtoolset-7", "rh-git218", "--"]
   tags:
     - docker
   script:
