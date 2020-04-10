@@ -81,25 +81,17 @@ find_program(READLINK NAMES "readlink")
 set(CMAKE_INSTALL_PREFIX "${SUPERBUILD_INSTALL_DIR}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(camera_list)
 include(${CMAKE_SOURCE_DIR}/../CMakeConfig/CommonCmakeOptions.cmake)
 
 if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/maja")
   message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/maja not found.")
 endif()
 
-file(STRINGS "${SUPERBUILD_BINARY_DIR}/CMakeCache.txt"
-  enable_camera_vars
-  REGEX "PLUGIN_(VENUS|SPOT4|FORMOSAT_MUSCATE_PROTO|LANDSAT8|LANDSAT8_MUSCATE|LANDSAT8_MUSCATE_PROTO|LANDSAT_MUSCATE|LANDSAT_MUSCATE_PROTO|SENTINEL2|SENTINEL2_GPP|SENTINEL2_MUSCATE).BOOL.")
-foreach(camera_option ${enable_camera_vars})
-  if(${camera_option} MATCHES "^PLUGIN_*.*BOOL=ON$")
-    string(REPLACE "PLUGIN_" "" camera_option "${camera_option}")
-    string(REPLACE ":BOOL=ON" "" camera_option "${camera_option}")
-    list(APPEND camera_list "${camera_option}")
-  endif()
+set(plugins_enabled)
+FOREACH(plugin_name  ${MAJA_LIST_OF_SPECTRAL_CAMERA_AVAILABLE})
+  list(APPEND plugins_enabled "${plugin_name}")
 endforeach()
-string(REPLACE ";" " " camera_list "${camera_list}")
-message(STATUS "specrtal camera enabled:\n '${camera_list}'")
+message (STATUS "List of plugins enabled: ${plugins_enabled}")
 
 set(PKG_MAJA_VERSION_STRING ${MAJA_VERSION})
 
@@ -146,7 +138,6 @@ include(install_orchestrator)
 include(install_python_bindings)
 include(install_share_dirs)
 include(installer_files)
-include(validation_files)
 include(create_package)
 
 configure_loader(LOADER_PROGRAM LOADER_ARGS LOADER_REGEX)
@@ -188,8 +179,5 @@ install(DIRECTORY "${SUPERBUILD_INSTALL_DIR}/etc" DESTINATION ${PKG_STAGE_DIR})
 
 installer_files()
 
-if(WITH_VALIDATION)
-  validation_files()
-endif()
 
 create_package()

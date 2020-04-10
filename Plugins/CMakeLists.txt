@@ -110,8 +110,6 @@ if(MAJA_CORE_LIBRARY_PROPERTIES)
   SET_TARGET_PROPERTIES(vnsInstallDataCxx PROPERTIES ${MAJA_CORE_LIBRARY_PROPERTIES})
 endif() #MAJA_CORE_LIBRARY_PROPERTIES
 
-OPTION(MAJA_ENABLE_EXAMPLES "Enable examples data treatments (prepare examples data to INSTALL command (for operational MAJA package)." OFF)
-MARK_AS_ADVANCED(MAJA_ENABLE_EXAMPLES)
 
 # Add subdirectories 
 #ADD_SUBDIRECTORY(Common)
@@ -166,34 +164,6 @@ IF(NOT MAJA_INSTALL_NO_LIBRARIES)
   ENDFOREACH(spectral_camera)
 endif() #NOT MAJA_INSTALL_NO_LIBRARIES
 
-
-#IF(MAJA_ENABLE_EXAMPLES AND NOT MAJA_INSTALL_NO_LIBRARIES)
-#  # Loop for all Spectral camera
-#  FOREACH(spectral_camera ${MAJA_LIST_OF_SPECTRAL_CAMERA})
-#    # create the directory to avoid loosing case on windows
-#    SET(INPUT_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/${spectral_camera}/Interfaces/Data)
-#    SET(OUTPUT_DIR ${MAJA_BINARY_DIR}/${MAJA_INSTALL_EXAMPLES_DIR}/${spectral_camera})
-#    FILE(MAKE_DIRECTORY ${OUTPUT_DIR})
-#    # Read the list of selected files
-#    #MESSAGE(STATUS "Copying data examples for ${spectral_camera}.")    
-#    # Read the list of selected files
-#    SET(LIST_OF_FILES_EXTRACTED_RAW)
-#    FILE(READ ${INPUT_DIR}/SELECTION_FOR_INSTALL.txt LIST_OF_FILES_EXTRACTED_RAW)
-#    STRING(REGEX MATCHALL "[\r\n]" ";" LIST_OF_FILES_EXTRACTED_RAW "${LIST_OF_FILES_EXTRACTED_RAW}" )
-#    STRING(REGEX REPLACE "[\r\n]" ";" LIST_OF_FILES_EXTRACTED_RAW "${LIST_OF_FILES_EXTRACTED_RAW}" )
-#    #MESSAGE(STATUS "Copying Gipps data for examples for ${spectral_camera}")
-#    # Loop for each files
-#    SET(LIST_OF_FILES_EXTRACTED)
-#    FOREACH(file ${LIST_OF_FILES_EXTRACTED_RAW})
-#      LIST(APPEND LIST_OF_FILES_EXTRACTED ${INPUT_DIR}/${file})
-#    ENDFOREACH(file)
-#    COPY_EXTRAS_FILES( ${spectral_camera} ${OUTPUT_DIR} "${LIST_OF_FILES_EXTRACTED}" )
-#    # INSTALL the output directory and the README file
-#    #file(COPY ${OUTPUT_DIR} DESTINATION ${MAJA_BINARY_DIR}/${MAJA_INSTALL_EXAMPLES_DIR})
-#    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/README
-#      DESTINATION ${MAJA_BINARY_DIR}/${MAJA_INSTALL_EXAMPLES_DIR}/${spectral_camera} )
-#  ENDFOREACH(spectral_camera)
-#ENDIF() #MAJA_ENABLE_EXAMPLES AND NOT MAJA_INSTALL_NO_LIBRARIES
 
 # COPY GIPP for VALIDATION directory
 IF(NOT MAJA_INSTALL_NO_DEVELOPMENT)

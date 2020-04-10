@@ -216,7 +216,6 @@ INCLUDE_DIRECTORIES(
 # MAJA_INSTALL_BIN_DIR          - binary dir (executables)
 # MAJA_INSTALL_LIB_DIR          - library dir (libs)
 # MAJA_INSTALL_CONF_DIR         - conf dir (config files, dictionary, ICD, etc)
-# MAJA_INSTALL_EXAMPLES_DIR         - share dir (say, examples, data, etc)
 # MAJA_INSTALL_INCLUDE_DIR      - include dir (headers)
 # MAJA_INSTALL_PACKAGE_DIR      - package/export configuration files
 # MAJA_INSTALL_NO_DEVELOPMENT   - do not install development files
@@ -255,11 +254,6 @@ endif()
 SET(MAJA_INSTALL_CMAKEMODULE_DIR ${MAJA_INSTALL_PACKAGE_DIR}/cmakemodules)
 
 # /share 
-
-# Examples (Gipps)
-IF(NOT MAJA_INSTALL_EXAMPLES_DIR)
-  SET(MAJA_INSTALL_EXAMPLES_DIR "share/examples")
-ENDIF(NOT MAJA_INSTALL_EXAMPLES_DIR)
 
 IF(NOT MAJA_INSTALL_SCHEMAS_DIR)
   SET(MAJA_INSTALL_SCHEMAS_DIR "share/schemas")

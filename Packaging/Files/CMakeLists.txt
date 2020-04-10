@@ -16,7 +16,6 @@ set(CTEST_DROP_SITE_CDASH TRUE)
 set(CMAKE_INSTALL_PREFIX "OUT_DIR")
 set(MAJA_BINARY_DIR "OUT_DIR")
 
-set(MAJA_VALIDATION_SRC_DIR ${CMAKE_INSTALL_PREFIX}/MAJA-Validation)
 include(${CMAKE_CURRENT_LIST_DIR}/tv_tva_tests/vnsMAJAGlobalConfiguration.cmake)
 set(LAUNCHER_TEST_NAME vnsTestMainLauncher.sh)
 set(DUMMY_PROGRAM_NAME vnsDummyProgram.sh)
@@ -26,15 +25,12 @@ set(MAJA_TEST_OUTPUT_ROOT "")
 
 foreach(v
     CMAKE_HOST_SYSTEM_NAME
-    MAJA_VALIDATION_SRC_DIR
     MAJADATA_SOURCE_DIR
     CMAKE_INSTALL_PREFIX
     MAJA_BINARY_DIR
     MAJA_TEST_OUTPUT_ROOT
     ENABLE_TV
     ENABLE_TVA
-    TEST_CAMERA
-    TEST_ONLY
     )
   message(STATUS "${v}=[${${v}}]")
 endforeach(v)

@@ -108,6 +108,15 @@ https://github.com/CNES/Start-MAJA
 
 There, you will find a manual on how to set up the software as well as a basic example.
 
+
+<a name="doc"></a>
+## GIPPs files
+
+MAJA uses GIPPs files to configure the different algorithms of the chain. You can find some sets here : 
+
+http://tully.ups-tlse.fr/olivier/gipp_maja/tree/master/
+
+
 <a name="doc"></a>
 ## Generation the documentation
 
@@ -132,7 +141,6 @@ cd build
 cmake ../SuperBuild \
 	-DMAJADATA_SOURCE_DIR=</path/to>/MAJA-DATA \
 	-DMAJA_TEST_OUTPUT_ROOT=`pwd`/../testing \
-	-DMAJA_VALIDATION_SRC_DIR=</path/to>/MAJA-Validation \
 	-DDOWNLOAD_DIR=</path/to>/Superbuild-archives \
 	-DENABLE_TV=ON \
 	-DENABLE_TVA=ON \
