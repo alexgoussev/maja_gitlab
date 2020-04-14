@@ -33,7 +33,7 @@ message(STATUS "Maja version: ${MAJA_VERSION}")
 
 set (CTEST_BUILD_NAME ${ci_short_sha})
 
-set (CTEST_INSTALL_DIRECTORY "${CI_BASE_DIR}/cots/maja/${MAJA_VERSION}")
+set (CTEST_INSTALL_DIRECTORY "/opt/cots/maja/${MAJA_VERSION}")
 set (CMAKE_COMMAND "cmake")
 
 set(CTEST_GIT_UPDATE_CUSTOM "${CMAKE_COMMAND}" "-E" "echo" "No update")

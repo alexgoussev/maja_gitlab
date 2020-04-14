@@ -36,4 +36,5 @@ build-centos7:
     - echo "Hello MAJA"
     - ls /opt
     - which g++
-
+    - ctest -VV -S CI/maja_build.cmake
+    - ctest -VV -S CI/maja_pkg.cmake
