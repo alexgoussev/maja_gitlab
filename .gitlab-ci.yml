@@ -25,7 +25,11 @@ prepare-centos7:
                        --dockerfile $CI_PROJECT_DIR/SuperBuild/Dockerfile
                        --context $CI_PROJECT_DIR
                        --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
-
+  only:
+    changes:
+      - SuperBuild/**/*
+      - CMakeConfig/CommonCmakeOptions.cmake
+      - CMakeConfig/MAJAConfigurationSetting.cmake
 
 build-centos7:
   stage: build
