@@ -11,9 +11,10 @@
                         o     o o    o  oooo  o    o
 
 ###################################################################################################
-orchestrator.cots.otb.otb_cots_manager -- shortdesc
 
-orchestrator.cots.otb.otb_cots_manager is a description
+orchestrator.cots.otb.otb_band_math -- shortdesc
+
+orchestrator.cots.otb.otb_band_math is a description
 
 It defines classes_and_methods
 
@@ -25,38 +26,24 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
+
+from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.common.logger.maja_logging import configure_logger
-import gc
+
 LOGGER = configure_logger(__name__)
 
 
-class OtbPipelineManager(object):
-    """
-    This class allow to manage launched apps in a pipeline.
+def clean_pipe(input_file_path):
 
-    """
-
-    def __init__(self):
-        """
-        Init to have constant values
-        """
-        self.otb_app_coarse_resolution = []
-        
-    def __del__(self):
-        self.free_otb_app()
-
-    def add_otb_app(self, otb_app):
-        self.otb_app_coarse_resolution.append(otb_app)
-
-    def free_otb_app(self):
-        for otb_app in self.otb_app_coarse_resolution:
-            if otb_app.get_app_name() is not None :
-                LOGGER.debug("Removing "+otb_app.get_app_name())
-            else:
-                LOGGER.debug("Removing anonymous")
-            del otb_app
-        self.otb_app_coarse_resolution = []
-        gc.collect()
-
-    def get_last_app(self):
-        return self.otb_app_coarse_resolution[-1]
+    parameters = {"in": input_file_path,
+                "startx": 0,
+                "starty": 0,
+                "sizex": 1,
+                "sizey": 1,
+                "out": "tmp.tif"}
+    otb_app = OtbAppHandler("ExtractROI",parameters,write_output=False)
+    parameters2 = {"im": otb_app.getoutput().get("out")}
+    otb_app2 = OtbAppHandler("Stats", parameters2, write_output=True)
+    LOGGER.debug("Stats on clean: "+str(otb_app2.getoutput().get("mean")))
+    del otb_app2
+    del otb_app

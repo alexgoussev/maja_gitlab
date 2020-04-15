@@ -78,12 +78,18 @@ namespace vns
             // Instantiate Filters
             // Expand filters used to resample the image at L2 resolution
             m_ExpandTdir = DedicatedPadAndFastResampleImageFilterType::New();
+            m_ExpandTdir->SetReleaseDataFlag(true);
             m_ExpandTdif = DedicatedPadAndFastResampleImageFilterType::New();
+            m_ExpandTdif->SetReleaseDataFlag(true);
             m_ExpandSatm = DedicatedPadAndFastResampleImageFilterType::New();
+            m_ExpandSatm->SetReleaseDataFlag(true);
             m_ExpandRhoEnv = DedicatedPadAndFastResampleImageFilterType::New();
+            m_ExpandRhoEnv->SetReleaseDataFlag(true);
 
             m_ComputeFinalResultEnvironmentCorrection = ComputeFinalResultEnvironmentCorrectionImageFilterType::New();
+            m_ComputeFinalResultEnvironmentCorrection->SetReleaseDataFlag(true);
             m_ThresholdVectorImageFilter = ThresholdVectorImageFilterType::New();
+            m_ThresholdVectorImageFilter->SetReleaseDataFlag(true);
 
             // Default No_Data value
             m_NoData = 0;

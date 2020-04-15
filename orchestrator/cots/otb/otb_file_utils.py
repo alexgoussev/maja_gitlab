@@ -56,7 +56,8 @@ def otb_copy_image_to_file(source, dest, raise_exceptions=True):
         else:
             LOGGER.debug("source : " + source + " , dest : " + dest)
             try:
-                shutil.copyfile(source, dest)
+                if not os.path.exists(dest) or not os.path.samefile(source, dest):
+                    shutil.copyfile(source, dest)
             except IOError as err:
                 if raise_exceptions:
                     raise MajaIOError(err)

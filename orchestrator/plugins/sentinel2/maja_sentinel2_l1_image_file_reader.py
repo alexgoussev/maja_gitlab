@@ -35,10 +35,11 @@ from orchestrator.plugins.common.sentinel2_base.maja_sentinel2_l1_image_file_rea
     Sentinel2L1ImageFileReaderBase
 from orchestrator.plugins.sentinel2.maja_sentinel2_plugin import MajaSentinel2Plugin
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
+from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.common.constants import ReadL1Mode
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.common.maja_common import BoundingBox
-from orchestrator.cots.otb.algorithms.otb_band_math import band_math
+from orchestrator.common.maja_utils import is_croco_off,is_croco_on
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math_or
@@ -122,11 +123,19 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             tmp_edg_pipe.add_otb_app(resample_mask)
             m_ResamplingList.append(resample_mask.getoutput()["out"])
 
+        out_concat = os.path.join(working, "ConcatSubEdgOneBand.tif")
+        param_oneband_concat = {"il": m_ResamplingList,
+                             "out": out_concat + ":uint8"
+                             }
+        qoth_concat_app = OtbAppHandler("ConcatenateImages", param_oneband_concat, write_output=False)
+        tmp_edg_pipe.add_otb_app(qoth_concat_app)
         out_or0 = os.path.join(working, "MaskOrMask_0.tif")
-        band_math_or_b1 = band_math_or(m_ResamplingList,
-                                       output_image=out_or0 + ":uint8")
-
+        band_math_or_b1 = one_band_equal_value(qoth_concat_app.getoutput().get("out"),
+                                       output_image=out_or0 + ":uint8",
+                                       threshold=1)
         self._edgsubmask = band_math_or_b1.getoutput().get("out")
+        tmp_edg_pipe.add_otb_app(band_math_or_b1)
+        tmp_edg_pipe.free_otb_app()
         LOGGER.debug("End IPEDGSub.")
 
         # *******************************************************************************************************
@@ -149,7 +158,8 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working, "IPEDGRealL2_{}.tif".format(res_str))
             l2edg_resamp_app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling,
-                                        OtbResampleType.LINEAR,threshold=0.001,write_output=False)
+                                        OtbResampleType.LINEAR, threshold=0.0,
+                                        write_output=(False or is_croco_on("sentinel2.l1reader.l2edg")))
             self._l2edg_pipeline.add_otb_app(l2edg_resamp_app)
             self._l2edgmasklist.append(l2edg_resamp_app.getoutput().get("out"))
         LOGGER.debug("End L2EDG ...")

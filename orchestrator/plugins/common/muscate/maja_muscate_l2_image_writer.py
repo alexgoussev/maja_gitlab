@@ -236,7 +236,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     tmp_sre_roi = os.path.join(working_dir, "tmp_sre_roi_" + l_ListOfBand[i] + ".tif")
                     tmp_sre_roi_app = extract_roi(self._sre_list[resol], [i],
                                                   tmp_sre_roi, write_output=False)
-                    if resol == resol_QLK and (l_RedBandId == i or l_GreenBandId ==i or l_BlueBandId == i):
+                    if resol == resol_QLK and (l_RedBandId == i or l_GreenBandId == i or l_BlueBandId == i):
                         tmp_l2_image_list.append(tmp_sre_roi_app.getoutput().get("out"))
                         tmp_l2_filename_list.append(tmp_sre_roi)
                         if l_RedBandId == i:
@@ -249,7 +249,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     tmp_sre_scaled = os.path.join(working_dir, "tmp_sre_multi_round_" + l_ListOfBand[i] + ".tif")
                     param_scaled_sre = {"im": tmp_sre_roi_app.getoutput().get("out"),
                                         "coef": p_ReflectanceQuantificationValue,
-                                        "out": tmp_sre_scaled
+                                        "out": tmp_sre_scaled+ ":int16"
                                         }
                     scaled_sre_app = OtbAppHandler("RoundVectorImage", param_scaled_sre, write_output=False)
                     sre_pipeline.add_otb_app(scaled_sre_app)
@@ -266,7 +266,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     tmp_fre_scaled = os.path.join(working_dir, "tmp_fre_multi_round_" + l_StrResolution + ".tif")
                     param_scaled_fre = {"im": self._fre_list[resol],
                                         "coef": p_ReflectanceQuantificationValue,
-                                        "out": tmp_fre_scaled
+                                        "out": tmp_fre_scaled + ":int16"
                                         }
                     scaled_fre_app = OtbAppHandler("RoundVectorImage", param_scaled_fre, write_output=False)
                     fre_pipeline.add_otb_app(scaled_fre_app)
@@ -274,7 +274,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     for i in range(l_NumberOfBands):
                         tmp_fre_roi = os.path.join(working_dir, "tmp_fre_roi_" + l_ListOfBand[i] + ".tif")
                         tmp_fre_roi_app = extract_roi(scaled_fre_app.getoutput().get("out"), [i],
-                                                      tmp_fre_roi, write_output=False)
+                                                      tmp_fre_roi+ ":int16", write_output=False)
                         tmp_l2_image_list.append(tmp_fre_roi_app.getoutput().get("out"))
                         fre_pipeline.add_otb_app(tmp_fre_roi_app)
                         tmp_l2_filename_list.append(l_BaseL2FullFilename + "_FRE_" + l_ListOfBand[i] + ".tif" +
@@ -325,7 +325,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                    }
                 aot_round_app = OtbAppHandler("RoundVectorImage", param_round_aot, write_output=False)
                 atb_pipeline.add_otb_app(aot_round_app)
-                atb_filename = l_BaseL2FullMASKSFilename + "_ATB_" + l_grpSuffix + ".tif"
+                atb_filename = l_BaseL2FullFilename + "_ATB_" + l_grpSuffix + ".tif"
                 param_atb_concat = {
                     "il": [vap_round_app.getoutput().get("out"), aot_round_app.getoutput().get("out")],
                     "out": atb_filename + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
@@ -353,8 +353,11 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                        }
                 iab_binconcat_app = OtbAppHandler("BinaryConcatenate", param_iab_binconcat, write_output=False)
                 iab_pipeline.add_otb_app(iab_binconcat_app)
-                tmp_l2_image_list.append(iab_binconcat_app.getoutput().get("out"))
-                tmp_l2_filename_list.append(iab_filename)
+                write_images([atb_binconcat_app.getoutput().get("out"), iab_binconcat_app.getoutput().get("out")],
+                             [atb_filename, iab_filename])
+
+                #tmp_l2_image_list.append(iab_binconcat_app.getoutput().get("out"))
+                #tmp_l2_filename_list.append(iab_filename)
 
 
                 # START WRITING EDG Image file DATA

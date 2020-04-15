@@ -136,9 +136,10 @@ private:
 
 	void DoExecute()
 	{
-		itk::MultiThreader::SetGlobalDefaultNumberOfThreads(8);
 		// Init filters
 		m_ComputeEnvironmentCorrectionImageFilter = ComputeEnvironmentCorrectionImageFilterType::New();
+		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataBeforeUpdateFlag(true);
+		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataFlag(true);
 		//Get image pointers
 		InputVectorImageConstPointerType l_RhoEnvPtr = this->GetParameterDoubleVectorImage("rhoenvsub");
 		InputVectorImageConstPointerType l_TdirPtr = this->GetParameterDoubleVectorImage("tdir");

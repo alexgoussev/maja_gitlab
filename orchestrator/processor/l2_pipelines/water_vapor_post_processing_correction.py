@@ -31,6 +31,8 @@ from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.xml_tools import as_bool
 import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.modules.maja_module import MajaModule
 
 import os
@@ -119,7 +121,7 @@ class MajaWaterVaporPostProcessing(MajaModule):
                                        }
                 subresampling_app = OtbAppHandler("Resampling", param_subresampling, write_output=False)
                 self._l2_pipeline.add_otb_app(subresampling_app)
-                dict_of_output["VAP_" + l_res] = subresampling_app.getoutput()["out"]
+
                 param_maskresampling = {"dtm": dict_of_input.get("DEM").ALTList[r],
                                         "im": watervpp_app.getoutput()["mask"],
                                         "interp": "linear",
@@ -128,7 +130,14 @@ class MajaWaterVaporPostProcessing(MajaModule):
                                         }
                 maskresampling_app = OtbAppHandler("Resampling", param_maskresampling, write_output=False)
                 self._l2_pipeline.add_otb_app(maskresampling_app)
-                dict_of_output["VAPMASK_" + l_res] = maskresampling_app.getoutput()["out"]
+                if is_croco_on("watervaporpostprocessing"):
+                    write_images([subresampling_app.getoutput()["out"],maskresampling_app.getoutput()["out"]],
+                                 [vap_image_filename,vap_mask_filename])
+                    dict_of_output["VAP_" + l_res] = vap_image_filename
+                    dict_of_output["VAPMASK_" + l_res] = vap_mask_filename
+                else:
+                    dict_of_output["VAP_" + l_res] = subresampling_app.getoutput()["out"]
+                    dict_of_output["VAPMASK_" + l_res] = maskresampling_app.getoutput()["out"]
                 vap_list.append(dict_of_output["VAP_" + l_res])
                 vapmask_list.append(dict_of_output["VAPMASK_" + l_res])
         dict_of_output["L2VAPList"] = vap_list

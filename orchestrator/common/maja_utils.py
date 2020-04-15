@@ -88,3 +88,23 @@ def get_test_mode():
         return True
     else:
         return False
+
+
+def is_croco_on(module=None):
+    if "MAJA_CROCO_MODE" in os.environ:
+        if module is None:
+            return "GLOBAL_ON" in os.environ["MAJA_CROCO_MODE"]
+        else:
+            return module+"_ON" in os.environ["MAJA_CROCO_MODE"]
+    else:
+        return False
+
+
+def is_croco_off(module=None):
+    if "MAJA_CROCO_MODE" in os.environ:
+        if module is None:
+            return "GLOBAL_OFF" in os.environ["MAJA_CROCO_MODE"]
+        else:
+            return module+"_OFF" in os.environ["MAJA_CROCO_MODE"]
+    else:
+        return False

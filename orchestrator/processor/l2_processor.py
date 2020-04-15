@@ -88,6 +88,7 @@ class L2Processor(BaseProcessor):
         # Set ram to use in otb apps
         OtbAppHandler.set_ram_to_use(self._ram)
         os.environ["OTB_MAX_RAM_HINT"] = str(self._ram)
+        os.environ["GDAL_CACHEMAX"] = str(max(64,self._ram/20))
         self._validate_schemas = self._apphandler.get_user_conf().get_Processing().get_CheckXMLFilesWithSchema()
         LOGGER.info("Validating xml : " + str(self._validate_schemas))
 

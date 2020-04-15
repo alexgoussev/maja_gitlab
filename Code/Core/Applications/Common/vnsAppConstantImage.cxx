@@ -81,7 +81,6 @@ private:
 		SetDescription("ConstantImage algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("constantimage");
 		SetDocLongDescription("This applicatio create a constant image");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -111,6 +110,8 @@ private:
 		vns::Loggers::GetInstance()->Initialize(GetName());
 		// Init filters
 		m_ConstImageFilter = RealConstantImageSourceFilterType::New();
+		m_ConstImageFilter->SetReleaseDataBeforeUpdateFlag(true);
+		m_ConstImageFilter->SetReleaseDataFlag(true);
 		vnsLogDebugMacro("Number of threads : "<<itk::MultiThreader::GetGlobalDefaultNumberOfThreads());
 		//Get dtm for reference size
 		ImagePointer l_dtmPtr = GetParameterDoubleImage("dtm");

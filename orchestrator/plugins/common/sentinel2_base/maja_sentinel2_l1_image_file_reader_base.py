@@ -31,7 +31,8 @@ import operator
 
 from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException, MajaExceptionPluginBase
+from orchestrator.common.maja_exceptions import MajaDataException
+from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math_or
@@ -396,7 +397,8 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_concatenate = {"il": self._l2zonemasklist[l2res],
                                      "out": zone_mask+":uint8"
                                      }
-                l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+                l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+                                                write_output=(False or is_croco_on("sentinel2.l1reader.l2zone")))
                 self._l2zoneimagelist.append(l2zoneimage_app.getoutput().get("out"))
                 self._pipeline.add_otb_app(l2zoneimage_app)
             else:
@@ -415,7 +417,8 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_binconcatenate = {"im": pix_vector.getoutput().get("out"),
                                         "out": pix_mask + ":uint8"
                                         }
-                pix = OtbAppHandler("BinaryConcatenate", param_binconcatenate,write_output=False)
+                pix = OtbAppHandler("BinaryConcatenate", param_binconcatenate,
+                                    write_output=(False or is_croco_on("sentinel2.l1reader.l2pix")))
                 self._pipeline.add_otb_app(pix)
                 self._l2piximagelist.append(pix.getoutput().get("out"))
             else:
@@ -787,7 +790,8 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            l2toa_concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+            l2toa_concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+                                             write_output=(False or is_croco_on("sentinel2.l1reader.l2toa")))
             self._pipeline.add_otb_app(l2toa_concat_app)
             self._l2toaimagelist.append(l2toa_concat_app.getoutput().get("out"))
 

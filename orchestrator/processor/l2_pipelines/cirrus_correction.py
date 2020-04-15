@@ -27,7 +27,12 @@ It defines method mandatory for a processor
 """
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
+from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.modules.maja_module import MajaModule
+from orchestrator.common.maja_utils import is_croco_on
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.cots.otb.algorithms.otb_clean_pipe import clean_pipe
+from orchestrator.plugins.common.base.maja_plugin_base import PluginBase
 from orchestrator.common.maja_exceptions import *
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.common.constants import *
@@ -49,6 +54,7 @@ class MajaCirrusCorrection(MajaModule):
         self.in_keys_to_check = ["Params.Caching", "AppHandler", "Plugin", "L1Reader","L2COMM", "DEM"]
         self.out_keys_to_check = []
         self.out_keys_provided = []
+        self._l2_pipeline = OtbPipelineManager()
    
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Cirrus Correction start")
@@ -65,6 +71,7 @@ class MajaCirrusCorrection(MajaModule):
         ref_result = self._gamma_compute_at_res(dict_of_input, dict_of_output, refres_idx, cirrus_working)
         result[bands_definition.ListOfL2Resolution[refres_idx]] = ref_result
         if ref_result[2]:
+            LOGGER.info("Cirrus flag enabled on reference resolution")
             l_gammamean = ref_result[3] * ref_result[4]
             l_nbgamma = ref_result[3]
             for i in range(0, len(bands_definition.ListOfL2Resolution)):
@@ -114,11 +121,12 @@ class MajaCirrusCorrection(MajaModule):
                                       "swirbandcodelist": swir_band_list ,
                                       "correctedtoa": corrected_toa
                                       }
-                app = OtbAppHandler("CirrusCorrectionApply", param_cirrus_apply, write_output=True)
-                del(app)
-                dict_of_output["L2TOA_" + l_res] = corrected_toa
-
-
+                app = OtbAppHandler("CirrusCorrectionApply", param_cirrus_apply,
+                                    write_output=(False or is_croco_on("cirruscorrection")))
+                self._l2_pipeline.add_otb_app(app)
+                dict_of_output["L2TOA_" + l_res] = app.getoutput().get("correctedtoa")
+        else:
+            LOGGER.info("Cirrus flag disabled on reference resolution, no cirrus correction")
         # return cirrus corrected flag
         dict_of_output["CirrusCorrected"] = ref_result[2]
         return ref_result[2]
@@ -135,14 +143,32 @@ class MajaCirrusCorrection(MajaModule):
                                    "interp": "bco",
                                    "out": l1cirrus_resampled
                                    }
-        OtbAppHandler("Resampling", param_l1cirrus_resample, write_output=True)
+        app_l1cirrus_resamp = OtbAppHandler("Resampling", param_l1cirrus_resample, write_output=False)
 
         # ---------- Resample Cirrus cloud to resolution ---------------
         cld_cirrus_resampled = dict_of_output[CLOUD_MASK_CIRRUS + "_" + l_res]
+        cirrusmask_resampled = os.path.join(p_working, "cirrusmask_" + l_res + ".tif")
         # ---------- Resample All cloud to resolution ---------------
         cld_all_resampled = dict_of_output[CLOUD_MASK_ALL + "_" + l_res]
+        allmask_resampled = os.path.join(p_working, "allmask_" + l_res + ".tif")
         # ---------- Resample Refl cloud to resolution ---------------
         cld_refl_resampled = dict_of_output[CLOUD_MASK_REFL + "_" + l_res]
+        allreflresampled = os.path.join(p_working, "reflmask_" + l_res + ".tif")
+        # -----   Caching of L2TOA
+        l2toa_cach = os.path.join(p_working, "l2toa_" + l_res + ".tif")
+        #Write to caching
+        write_images([cld_cirrus_resampled,cld_all_resampled,cld_refl_resampled, dict_of_output["L2TOA_" + l_res]],
+                     [cirrusmask_resampled,allmask_resampled,allreflresampled,l2toa_cach])
+        # Update dict
+        clean_pipe(dict_of_output[CLOUD_MASK_CIRRUS + "_" + l_res])
+        clean_pipe(dict_of_output[CLOUD_MASK_ALL + "_" + l_res])
+        clean_pipe(dict_of_output[CLOUD_MASK_REFL + "_" + l_res])
+        clean_pipe(dict_of_output["L2TOA_" + l_res])
+        dict_of_output[CLOUD_MASK_CIRRUS + "_" + l_res] = cirrusmask_resampled
+        dict_of_output[CLOUD_MASK_ALL + "_" + l_res] = allmask_resampled
+        dict_of_output[CLOUD_MASK_REFL + "_" + l_res] = allreflresampled
+        dict_of_output["L2TOA_" + l_res] = l2toa_cach
+
 
         # --------------------- Gamma compute for the resolution
         # construct band list
@@ -154,17 +180,19 @@ class MajaCirrusCorrection(MajaModule):
             if l_l2bandcodes[i] in gamm_band_list:
                 l_resbandlist.append(str(i))
         cirrus_mask = os.path.join(p_working, "cirrus_corr_mask_" + l_res + ".tif")
-        param_gamma_compute = {"l2toa": dict_of_output["AtmoAbsIPTOA_" + l_res],
+        param_gamma_compute = {"l2toa": l2toa_cach,
                                "l2edg": dict_of_input.get("L1Reader").get_value("L2EDGOutputList")[p_res],
                                "l2dtm": dict_of_input.get("DEM").ALTList[p_res],
-                               "l2cirrus": param_l1cirrus_resample["out"],
+                               "l2cirrus": app_l1cirrus_resamp.getoutput().get("out"),
                                "bandlist": l_resbandlist,
-                               "cloudcirrus": cld_cirrus_resampled,
-                               "cloudall": cld_all_resampled,
-                               "cloudrefl": cld_refl_resampled,
+                               "cloudcirrus": cirrusmask_resampled,
+                               "cloudall": allmask_resampled,
+                               "cloudrefl": allreflresampled,
                                "cirrusminpixinlist": int(dict_of_input.get("L2COMM").get_value("CirrusCorrectionMinPixInList")),
                                "mask": cirrus_mask + ":uint8"}
         gamma_compute_app = OtbAppHandler("GammaCompute", param_gamma_compute, write_output=True)
-
-        return [l1cirrus_resampled, cirrus_mask, bool(gamma_compute_app.getoutput()["cirrusflag"]), len(l_resbandlist),
-                float(gamma_compute_app.getoutput()["gamma"])]
+        cirr_flag = bool(gamma_compute_app.getoutput()["cirrusflag"])
+        gamma = float(gamma_compute_app.getoutput()["gamma"])
+        del gamma_compute_app
+        del app_l1cirrus_resamp
+        return [l1cirrus_resampled, cirrus_mask, cirr_flag , len(l_resbandlist),gamma]

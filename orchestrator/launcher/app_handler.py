@@ -437,7 +437,7 @@ class AppHandler:
             LOGGER.setLevel(logging.WARNING)
         elif args.loglevel == "DEBUG":
             LOGGER.setLevel(logging.DEBUG)
-            os.environ["OTB_LOGGER_LEVEL"] = "INFO"
+            os.environ["OTB_LOGGER_LEVEL"] = "DEBUG"
         elif args.loglevel == "ERROR":
             LOGGER.setLevel(logging.ERROR)
 

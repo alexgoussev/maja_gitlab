@@ -34,6 +34,7 @@ import os
 from orchestrator.plugins.sentinel2.maja_sentinel2_l1_image_file_reader import Sentinel2L1ImageFileReader
 from orchestrator.plugins.sentinel2.maja_sentinel2_plugin import MajaSentinel2Plugin
 from orchestrator.common.dem.dem_base import DEMBase
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 import orchestrator.common.gipp_utils as gipp_utils
 
 
@@ -67,3 +68,6 @@ def test(argv):
 
     maja_object._dem = dem
     maja_object.generate_edg_images_from_toa(l_ListOfTOAImageFileNames, working_dir)
+    otb_copy_image_to_file(maja_object._l2edgmasklist[0], os.path.join(working_dir, "IPEDGMaskL2_R1.tif"))
+    otb_copy_image_to_file(maja_object._l2edgmasklist[1], os.path.join(working_dir, "IPEDGMaskL2_R2.tif"))
+    otb_copy_image_to_file(maja_object._edgsubmask, os.path.join(working_dir, "MaskOrMask12.tif"))

@@ -18,6 +18,9 @@ import shlex
 from orchestrator.common.logger.maja_logging import configure_logger
 import subprocess
 import sys
+import tracemalloc
+import linecache
+import os
 
 global PROCESS_ID_FIELD
 PROCESS_ID_FIELD = 1
@@ -306,6 +309,32 @@ def obtain_subprocesses_from_main_process(idprocess):
         currentprocesslist = modifylist(argsfinal, currentprocesslist, currentid)
 
     return finalprocesslist
+
+
+def display_top_ram_consumer(key_type='lineno', limit=20):
+    snapshot = tracemalloc.take_snapshot()
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    LOGGER.debug("Top %s lines" % limit)
+    for index, stat in enumerate(top_stats[:limit], 1):
+        frame = stat.traceback[0]
+        # replace "/path/to/module/file.py" with "module/file.py"
+        filename = os.sep.join(frame.filename.split(os.sep)[-2:])
+        LOGGER.debug("#%s: %s:%s: %.1f KiB"
+              % (index, filename, frame.lineno, stat.size / 1024))
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        if line:
+            print('    %s' % line)
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        LOGGER.debug("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+    LOGGER.debug("Total allocated size: %.1f KiB" % (total / 1024))
 
 
 def usage():

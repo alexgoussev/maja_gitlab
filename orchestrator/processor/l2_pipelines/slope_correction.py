@@ -29,6 +29,7 @@ from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
 import os
@@ -142,9 +143,16 @@ class MajaSlopeCorrection(MajaModule):
                                }
             slope_app = OtbAppHandler("SlopeCorrection", param_slopecorr,write_output=False)
             self._l2_app_pipeline.add_otb_app(slope_app)
-            dict_of_output["FRE_" + l_res] = slope_app.getoutput().get("fre")
-            dict_of_output["TGS_" + l_res] = slope_app.getoutput().get("tgs")
-            dict_of_output["STL_" + l_res] = slope_app.getoutput().get("stl")
+            if is_croco_on("slopecorrection"):
+                dict_of_output["FRE_" + l_res] = fre_image
+                dict_of_output["TGS_" + l_res] = tgs_image
+                dict_of_output["STL_" + l_res] = stl_image
+                write_images([slope_app.getoutput().get("fre"),slope_app.getoutput().get("tgs"),slope_app.getoutput().get("stl")],
+                             [fre_image,tgs_image,stl_image])
+            else:
+                dict_of_output["FRE_" + l_res] = slope_app.getoutput().get("fre")
+                dict_of_output["TGS_" + l_res] = slope_app.getoutput().get("tgs")
+                dict_of_output["STL_" + l_res] = slope_app.getoutput().get("stl")
             fre_list.append(dict_of_output["FRE_" + l_res])
             tgs_list.append(dict_of_output["TGS_" + l_res])
             stl_list.append(dict_of_output["STL_" + l_res])

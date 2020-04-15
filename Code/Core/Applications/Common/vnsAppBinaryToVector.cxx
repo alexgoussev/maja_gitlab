@@ -109,7 +109,8 @@ private:
 	{
 		// Init filters
 		m_vector = BinaryToVectorImageFilterType::New();
-
+		m_vector->SetReleaseDataFlag(true);
+		m_vector->SetReleaseDataBeforeUpdateFlag(true);
 		//Get Image
 		UnsignedImagePointerType l_im = this->GetParameterUInt16Image("im");
 		m_vector->SetInput(l_im);

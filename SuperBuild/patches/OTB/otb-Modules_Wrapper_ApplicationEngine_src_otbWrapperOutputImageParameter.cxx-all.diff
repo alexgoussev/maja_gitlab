@@ -1,0 +1,22 @@
+--- OTB-7.0.0.orig/Modules/Wrappers/ApplicationEngine/src/otbWrapperOutputImageParameter.cxx	2019-10-29 10:11:39.000000000 +0100
++++ OTB-7.0.0/Modules/Wrappers/ApplicationEngine/src/otbWrapperOutputImageParameter.cxx	2020-04-04 14:22:35.000000000 +0200
+@@ -302,6 +302,7 @@
+   m_OutputCaster = clamp.ocif;
+ 
+   m_Writer = writer;
++  m_ImageCasted = clamp.out;
+ }
+ 
+ 
+@@ -383,6 +384,11 @@
+ 
+ ImageBaseType* OutputImageParameter::GetValue()
+ {
++  if (m_PixelType != m_DefaultPixelType && m_Image)
++  {
++	  this->InitializeWriters();
++	  return m_ImageCasted;
++  }
+   return m_Image;
+ }
+ 

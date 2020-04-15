@@ -110,7 +110,8 @@ private:
 	{
 		// Init filters
 		m_filter = OneBandEqualThresholdFilterType::New();
-
+		m_filter->SetReleaseDataFlag(true);
+		m_filter->SetReleaseDataBeforeUpdateFlag(true);
 		//Get Image
 		VectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
 		const double l_thresholdValue = this->GetParameterFloat("thresholdvalue");
@@ -122,7 +123,7 @@ private:
 		m_filter->GetFunctor().SetEqualValue(l_equalValue); // 255
 		m_filter->GetFunctor().SetOutsideValue(l_outsideValue); //0
 		m_filter->UpdateOutputInformation();
-
+		SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
 		SetParameterOutputImage<MaskType>("out",m_filter->GetOutput());
 
 	}

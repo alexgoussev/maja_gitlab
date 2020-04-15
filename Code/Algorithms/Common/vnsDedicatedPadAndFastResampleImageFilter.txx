@@ -67,6 +67,8 @@ namespace vns
             this->SetNumberOfRequiredInputs(1);
             m_Pader = PadFilterType::New();
             m_Resampler = ResamplerFilterType::New();
+            m_Resampler->SetReleaseDataFlag(true);
+            m_Pader->SetReleaseDataFlag(true);
 
         }
 

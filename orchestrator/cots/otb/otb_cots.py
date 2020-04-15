@@ -30,7 +30,7 @@ from ..maja_cots import MajaCots
 from orchestrator.common.maja_exceptions import *
 from orchestrator.common.maja_utils import get_test_mode
 import otbApplication
-import copy
+import copy,gc
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -54,7 +54,6 @@ class MajaOtbCots(MajaCots):
         # TODO: TBC
         self.outputs = {}
         self.otb_app = None
-        self._in_swig_py = None
 
     def run(self, write_output=True):
         if write_output:
@@ -64,6 +63,8 @@ class MajaOtbCots(MajaCots):
             self.otb_app.Execute()
 
     def __del__(self):
+        if self.otb_app is not None:
+            self.otb_app.FreeRessources()
         del(self.otb_app)
         self.otb_app = None
 
@@ -92,16 +93,6 @@ class MajaOtbCots(MajaCots):
             self.otb_app.SetParameters(parameters_im)
             if not get_test_mode():
                 self.otb_app.UpdateParameters()
-            if type(parameters["in"]).__name__ == "SwigPyObject":
-                self._in_swig_py = parameters["in"]
-        if "im" in parameters:
-            if type(parameters["im"]).__name__ == "SwigPyObject":
-                self._in_swig_py = parameters["im"]
-        if "il" in parameters and len(parameters["il"]) > 0:
-            if type(parameters["il"][0]).__name__ == "SwigPyObject":
-                self._in_swig_py = parameters["il"][0]
-
-
         # remove flag if set to false
         parameters_clean = {}
         for key, value in parameters.items():
@@ -109,7 +100,7 @@ class MajaOtbCots(MajaCots):
                 if self.otb_app.GetParameterType(key) == otbApplication.ParameterType_OutputImage \
                         and len(value.split(":")) > 1:
                     # split value into value and output type
-                    if value.split(":")[1] in  OTB_APP_PIXELS_TYPE.keys():
+                    if value.split(":")[1] in OTB_APP_PIXELS_TYPE.keys():
                         parameters_clean[key] = (value.split(":")[0])
                         self.otb_app.SetParameterOutputImagePixelType(key, OTB_APP_PIXELS_TYPE.get(value.split(":")[1]))
                     else:
@@ -126,7 +117,6 @@ class MajaOtbCots(MajaCots):
             self.otb_app.UpdateParameters()
 
     def post(self, write_output=True):
-
         LOGGER.debug("Write output %s", write_output)
         params_keys = self.otb_app.GetParametersKeys()
         for param in params_keys:
@@ -153,27 +143,7 @@ class MajaOtbCots(MajaCots):
                             if not self.otb_app.GetParameterType(param) == otbApplication.ParameterType_Group:
                                 self.outputs[param] = copy.deepcopy(self.otb_app.GetParameterValue(param))
         if write_output:
-            if self._in_swig_py is not None and not get_test_mode():
-                parameters = {"in": self._in_swig_py,
-                              "startx": 0,
-                              "starty": 0,
-                              "sizex": 1,
-                              "sizey": 1,
-                              "out": "tmp.tif"}
-                otb_app = otbApplication.Registry.CreateApplication("ExtractROI")
-                if otb_app is None:
-                    raise MajaDriverException("No app ExtractROI found")
-                otb_app.Init()
-                otb_app.SetParameters(parameters)
-                otb_app.Execute()
-                otb_app2 = otbApplication.Registry.CreateApplication("Stats")
-                if otb_app2 is None:
-                    raise MajaDriverException("No app Stats found")
-                otb_app2.Init()
-                parameters2 = {"im": otb_app.GetParameterOutputImage("out")}
-                otb_app2.SetParameters(parameters2)
-                otb_app2.ExecuteAndWriteOutput()
-                del otb_app
-                del otb_app2
+            self.otb_app.FreeRessources()
             del self.otb_app
             self.otb_app = None
+

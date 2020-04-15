@@ -500,10 +500,8 @@ private:
 		} else
 		{
 			SetParameterOutputImage<InputMaskType>("refl", m_ReflectanceThresholdFilter->GetOutput());
-			if (HasValue("reflvar"))
-				SetParameterOutputImage<InputMaskType>("reflvar", m_ReflectanceThresholdFilter->GetOutput());
-			if (HasValue("reflext"))
-				SetParameterOutputImage<InputMaskType>("reflext", m_ReflectanceThresholdFilter->GetOutput());
+			SetParameterOutputImage<InputMaskType>("reflvar", m_ReflectanceThresholdFilter->GetOutput());
+			SetParameterOutputImage<InputMaskType>("reflext", m_ReflectanceThresholdFilter->GetOutput());
 		}
 	}
 

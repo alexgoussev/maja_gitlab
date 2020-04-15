@@ -139,6 +139,7 @@ private:
 	{
 		// Init filters
 		m_TOACorrectionFilter = TOACorrectionImageFilterType::New();
+		m_TOACorrectionFilter->SetReleaseDataFlag(true);
 		//Get image pointers
 		TOAImageConstPointer l_toa = this->GetParameterDoubleVectorImage("toa");
 		VAPImagePointer l_wateramount;

@@ -109,9 +109,9 @@ add_test(NAME pyTuL1ImageInfoReaderSentinel2Plugin
 
           #L2PIX
           ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2PIXImageOutput_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2DFPImageList_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2PIXImageList_R1.tif
           ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2PIXImageOutput_R2.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2DFPImageList_R2.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2PIXImageList_R2.tif
 
           # AngleZoneMaskList
           ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_AngleZoneMaskList_R1.tif

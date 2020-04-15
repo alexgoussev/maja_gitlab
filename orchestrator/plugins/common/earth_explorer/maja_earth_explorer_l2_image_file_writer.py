@@ -29,7 +29,11 @@ import orchestrator.common.file_utils as file_utils
 from orchestrator.plugins.common.base.maja_l2_image_writer_base import L2ImageWriterBase
 from orchestrator.plugins.common.base.maja_l2_image_filenames_provider import L2ImageFilenamesProvider
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
+from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.common.maja_utils import is_croco_on
+from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_clean_pipe import clean_pipe
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.common.logger.maja_logging import configure_logger
 import os
@@ -41,6 +45,9 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
 
     def __init__(self):
         super(EarthExplorerL2ImageFileWriter, self).__init__()
+        self._qckl_red_image = None
+        self._qckl_green_image = None
+        self._qckl_blue_image = None
 
     def write(self, working_dir):
         LOGGER.info("EarthExplorerL2ImageFileWriter:Write()")
@@ -124,24 +131,12 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
             # Write Quicklook QLK
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
             if self._writepublicproduct:
-                l_RedBandId = 0
-                l_GreenBandId = 0
-                l_BlueBandId = 0
-                resol_QLK = 0
-                l_Resolution = ""
-                l_BandsDefinitions = self._plugin.BandsDefinitions
-                l_BandsDefinitions.get_l2_information_for_quicklook_band_code(
-                    self._quicklookredbandcode,
-                    self._quicklookgreenbandcode,
-                    self._quicklookbluebandcode,
-                   )
-                self.write_quicklook_image(
+                self.write_quicklook_image_from_files(
                     l_L2ImageFilenamesProvider.get_qlk_filename(),
-                    self._sre_list[resol_QLK],
                     self._writepublicproduct,
-                    l_RedBandId,
-                    l_GreenBandId,
-                    l_BlueBandId,
+                    self._qckl_red_image,
+                    self._qckl_green_image,
+                    self._qckl_blue_image,
                     self._quicklookminreflredband,
                     self._quicklookmaxreflredband,
                     self._quicklookminreflgreenband,
@@ -166,9 +161,14 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         # Concat to get atb
         qoth_tmp_concat = os.path.join(working_dir, "tmp_qoth_" + l_StrRes + ".tif")
         param_qoth_concat = {"il": QOTHImageList,
-                             "out": qoth_tmp_concat
+                             "out": qoth_tmp_concat + ":uint8"
                              }
         qoth_concat_app = OtbAppHandler("ConcatenateImages", param_qoth_concat, write_output=False)
+        qoth_tmp_binconcat = os.path.join(working_dir, "tmp_binqoth_" + l_StrRes + ".tif")
+        param_qoth_binconcat = {"im": qoth_concat_app.getoutput().get("out"),
+                               "out": qoth_tmp_binconcat + ":uint8"
+                               }
+        qoth_binconcat_app = OtbAppHandler("BinaryConcatenate", param_qoth_binconcat, write_output=False)
 
         # -------------------------------------------------------
         # Concatenation of the QLT mask with the SAT, PIX and OTH masks
@@ -176,7 +176,7 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         # As for the PIX mask, the SAT mask in concatenate in one band where each bit matches one band
         sat_tmp_concat = os.path.join(working_dir, "tmp_sat_" + l_StrRes + ".tif")
         param_sat_binconcat = {"im": self._l2satimagelist[p_res],
-                               "out": sat_tmp_concat
+                               "out": sat_tmp_concat + ":uint8"
                                }
         sat_binconcat_app = OtbAppHandler("BinaryConcatenate", param_sat_binconcat, write_output=False)
 
@@ -184,9 +184,9 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         QLTImageList = []
         QLTImageList.append(sat_binconcat_app.getoutput().get("out"))
         QLTImageList.append(self._l2piximagelist[p_res])
-        QLTImageList.append(qoth_concat_app.getoutput().get("out"))
+        QLTImageList.append(qoth_binconcat_app.getoutput().get("out"))
         param_qlt_concat = {"il": QLTImageList,
-                            "out": p_qlt_image_filename
+                            "out": p_qlt_image_filename + ":uint8"
                             }
         OtbAppHandler("ConcatenateImages", param_qlt_concat)
 
@@ -209,10 +209,20 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         if p_WritePublicProduct:
             l_NumberOfResolutions = len(p_L2ImageFilenamesProvider.get_sre_headers())
             LOGGER.debug("L2ImageFileWriterBase::Initialize Number of resolutions: " + str(l_NumberOfResolutions) + ".")
+            l_BandsDefinitions = self._plugin.BandsDefinitions
+            l_RedBandId = 0
+            l_GreenBandId = 0
+            l_BlueBandId = 0
+            resol_QLK = 0
+            l_Resolution = ""
+            l_BandsDefinitions = self._plugin.BandsDefinitions
+            l_RedBandId, l_BlueBandId, l_GreenBandId = l_BandsDefinitions.get_l2_information_for_quicklook_band_code(
+                self._quicklookredbandcode,
+                self._quicklookgreenbandcode,
+                self._quicklookbluebandcode,
+            )
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
             # ** ** LOOP on RESOLUTION ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-            l_BandsDefinitions = self._plugin.BandsDefinitions
-
             for resol in range(0, l_NumberOfResolutions):
                 l_StrResolution = l_BandsDefinitions.ListOfL2Resolution[resol]
                 # --------------------------------------------------------
@@ -230,7 +240,10 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                     ".")
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # ** ** PUBLIC  DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-
+                #Store image pointer and filename
+                tmp_l2_filename_list = []
+                tmp_l2_image_list = []
+                tmp_l2_pipe = OtbPipelineManager()
                 # START WRITING SRE Image file DATA
                 # Caching the SRE image, before computing the QuickLook.
                 # Create the scalar image filter
@@ -239,24 +252,53 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 param_scaled_sre = {
                     "im": self._sre_list[resol],
                     "coef": p_ReflectanceQuantificationValue,
-                    "out": sre_filename}
+                    "out": sre_filename+":int16"}
+                sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre,
+                                             write_output=is_croco_on("earthexplorer.l2writer.sre"))
+                tmp_l2_image_list.append(sre_scal_app.getoutput().get("out"))
+                tmp_l2_filename_list.append(sre_filename)
+                tmp_l2_pipe.add_otb_app(sre_scal_app)
+                #QuickLook stuff
+                if resol == resol_QLK :
+                    tmp_sre_roi_red = os.path.join(working_dir, "tmp_sre_roi_red.tif")
+                    tmp_sre_roi_red_app = extract_roi(self._sre_list[resol], [l_RedBandId],
+                                                  tmp_sre_roi_red, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                    tmp_l2_image_list.append(tmp_sre_roi_red_app.getoutput().get("out"))
+                    tmp_l2_filename_list.append(tmp_sre_roi_red)
+                    self._qckl_red_image = tmp_sre_roi_red
+                    tmp_l2_pipe.add_otb_app(tmp_sre_roi_red_app)
+                    tmp_sre_roi_green = os.path.join(working_dir, "tmp_sre_roi_green.tif")
+                    tmp_sre_roi_green_app = extract_roi(self._sre_list[resol], [l_GreenBandId],
+                                                      tmp_sre_roi_green, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                    tmp_l2_image_list.append(tmp_sre_roi_green_app.getoutput().get("out"))
+                    tmp_l2_filename_list.append(tmp_sre_roi_green)
+                    self._qckl_green_image = tmp_sre_roi_green
+                    tmp_l2_pipe.add_otb_app(tmp_sre_roi_green_app)
+                    tmp_sre_roi_blue = os.path.join(working_dir, "tmp_sre_roi_blue.tif")
+                    tmp_sre_roi_blue_app = extract_roi(self._sre_list[resol], [l_BlueBandId],
+                                                      tmp_sre_roi_blue, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                    tmp_l2_image_list.append(tmp_sre_roi_blue_app.getoutput().get("out"))
+                    tmp_l2_filename_list.append(tmp_sre_roi_blue)
+                    self._qckl_blue_image = tmp_sre_roi_blue
+                    tmp_l2_pipe.add_otb_app(tmp_sre_roi_blue_app)
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING FRE Image file DATA
+                fre_scal_app = None
                 if p_EnvCorOption:
-                    sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre, write_output=False)
                     fre_filename = p_L2ImageFilenamesProvider.get_fre_filenames()[
                                        resol] + file_utils.get_extended_filename_write_image_file_standard()
                     param_scaled_fre = {
                         "im": self._fre_list[resol],
                         "coef": p_ReflectanceQuantificationValue,
-                        "out": fre_filename}
-                    fre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_fre, write_output=False)
+                        "out": fre_filename+":int16"}
+                    fre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_fre,
+                                                 write_output=is_croco_on("earthexplorer.l2writer.fre"))
                     #Write SRE and FRE simultaneously
-                    write_images([sre_scal_app.getoutput().get("out"),fre_scal_app.getoutput().get("out")],
-                                 [sre_filename,fre_filename])
-                else:
-                    sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre, write_output=True)
+                    tmp_l2_image_list.append(fre_scal_app.getoutput().get("out"))
+                    tmp_l2_filename_list.append(fre_filename)
+                    tmp_l2_pipe.add_otb_app(fre_scal_app)
+
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING ATB Image file DATA
@@ -287,12 +329,16 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                                       "out": tmp_aot
                                       }
                 aot_scal_app = OtbAppHandler("BandMath", param_bandmath_aot, write_output=False)
-
+                tmp_l2_pipe.add_otb_app(aot_scal_app)
+                atb_filename = p_L2ImageFilenamesProvider.get_atb_image_filename()[resol]
                 param_atb_concat = {"il": [vap_scal_app.getoutput().get("out"), aot_scal_app.getoutput().get("out")],
-                                    "out": p_L2ImageFilenamesProvider.get_atb_image_filename()[resol]
+                                    "out": atb_filename + ":uint8"
                                     }
-                OtbAppHandler("ConcatenateImages", param_atb_concat)
-
+                atb_concat_app = OtbAppHandler("ConcatenateImages", param_atb_concat,
+                                               write_output=is_croco_on("earthexplorer.l2writer.atb"))
+                tmp_l2_image_list.append(atb_concat_app.getoutput().get("out"))
+                tmp_l2_filename_list.append(atb_filename)
+                tmp_l2_pipe.add_otb_app(atb_concat_app)
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING MSK Image file DATA
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
@@ -301,27 +347,33 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 was_resampled = os.path.join(working_dir, "was_resampled_" + l_StrResolution + ".tif")
                 app_resample_was = resample(self._wasimage, self._dtm.ALTList[resol],
                                             was_resampled, threshold=0.25, write_output=False)
+                tmp_l2_pipe.add_otb_app(app_resample_was)
                 # Connect the HID image
                 hid_resampled = os.path.join(working_dir, "hid_resampled_" + l_StrResolution + ".tif")
                 app_resample_hid = resample(self._dtm_hid, self._dtm.ALTList[resol],
                                             hid_resampled, threshold=0.25, write_output=False)
+                tmp_l2_pipe.add_otb_app(app_resample_hid)
                 # Connect the SHDimage
                 shd_resampled = os.path.join(working_dir, "shd_resampled_" + l_StrResolution + ".tif")
                 app_resample_shd = resample(self._dtm_shd, self._dtm.ALTList[resol],
                                             shd_resampled, threshold=0.25, write_output=False)
+                tmp_l2_pipe.add_otb_app(app_resample_shd)
 
                 # Create the MOTH image that concatenates the WAT, HID, SHD, STL and TGS masks
                 MOTHImageList = []
                 MOTHImageList.append(app_resample_was.getoutput().get("out"))
                 MOTHImageList.append(app_resample_hid.getoutput().get("out"))
                 MOTHImageList.append(app_resample_shd.getoutput().get("out"))
+                # Append STL
                 MOTHImageList.append(self._stl_list[resol])
+                # Append TGS
                 MOTHImageList.append(self._tgs_list[resol])
                 app_resample_snow = None
                 if self._cld_snow is not None:
                     snow_resampled = os.path.join(working_dir, "snow_resampled_" + l_StrResolution + ".tif")
                     app_resample_snow = resample(self._cld_snow, self._dtm.ALTList[resol],
                                                  snow_resampled, working_dir, 0.25, write_output=False)
+                    tmp_l2_pipe.add_otb_app(app_resample_snow)
                     MOTHImageList.append(app_resample_snow.getoutput().get("out"))
                 # Concat to get atb
                 moth_tmp_concat = os.path.join(working_dir, "tmp_moth_" + l_StrResolution + ".tif")
@@ -330,19 +382,74 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                                      }
                 # Concatenate to produce the MOTH file
                 app_moth_concat = OtbAppHandler("ConcatenateImages", param_moth_concat, write_output=False)
+                tmp_l2_pipe.add_otb_app(app_moth_concat)
                 # Binary concatenation of WAT, HID, SHD, STL and TGS masks
+                msk_filename = p_L2ImageFilenamesProvider.get_msk_filename()[resol]
                 param_moth_binconcat = {"im": app_moth_concat.getoutput().get("out"),
-                                        "out": p_L2ImageFilenamesProvider.get_msk_filename()[resol]
+                                        "out": msk_filename + ":uint8"
                                         }
-                moth_binconcat_app = OtbAppHandler("BinaryConcatenate", param_moth_binconcat)
-
+                moth_binconcat_app = OtbAppHandler("BinaryConcatenate", param_moth_binconcat,
+                                                   write_output=is_croco_on("earthexplorer.l2writer.msk"))
+                tmp_l2_image_list.append(moth_binconcat_app.getoutput().get("out"))
+                tmp_l2_filename_list.append(msk_filename)
+                tmp_l2_pipe.add_otb_app(moth_binconcat_app)
                 # Concatenation of the MSK mask with the CLD and MOTH masks
                 # --------------------------------------------------------
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # START WRITING QLT Image file DATA
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-                self.write_qlt_product(resol, p_L2ImageFilenamesProvider.get_qlt_filenames()[resol], working_dir)
+                QOTHImageList = []
+
+                QOTHImageList.append(self._l2edgimagelist[resol])
+                QOTHImageList.append(self._l2taomasklist[resol])
+                if self._plugin.WaterVapourDetermination:
+                    QOTHImageList.append(self._l2iwcmasklist[resol])
+
+                # Concat to get atb
+                qoth_tmp_concat = os.path.join(working_dir, "tmp_qoth_" + l_StrResolution + ".tif")
+                param_qoth_concat = {"il": QOTHImageList,
+                                     "out": qoth_tmp_concat + ":uint8"
+                                     }
+                qoth_concat_app = OtbAppHandler("ConcatenateImages", param_qoth_concat, write_output=False)
+                qoth_tmp_binconcat = os.path.join(working_dir, "tmp_binqoth_" + l_StrResolution + ".tif")
+                param_qoth_binconcat = {"im": qoth_concat_app.getoutput().get("out"),
+                                        "out": qoth_tmp_binconcat + ":uint8"
+                                        }
+                qoth_binconcat_app = OtbAppHandler("BinaryConcatenate", param_qoth_binconcat, write_output=False)
+
+                # -------------------------------------------------------
+                # Concatenation of the QLT mask with the SAT, PIX and OTH masks
+                # --------------------------------------------------------
+                # As for the PIX mask, the SAT mask in concatenate in one band where each bit matches one band
+                sat_tmp_concat = os.path.join(working_dir, "tmp_sat_" + l_StrResolution + ".tif")
+                param_sat_binconcat = {"im": self._l2satimagelist[resol],
+                                       "out": sat_tmp_concat + ":uint8"
+                                       }
+                sat_binconcat_app = OtbAppHandler("BinaryConcatenate", param_sat_binconcat, write_output=False)
+
+                # Create the QLT vector image
+                qlt_tmp_concat = os.path.join(working_dir, "tmp_qlt_" + l_StrResolution + ".tif")
+                QLTImageList = []
+                QLTImageList.append(sat_binconcat_app.getoutput().get("out"))
+                QLTImageList.append(self._l2piximagelist[resol])
+                QLTImageList.append(qoth_binconcat_app.getoutput().get("out"))
+                param_qlt_concat = {"il": QLTImageList,
+                                    "out": qlt_tmp_concat + ":uint8"
+                                    }
+                qlt_concat_app = OtbAppHandler("ConcatenateImages", param_qlt_concat,
+                                               write_output=is_croco_on("earthexplorer.l2writer.qlt"))
+                tmp_l2_image_list.append(qlt_concat_app.getoutput().get("out"))
+                tmp_l2_filename_list.append(p_L2ImageFilenamesProvider.get_qlt_filenames()[resol])
+                tmp_l2_pipe.add_otb_app(qlt_concat_app)
+
+                # --------------------------
+                # Write all the images at L2 Reso
+                write_images(tmp_l2_image_list, tmp_l2_filename_list)
+                tmp_l2_pipe.free_otb_app()
+                clean_pipe(self._sre_list[resol])
+                if p_EnvCorOption:
+                    clean_pipe(self._fre_list[resol])
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
                 # START WRITING CLD Public Image file DATA

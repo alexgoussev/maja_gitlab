@@ -30,7 +30,7 @@ from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
-
+from orchestrator.common.maja_utils import is_croco_on
 import os
 LOGGER = configure_logger(__name__)
 
@@ -90,7 +90,8 @@ class MajaScatteringCorrection(MajaModule):
                 l_l2bandids = bands_definition.get_list_of_l2_coarse_band_id_associated_to_l2_band_code(
                     bands_definition.get_list_of_l2_band_code(l_res))
                 param_scattering["l2bandincoarse"] = [str(b) for b in l_l2bandids]
-                scat_app = OtbAppHandler("ScatteringCorrection", param_scattering, write_output=False)
+                scat_app = OtbAppHandler("ScatteringCorrection", param_scattering,
+                                         write_output=is_croco_on("scatteringcorrection"))
                 self._l2_pipeline.add_otb_app(scat_app)
                 dict_of_output["TOC_" + l_res] = scat_app.getoutput().get("tocr")
                 tocr_list.append(dict_of_output["TOC_" + l_res])

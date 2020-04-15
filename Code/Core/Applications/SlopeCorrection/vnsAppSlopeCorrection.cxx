@@ -166,11 +166,13 @@ private:
 
 	void DoExecute()
 	{
-		itk::MultiThreader::SetGlobalDefaultNumberOfThreads(8);
 		// Init filters
 		m_InternalSlopeCorrection = InternalSlopeCorrectionImageFilterType::New();
+		m_InternalSlopeCorrection->SetReleaseDataFlag(true);
 		m_ExpandTdif = DedicatedPadAndFastResampleImageFilterType::New();
+		m_ExpandTdif->SetReleaseDataFlag(true);
 		m_ExpandTdir = DedicatedPadAndFastResampleImageFilterType::New();
+		m_ExpandTdir->SetReleaseDataFlag(true);
 		//Get image pointers
 		InputVectorImagePointerType l_L2SREPtr = this->GetParameterDoubleVectorImage("sre");
 		l_L2SREPtr->UpdateOutputInformation();
@@ -218,7 +220,6 @@ private:
 				m_ExpandTdir,l_TdirPtr /* Input */,
 				ResamplerHelper::RB_INTERPOLATOR_MAJA_FAST_VECTOR_LINEAR /* Interpolator */,l_DEMAreaToL2Resolution)
 		//, l_edgeVal /* edgePaddingValue */)
-		DedicatedPadAndFastResampleImageFilterPointerType l_ExpandTdif = DedicatedPadAndFastResampleImageFilterType::New();
 		vnsImagePadAndFastDedicatedResamplerMacro("ExpandTdif", /* DedicatedPadAndFastResampleImageFilterType, */
 				m_ExpandTdif,l_TdifPtr /* Input */,
 				ResamplerHelper::RB_INTERPOLATOR_MAJA_FAST_VECTOR_LINEAR /* Interpolator */,l_DEMAreaToL2Resolution)

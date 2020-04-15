@@ -314,8 +314,6 @@ private:
 	void DoExecute()
 	{
 		// Init filters
-		itk::MultiThreader::SetGlobalDefaultNumberOfThreads(1);
-
 		m_MTThresholdsFilter = MTThreholdsFilterType::New();
 		m_MTComputeAOTImageFilter = MTComputeAOTImageFilterType::New();
 		m_MSComputeAOTImageFilter = MSComputeAOTImageFilterType::New();

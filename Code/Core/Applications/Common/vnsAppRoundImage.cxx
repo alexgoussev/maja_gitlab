@@ -67,7 +67,7 @@ public:
 	itkTypeMacro(RoundImage, otb::Wrapper::Application);
 
 	/** Some convenient typedefs. */
-	typedef itk::RoundImageFilter<DoubleImageType, UInt16ImageType> RealToMaskRoundImageFilterType;
+	typedef itk::RoundImageFilter<DoubleImageType, Int16ImageType> RealToMaskRoundImageFilterType;
 	typedef typename RealToMaskRoundImageFilterType::Pointer RealToMaskRoundImageFilterPointer;
 
 
@@ -108,11 +108,8 @@ private:
 		//Get Image
 		DoubleImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
 		m_round_filter->SetInput(l_im);
-		SetParameterOutputImage<
+		SetParameterOutputImage<Int16ImageType>("out",m_round_filter->GetOutput());
 
-
-
-		>("out",m_round_filter->GetOutput());
 
 	}
 

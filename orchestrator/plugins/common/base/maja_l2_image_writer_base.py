@@ -32,6 +32,7 @@ from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_rescale import rescale_intensity
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 import orchestrator.common.file_utils as file_utils
+from orchestrator.plugins.common.base.maja_plugin_base import PluginBase
 import orchestrator.cots.otb.otb_file_utils as otb_file_utils
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 import os
@@ -336,7 +337,7 @@ class L2ImageWriterBase(object):
     def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename):
         il = []
         for c in p_clddatabandsselected:
-            band = self._plugin.get_cld_algoindex_from_bandname(c)
+            band = PluginBase.get_cld_algoindex_from_bandname(c)
             il.append(p_cldimages[band])
 
         param_concat = {

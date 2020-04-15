@@ -174,8 +174,6 @@ private:
 
 	void DoExecute()
 	{
-		itk::MultiThreader::SetGlobalDefaultNumberOfThreads(8);
-
 		// Init filters
 		m_ScatteringFilter =  ComputeScatteringCorrectionImageFilterType::New();
 		m_Readers = ImageFileReaderListType::New();

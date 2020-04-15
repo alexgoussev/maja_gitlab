@@ -82,7 +82,6 @@ private:
 		SetDescription("DispatchZonesToVector algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("BinaryToVector");
 		SetDocLongDescription("This application put in the output the maximum value of the input image mask that has the bit for band b set");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

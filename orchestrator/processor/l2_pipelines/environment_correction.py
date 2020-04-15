@@ -29,6 +29,8 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
@@ -125,18 +127,22 @@ class MajaEnvCorr(MajaModule):
                              "albd": albdl2_image_app.getoutput()["out"],
                              "rhoenvsub": rhoenvl2_image_app.getoutput()["out"],
                              "nodata": dict_of_input.get("Params").get("RealL2NoData"),
-                             "ram": str(OtbAppHandler.ram_to_use/4),
                              "toc": dict_of_output["TOC_" + l_res],
                              "edg": dict_of_input.get("L1Reader").get_value("L2EDGOutputList")[r],
                              "sre": sre_image,
                              "rhoenv": rhoenv_image
                              }
-            envcorr_app = OtbAppHandler("EnvCorrection", param_envcorr, write_output=False)
+            envcorr_app = OtbAppHandler("EnvCorrection", param_envcorr,write_output=False)
             self._l2_pipeline.add_otb_app(envcorr_app)
-            #write_images([envcorr_app.getoutput().get("sre"), envcorr_app.getoutput().get("rhoenv")],
-            #             [sre_image, rhoenv_image])
-            dict_of_output["SRE_" + l_res] = envcorr_app.getoutput().get("sre")
-            dict_of_output["RhoEnv_" + l_res] = envcorr_app.getoutput().get("rhoenv")
-            sre_list.append(envcorr_app.getoutput().get("sre"))
+            if is_croco_on("envcorrection"):
+                write_images([envcorr_app.getoutput().get("sre"), envcorr_app.getoutput().get("rhoenv")],
+                             [sre_image, rhoenv_image])
+                dict_of_output["SRE_" + l_res] = sre_image
+                dict_of_output["RhoEnv_" + l_res] = rhoenv_image
+                sre_list.append(sre_image)
+            else:
+                dict_of_output["SRE_" + l_res] = envcorr_app.getoutput().get("sre")
+                dict_of_output["RhoEnv_" + l_res] = envcorr_app.getoutput().get("rhoenv")
+                sre_list.append(envcorr_app.getoutput().get("sre"))
         dict_of_output["SRE_List"] = sre_list
 

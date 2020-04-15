@@ -219,7 +219,6 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
         #Before Landsat Collection 1: LC8...
         #After Landsat Collection 1: LC08...
         if "LC8" or "LC08" in l_ShortDirectory:
-            LOGGER.debug("Check directory OK")
             if "_MTL" in l_ShortFilename and os.path.splitext(l_ShortFilename)[1] == ".txt":
                 LOGGER.debug("Check filename OK: " + l_ShortFilename)
                 return True
@@ -227,17 +226,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
 
 
     def is_a_landsat8_l1product_by_checking_the_satellite(p_filename, plugin_base):
-        LOGGER.debug("File detected with the filenaming <" + p_filename +
-                     ">. Check with the field 'Platform' in the xml file...")
         lASCIIHandler = Landsat8ASCIIFileHandler(p_filename)
         lplatform = lASCIIHandler.get_platform()
-        LOGGER.debug(
-            "Is the filename " +
-            p_filename + " (platform=" + lplatform +
-            ") a Landsat8 L1 product compatible with the plugin '" +
-            plugin_base.PluginName +
-            "' ??")
-
         if plugin_base.is_valid_with_satellite(lplatform):
             LOGGER.debug(
                 "The filename " +

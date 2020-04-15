@@ -317,6 +317,8 @@ private:
 		SetParameterInt("cirrusflag",l_CirrusCorrectionFlag);
 		SetParameterFloat("gamma",l_GammaMean);
 
+		m_multiMean = NULL;
+
 	}
 
 

@@ -123,6 +123,7 @@ private:
         {
         	m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
         }
+        SetParameterOutputImagePixelType("out",ImagePixelType_int16);
 		SetParameterOutputImage<VectorImageType>("out", m_filter->GetOutput());
 	}
 

@@ -87,15 +87,16 @@ public:
 	typedef ImageType::Pointer ImagePointer;
 	typedef ImageType::PixelType PixelType;
 
-	typedef UInt8ImageType MaskType;
+	typedef UInt8VectorImageType MaskType;
 	typedef MaskType::Pointer MaskPointer;
 	typedef MaskType::ConstPointer MaskConstPointer;
+
 
 	/** PadFilter used to manipulate real data */
 	typedef PadAndResampleImageFilter<VectorImageType, VectorImageType> PadAndResampleImageFilterType;
 	typedef PadAndResampleImageFilterType::Pointer PadAndResampleImageFilterPointerType;
 
-	typedef BinaryThresholdVectorImageFilter<VectorImageType, VectorImageType> BinaryThresholdVectorImageFilterType;
+	typedef BinaryThresholdVectorImageFilter<VectorImageType, MaskType> BinaryThresholdVectorImageFilterType;
 	typedef BinaryThresholdVectorImageFilterType::Pointer BinaryThresholdVectorImageFilterPointer;
 
 	/* VectorImage to image converter */
@@ -235,7 +236,7 @@ private:
 			   m_Thresholder->SetInsideValue(0);
 			   m_Thresholder->SetOutsideValue(1);
 			   SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
-			   SetParameterOutputImage<VectorImageType>("out",m_Thresholder->GetOutput());
+			   SetParameterOutputImage<MaskType>("out",m_Thresholder->GetOutput());
 
 		   }
 		   else
@@ -250,7 +251,8 @@ private:
             m_PadAndResampleFilter = PadAndResampleImageFilterType::New();
             m_PadAndResampleFilter->SetInput0(l_inPtr);
             m_PadAndResampleFilter->SetInterpolator(l_interpolator);
-
+            m_PadAndResampleFilter->SetReleaseDataFlag(true);
+            m_PadAndResampleFilter->SetReleaseDataBeforeUpdateFlag(true);
             if(HasValue("outareasize.x") && HasValue("outareasize.y") )
             {
               vns::AreaType::SizeType l_outputSize;
@@ -272,12 +274,14 @@ private:
             if(HasValue("threshold"))
 		    {
                 m_Thresholder = BinaryThresholdVectorImageFilterType::New();
+                m_Thresholder->SetReleaseDataBeforeUpdateFlag(true);
+                m_Thresholder->SetReleaseDataFlag(true);
                 m_Thresholder->SetInput(m_PadAndResampleFilter->GetOutput());
                 m_Thresholder->ThresholdAbove(GetParameterFloat("threshold"));
                 m_Thresholder->SetInsideValue(0);
                 m_Thresholder->SetOutsideValue(1);
                 SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
-                SetParameterOutputImage<VectorImageType>("out",m_Thresholder->GetOutput());
+                SetParameterOutputImage<MaskType>("out",m_Thresholder->GetOutput());
 
 		    }
 		    else
