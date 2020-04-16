@@ -38,7 +38,6 @@ set (CMAKE_COMMAND "cmake")
 
 set(CTEST_GIT_UPDATE_CUSTOM "${CMAKE_COMMAND}" "-E" "echo" "No update")
 
-# TODO : git clone maja-data 
 if(NOT EXISTS "${CI_BASE_DIR}/data")
   file(MAKE_DIRECTORY "${CI_BASE_DIR}/data")
 endif()
@@ -59,10 +58,14 @@ set (MAJA_CONFIGURE_OPTIONS
 "-DPYTHON_EXECUTABLE:PATH=${CTEST_INSTALL_DIRECTORY}/bin/python3"
 "-DMAJADATA_SOURCE_DIR:PATH=${CI_BASE_DIR}/data"
 "-DBUILD_TESTING:BOOL=ON"
+"-DMAJA_TU_ENABLE_LONG_TESTING:BOOL=OFF"
 "-DMAJA_ENABLE_COVERAGE:BOOL=OFF"
-"-DENABLE_TU:BOOL=ON"
+"-DMAJA_ENABLE_EXAMPLES:BOOL=ON"
+"-DENABLE_TU:BOOL=OFF"
 "-DENABLE_TVA:BOOL=ON"
+#~ "-DTEST_TYPE:STRING=${TEST_TYPE}"
 #~ "-DMAJA_TEST_OUTPUT_ROOT:PATH=${MAJA_TEST_OUTPUT_ROOT}"
+#~ "-DMAJA_VALIDATION_SRC_DIR:PATH=${MAJA_VALIDATION_SRC_DIR}"
 #~ "-DPLUGIN_VENUS:BOOL=${PLUGIN_VENUS}"
 #~ "-DPLUGIN_SENTINEL2:BOOL=${PLUGIN_SENTINEL2}"
 #~ "-DPLUGIN_SENTINEL2_TM:BOOL=${PLUGIN_SENTINEL2_TM}"
@@ -103,6 +106,14 @@ if ( ( NOT "${_build_nb_err}" EQUAL 0 ) OR ( "${_build_error}" EQUAL -1 ))
 endif()
 
 # run tests
+ctest_test(PARALLEL_LEVEL 4
+           RETURN_VALUE _test_rv
+           CAPTURE_CMAKE_ERROR _test_error
+           )
 
+if ( NOT _test_rv EQUAL 0 )
+  message( SEND_ERROR "An error occurs during ctest_test: ${_test_error}")
+endif()
 
 #~ ctest_submit()
+
