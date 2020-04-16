@@ -500,7 +500,7 @@ class L2Processor(BaseProcessor):
         l_global_params_dict["EnvCorOption"] = l_EnvCorOption
         l_global_params_dict["FinalizeBackWard"] = p_finalize_backward
         l_global_params_dict["BackWardMode"] = p_backwardmode
-        l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds[0]
+
         l_global_params_dict["UseCamsData"] = l_UseCamsData
         l_global_params_dict["Caching"] = caching
         l_global_params_dict["Threads"] = self._nbThreads
@@ -534,9 +534,6 @@ class L2Processor(BaseProcessor):
                 l_SatelliteD).get_dirt_for_model(l_constant_model)
             global_input_dict["L2ALBD"] = self._AthmosphericLutHandlerMap.get(
                 l_SatelliteD).get_albd_for_model(l_constant_model)
-
-        LOGGER.debug("global_input_dict %s", global_input_dict)
-        LOGGER.debug("Params %s", l_global_params_dict)
 
         global_output_dict = {}
         # Create now the header writer to ensure it is available
@@ -773,6 +770,8 @@ class L2Processor(BaseProcessor):
                     LOGGER.debug(k + " : " + str(v))
 
                 LOGGER.debug("global_output_dict %s", global_output_dict)
+                l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds[0]
+
                 # Setup image writer
                 l2_processor_image_writer_setup.setup_l2_image_writer(self, p_OutputL2ImageFileWriter, global_input_dict,
                                                        global_output_dict,
@@ -788,6 +787,10 @@ class L2Processor(BaseProcessor):
         p_OutputL2ImageFileWriter.set_l1_image_informations_provider(global_input_dict["L1Info"])
         p_OutputL2ImageFileWriter.set_output_directory(global_input_dict["Params"]["L2OutputDirectory"])
         p_OutputL2ImageFileWriter.initialize_product()
+
+        LOGGER.debug("global_input_dict %s", global_input_dict)
+        LOGGER.debug("Params %s", l_global_params_dict)
+
 
         # Compute NDT ratio to insure product validity (FA1395)
         # --------------------------------------------------

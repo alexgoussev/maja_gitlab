@@ -134,6 +134,8 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
     # = > NO, because the first step of Backward is to find the first valid product to start the loop of backward.
     # The first valid could be the last product.
     #  In this case, p_finalize_backward == True and the mode is INIT
+    LOGGER.debug(in_global_dict["Params"]["CheckingConditionalClouds"])
+
     if in_global_dict["Params"]["FinalizeBackWard"] and in_global_dict["Params"]["BackWardMode"]\
             and in_global_dict["Params"]["CheckingConditionalClouds"] == False:
         LOGGER.debug(
@@ -192,7 +194,8 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
                     str(i) for i in in_global_dict["Params"]["ListOfBandIndexForLTCComposite_DateD"]]}
             extractChannels_app = OtbAppHandler("LutExtractChannels", param_extractchannels)
             p_OutputL2ImageFileWriter.set_ltc_image(extractChannels_app.getoutput()["lut"])
-        LOGGER.debug("Starting L2 product writing ...")
-        p_OutputL2ImageFileWriter.write(l2_write_working)
-        LOGGER.debug("End of L2 product writing ...")
-        # ** ** * END WRITING DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+
+    LOGGER.debug("Starting L2 product writing ...")
+    p_OutputL2ImageFileWriter.write(l2_write_working)
+    LOGGER.debug("End of L2 product writing ...")
+    # ** ** * END WRITING DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
