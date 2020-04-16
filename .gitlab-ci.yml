@@ -25,11 +25,11 @@ prepare-centos7:
                        --dockerfile $CI_PROJECT_DIR/SuperBuild/Dockerfile
                        --context $CI_PROJECT_DIR
                        --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
-  #~ only:
-    #~ changes:
-      #~ - SuperBuild/**/*
-      #~ - CMakeConfig/CommonCmakeOptions.cmake
-      #~ - CMakeConfig/MAJAConfigurationSetting.cmake
+  only:
+    changes:
+      - SuperBuild/**/*
+      - CMakeConfig/CommonCmakeOptions.cmake
+      - CMakeConfig/MAJAConfigurationSetting.cmake
 
 build-centos7:
   stage: build
@@ -38,6 +38,8 @@ build-centos7:
     - docker
   script:
     - time rclone copy s3_otb:maja-data/TVA data/TVA
+    - ls data/TVA
+    - pwd
     - ctest -VV -S CI/maja_build.cmake
     - ls -lh build/Testing/*-*/
     - ctest -VV -S CI/maja_pkg.cmake
