@@ -358,6 +358,7 @@ class L2Processor(BaseProcessor):
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
         # Get the maximum cloud percentage for which a L2 product is generated
         l_MaxCloudPercentage = float(l_GIPPL2COMMHandler.get_value("MaxCloudPercentage"))
+        l_MaxNoDataPercentage = float(l_GIPPL2COMMHandler.get_value("MaxNoDataPercentage"))
         # Get the environment correction option
         l_EnvCorOption = xml_tools.as_bool(l_GIPPL2COMMHandler.get_value("EnvCorrOption"))
         # Get the cams data use option
@@ -790,38 +791,19 @@ class L2Processor(BaseProcessor):
 
         # Compute NDT ratio to insure product validity (FA1395)
         # --------------------------------------------------
-        if l_StopLevel2Processing == False and (
-                p_checking_conditional_clouds[0] == True or p_finalize_backward == True):
-            pass
-            # TODO put in processors
-            """ValueCountFilterType::Pointer l_L2outNDTCount = ValueCountFilterType::New()
-            l_L2outNDTCount.SetImage(l_CompositeImage.GetL2NDTOutput())
-            l_L2outNDTCount.SetPixelValue(static_cast<MaskType::PixelType>(1))
-            vnsLaunchBasicOnlyCommandInDebug(l_L2outNDTCount.Update())
+        if not l_StopLevel2Processing and (p_checking_conditional_clouds[0] or p_finalize_backward):
+            LOGGER.debug("MaxNoDataPercentage  : " + str(l_MaxNoDataPercentage)+"%")
+            validity_l2_nodata_percentage = MajaModule.create("ValidityL2NoData")
+            validity_l2_nodata_percentage.launch(global_input_dict, global_output_dict)
+            l_module_list.append(validity_l2_nodata_percentage)
+            l_NoDataRate = global_output_dict["NoDataRate"]
+            LOGGER.info("NoData Rate on the Product : " + str(l_NoDataRate))
 
-            const unsigned long l_L2outNoDataNumber(l_L2outNDTCount.GetValueCount())
-
-            const double l_L2outNoDataRate(
-                    static_cast<double>(l_L2outNoDataNumber) * 100.
-                    / static_cast<double>(l_AreaToL2CoarseResolution.Size[0] * l_AreaToL2CoarseResolution.Size[1]))
-
-            LOGGER.debug(
-                    "Image Size [XY]                  : " + l_AreaToL2CoarseResolution.Size[0] + ""+l_AreaToL2CoarseResolution.Size[0]+" . "+ l_AreaToL2CoarseResolution.Size[0] * l_AreaToL2CoarseResolution.Size[1])
-            LOGGER.debug("l_L2outNDTCount.GetValueCount()  : " + l_L2outNoDataNumber)
-            LOGGER.debug(" . L2outNoDataRate (pourcentage) : " + l_L2outNoDataRate+"%")
-            LOGGER.debug("MaxNoDataPercentage               : " + l_GIPPL2COMMHandler.GetMaxNoDataPercentage()+"%")
-
-            if (l_L2outNoDataRate > l_GIPPL2COMMHandler.GetMaxNoDataPercentage())
-            {
-                self._productIsValid = false
-                p_checking_conditional_clouds = false
+            if l_NoDataRate > l_MaxNoDataPercentage:
+                self._productIsValid = False
+                p_checking_conditional_clouds = False
                 # Stop the level2 processing
-                vnsLogWarningMacro("The number of NoData pixel in the output L2 composite product is too high.")
-            }"""
-
-        #         LOGGER.debug(js.dumps(global_output_dict))
-        #         LOGGER.debug(str(self._productIsValid))
-        #         LOGGER.debug(str(l_IgnoreCurrentLTC))
+                LOGGER.warn("The number of NoData pixel in the output L2 composite product is too high.")
 
         l2_processor_header_writer_setup.setup_l2_header_writer(l_L2HeaderFileWriter, l_CurrentPluginBase, p_OutputL2ImageFileWriter, global_input_dict,
                                                 global_output_dict, self._productIsValid, l_WriteL2Products,

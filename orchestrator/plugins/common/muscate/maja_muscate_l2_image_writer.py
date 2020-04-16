@@ -332,8 +332,8 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     }
 
                 atb_binconcat_app = OtbAppHandler("ConcatenateImages", param_atb_concat,write_output=False)
-                tmp_l2_image_list.append(atb_binconcat_app.getoutput().get("out"))
-                tmp_l2_filename_list.append(atb_filename)
+                #tmp_l2_image_list.append(atb_binconcat_app.getoutput().get("out"))
+                #tmp_l2_filename_list.append(atb_filename)
                 atb_pipeline.add_otb_app(atb_binconcat_app)
 
                 # START WRITING IAB MASK
@@ -454,8 +454,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_mg2_concat_app = OtbAppHandler("ConcatenateImages", param_mg2_concat,write_output=False)
                 param_mg2_binconcat = {"im": tmp_mg2_concat_app.getoutput().get("out"),
                                        "out": l_BaseL2FullMASKSFilename + "_MG2_" + l_grpSuffix + ".tif"
-                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard(),
-                                       "ram": str(OtbAppHandler.ram_to_use / 4)
+                                       + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard()
                                        }
                 mg2_binconcat_app = OtbAppHandler("BinaryConcatenate", param_mg2_binconcat, write_output=True)
                 mg2_pipeline.add_otb_app(mg2_binconcat_app)

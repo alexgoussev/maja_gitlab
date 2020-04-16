@@ -29,6 +29,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.maja_exceptions import *
 from orchestrator.modules.maja_module import MajaModule
@@ -307,6 +308,10 @@ class MajaCloudMaskComputation(MajaModule):
 
         # ---------------------------------------------------------------
         # ------------------- Cld shadow ------------------------
+        #caching of ShadowVIE that is know for causing troubles
+        shadowvie_filename = os.path.join(cloud_working, "shadow_vie.tif")
+        otb_copy_image_to_file(dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),shadowvie_filename)
+
         cloud_shadow_filename = os.path.join(cloud_working, "cloud_shadow.tif")
         cloud_cla_filename = os.path.join(cloud_working, "cloud_cla.tif")
         grid_ref_alt = dict_of_input.get("Plugin").ConfigUserCamera.get_Algorithms().get_GRID_Reference_Altitudes()
@@ -314,7 +319,7 @@ class MajaCloudMaskComputation(MajaModule):
                         "edg": dict_of_input.get("L1Reader").get_value("IPEDGSubOutput"),
                         "cldall": cloud_allnoext_image,
                         "cla": dict_of_output.get("CLA_Sub"),
-                        "vie": dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),
+                        "vie": shadowvie_filename,
                         "dtm": dict_of_input.get("DEM").ALC,
                         "sol1.in": dict_of_input.get("L1Reader").get_value("SOL1Image"),
                         "sol1.h": grid_ref_alt.get_SOLH1(),

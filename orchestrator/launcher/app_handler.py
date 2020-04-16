@@ -142,7 +142,7 @@ class AppHandler:
 
     def get_system_infos(self):
         return "System infos : RAM max : " + str(int(memory_used_by_process2(os.getpid()))) + " MB, DiskUsage : " + str(
-            int(disk_space_used(self._workingDirectory))) + " MB, Elapsed time: " + time.strftime("%M min %S seconds",
+            int(disk_space_used(self._workingDirectory))) + " MB, Elapsed time: " + time.strftime("%H hour %M min %S seconds",
                                                                                                   time.gmtime(
                                                                                                       time.time() - self._start_time))
 

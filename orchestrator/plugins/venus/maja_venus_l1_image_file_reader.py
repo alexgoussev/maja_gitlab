@@ -242,12 +242,12 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                          "outsidevalue": 0,
                          "out": tmp_edg_thresholder
                          }
-            app_edg_thresholder1 = OtbAppHandler("OneBandEqualThreshold", param_edg_thresholder1, write_output=False)
+            app_edg_thresholder1 = OtbAppHandler("OneBandEqualThreshold", param_edg_thresholder1, write_output=True)
             self._edg_pipeline.add_otb_app(app_edg_thresholder1)
 
             tmp_edg_resample = os.path.join(working_dir, "edg_resample.tif")
             app_edg_resample = resample(app_edg_thresholder1.getoutput().get("out"), self._dem.ALTList[0], tmp_edg_resample,
-                                            OtbResampleType.BCO, padradius=4.0, write_output=False)
+                                            OtbResampleType.BCO, padradius=4.0, write_output=True)
             self._edg_pipeline.add_otb_app(app_edg_resample)
 
             # Threshold the output
@@ -265,9 +265,9 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # IPEDGSub image pipeline connection
             # *********************************************************************************************************
             tmp_edgsub_resample = os.path.join(working_dir, "edgsub_resample.tif")
-            app_edgsub_resample = resample(app_edg_resample.getoutput().get("out"), self._dem.ALC,
+            app_edgsub_resample = resample(app_edg_thresholder1.getoutput().get("out"), self._dem.ALC,
                                         tmp_edgsub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=True)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=12.0, write_output=True)
             self._edg_pipeline.add_otb_app(app_edgsub_resample)
             # Threshold the output
             out_sub_edgsub = os.path.join(working_dir, "edgsub.tif")
@@ -277,7 +277,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                       "outsidevalue": 1,
                                       "out": out_sub_edgsub + ":uint8"
                                       }
-            app_edgsub_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edgsub_thresholder2, write_output=False)
+            app_edgsub_thresholder2 = OtbAppHandler("OneBandEqualThreshold", param_edgsub_thresholder2, write_output=True)
             self._edgsub = app_edgsub_thresholder2.getoutput().get("out")
             self._edg_pipeline.add_otb_app(app_edgsub_thresholder2)
 
@@ -298,7 +298,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_l2toa = os.path.join(working_dir, "l2toa.tif")
             app_l2toa = apply_mask(app_l2toa_resample.getoutput().get("out"),
                                           app_edg_thresholder2.getoutput().get("out"),
-                                          l_toathresholvalue, tmp_l2toa,write_output=True)
+                                          l_toathresholvalue, tmp_l2toa,write_output=False)
             self._l2toa = app_l2toa.getoutput().get("out")
             self._l2toa_pipeline.add_otb_app(app_l2toa)
 
@@ -306,10 +306,10 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # TOA Sub image pipeline connection
             # *********************************************************************************************************
             tmp_toasub_resample = os.path.join(working_dir, "toasub_resample.tif")
-            app_toasub_resample = resample(app_l2toa.getoutput().get("out"),
+            app_toasub_resample = resample(self._toascalar,
                                            self._dem.ALC,
                                           tmp_toasub_resample,
-                                          OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=False)
+                                          OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, write_output=True)
             self._l2toa_pipeline.add_otb_app(app_toasub_resample)
 
             # Threshold the output
@@ -320,7 +320,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                       "outsidevalue": 0,
                                       "out": out_edgsub_threshold + ":uint8"
                                       }
-            app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold, write_output=False)
+            app_edgsub_threshold = OtbAppHandler("OneBandEqualThreshold", param_edgsub_threshold, write_output=True)
             self._edg_pipeline.add_otb_app(app_edgsub_threshold)
 
 
@@ -340,13 +340,13 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                                      inside_value=1000,
                                                      outside_value=0,
                                                      output_image=tmp_l2edg_threshold,
-                                                     write_output=False)
+                                                     write_output=True)
             self._l2edg_pipeline.add_otb_app(app_l2edg_threshold)
             tmp_l2edg_resample = os.path.join(working_dir, "l2edg.tif")
             app_l2edg_resample = resample(app_l2edg_threshold.getoutput().get("out"),
                                            self._dem.ALTList[0],
                                           tmp_l2edg_resample,
-                                           OtbResampleType.LINEAR, padradius=4.0, threshold=1.0,write_output=False)
+                                           OtbResampleType.LINEAR, padradius=4.0, threshold=1.0,write_output=True)
             self._l2edg = app_l2edg_resample.getoutput().get("out")
             self._l2edg_pipeline.add_otb_app(app_l2edg_resample)
 
@@ -365,9 +365,10 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
 
             tmp_sat_resample = os.path.join(working_dir, "l2sat.tif")
             app_sat_resample = resample(app_sat_bin2vec.getoutput().get("out"),
-                                          self._dem.ALTList[0],
-                                          tmp_sat_resample,
-                                          OtbResampleType.BCO, padradius=4.0, threshold=l_l2sat_thresholdvalue,write_output=True)
+                                        self._dem.ALTList[0],
+                                        tmp_sat_resample,
+                                        OtbResampleType.BCO, padradius=4.0,
+                                        threshold=l_l2sat_thresholdvalue,write_output=False)
             self._l2sat = app_sat_resample.getoutput().get("out")
             self._sat_pipeline.add_otb_app(app_sat_resample)
 
@@ -376,10 +377,11 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # *********************************************************************************************************
             l_sat_subthresholdvalue = l2comm.get_value_f("SaturationThresholdSub")
             tmp_satsub_resample = os.path.join(working_dir, "satsub.tif")
-            app_satsub_resample = resample(self._l2sat,
+            app_satsub_resample = resample(app_sat_bin2vec.getoutput().get("out"),
                                         self._dem.ALC,
                                         tmp_satsub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0, threshold=l_sat_subthresholdvalue)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,
+                                        threshold=l_sat_subthresholdvalue)
             self._satsub = app_satsub_resample.getoutput().get("out")
             self._sat_pipeline.add_otb_app(app_satsub_resample)
 
