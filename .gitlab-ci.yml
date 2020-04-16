@@ -37,7 +37,7 @@ build-centos7:
   tags:
     - docker
   script:
-    - rclone copy -P s3_otb:maja-data/TVA data/TVA
+    - time rclone copy s3_otb:maja-data/TVA data/TVA
     - ctest -VV -S CI/maja_build.cmake
     - ls -lh build/Testing/*-*/
     - ctest -VV -S CI/maja_pkg.cmake
