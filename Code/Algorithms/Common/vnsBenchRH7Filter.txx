@@ -38,97 +38,128 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsMultiplyByScalarVectorImageFilter_txx
-#define __vnsMultiplyByScalarVectorImageFilter_txx
+#ifndef __vnsBenchRH7Filter_txx
+#define __vnsBenchRH7Filter_txx
 
-#include "vnsMultiplyByScalarVectorImageFilter.h"
-
-#include "itkImageRegionIterator.h"
-#include "itkImageRegionConstIterator.h"
+#include "vnsBenchRH7Filter.h"
+#include "vnsMacro.h"
 #include "itkNumericTraits.h"
 
 namespace vns
 {
+extern "C"
+{
+typedef void *( *c_void_cast )(void *);
+}
+
+	struct ThreadInfoStruct
+    {
+    unsigned int ThreadID;
+    unsigned int NumberOfThreads;
+    unsigned int NumberOfBands;
+    unsigned int NumberOfPixels;
+    void *UserData;
+    };
+
+	template<class TInputImage, class TOutputImage>
+	class machin
+	{
+	public :
+		void doBidule(const unsigned int nbBands, const unsigned int nbPixels,const unsigned int threadId)
+		{
+			vnsLogDebugMacro("Plop "<<threadId);
+			for (unsigned int i = 0; i < nbPixels;i++)
+			{
+				typename TInputImage::PixelType pix;
+				pix.SetSize(nbBands);
+				pix.Fill(i);
+				typename TOutputImage::PixelType pixou = static_cast<typename TOutputImage::PixelType>(pix*100.0);
+			}
+		}
+	};
+
 
     /** Constructor */
     template<class TInputImage, class TOutputImage>
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::MultiplyByScalarVectorImageFilter() : m_Coeff(1.0)
+    BenchRH7<TInputImage, TOutputImage>::BenchRH7(const unsigned int nbThreads, const unsigned int nbBands, const unsigned int nbPixels) :
+	m_nbThreads(nbThreads),m_nbBands(nbBands),m_nbPixels(nbPixels)
         {
         }
 
     /** Destructor */
     template<class TInputImage, class TOutputImage>
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::~MultiplyByScalarVectorImageFilter()
+    BenchRH7<TInputImage, TOutputImage>::~BenchRH7()
         {
         }
 
     template<class TInputImage, class TOutputImage>
         void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
+		BenchRH7<TInputImage, TOutputImage>::Update()
         {
-            // Call to the superclass implementation
-            Superclass::GenerateOutputInformation();
-
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
-
-            // initialize the number of channels of the output image
-            outputPtr->SetNumberOfComponentsPerPixel(inputPtr->GetNumberOfComponentsPerPixel());
-        }
-
-    template<class TInputImage, class TOutputImage>
-        void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateData(
-                const RegionType& outputRegionForThread, itk::ThreadIdType /*threadId*/)
-        {
-            // Grab the input and output
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
-
-            // Define the iterators
-            itk::ImageRegionConstIterator<InputImageType> inputIt(inputPtr, outputRegionForThread);
-            itk::ImageRegionIterator<OutputImageType> outputIt(outputPtr, outputRegionForThread);
-
-
-            // Iterator initialization
-            inputIt.GoToBegin();
-            outputIt.GoToBegin();
-
             OutputImagePixelType outputVectorValue;
 
-            outputVectorValue.SetSize(inputPtr->GetNumberOfComponentsPerPixel());
+            outputVectorValue.SetSize(m_nbBands);
             outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
             const unsigned int nbValue = outputVectorValue.GetSize();
 
-            // Pixel loop
-            while (inputIt.IsAtEnd() == false)
+            //Doer
+            machin<TInputImage,TOutputImage> un_machin;
+
+            // thread loop
+            pthread_attr_t attr;
+            pthread_attr_init(&attr);
+            ThreadInfoStruct   infoarray[m_nbThreads];
+            pthread_t threadarray[m_nbThreads];
+            for (unsigned int i = 0; i< m_nbThreads;i++)
             {
-                const InputImagePixelType& inputValue = inputIt.Get();
-
-                // Band loop
-
-                for (unsigned int j = 0 ; j < nbValue ; j++)
-                {
-                    // Set to one the bit to the associated band
-                    outputVectorValue[j] = static_cast<OutputImageInternalPixelType> (m_Coeff * inputValue[j]);
-                }
-
-                // Set the output pixel value
-                outputIt.Set(outputVectorValue);
-
-                ++inputIt;
-                ++outputIt;
+            	infoarray[i].NumberOfBands = m_nbBands;
+            	infoarray[i].NumberOfPixels = m_nbPixels;
+            	infoarray[i].NumberOfThreads = m_nbThreads;
+            	infoarray[i].ThreadID = i;
+            	infoarray[i].UserData = (void*)(&un_machin);
+            	int threadError = pthread_create( &( threadarray[i] ),
+            			&attr, reinterpret_cast<c_void_cast>( this->ThreaderCallback ),
+						( (void *)( &infoarray[i] ) ) );
+            	 if( threadError != 0 )
+            	 {
+            		 vnsStaticExceptionMacro("Unable to create a thread.  pthread_create() returned "<< threadError);
+            	 }
+            }
+            for (unsigned int i = 0; i< m_nbThreads;i++)
+            {
+            	// Using POSIX threads
+            	if ( pthread_join(threadarray[i], ITK_NULLPTR) )
+            	{
+            		vnsStaticExceptionMacro("Unable to join thread : "<<i);
+            	}
             }
         }
 
-    /** PrintSelf method */
+    // Callback routine used by the threading library. This routine just calls
+    // the ThreadedGenerateData method after setting the correct region for this
+    // thread.
     template<class TInputImage, class TOutputImage>
-        void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::PrintSelf(std::ostream& os, itk::Indent indent) const
-        {
-            Superclass::PrintSelf(os, indent);
-        }
+    ITK_THREAD_RETURN_TYPE
+	BenchRH7<TInputImage,TOutputImage>
+    ::ThreaderCallback(void *arg)
+    {
+      machin<TInputImage,TOutputImage> *str;
+      unsigned int ThreadIdType,total, threadId, threadCount, nbBands, nbPixels;
+
+      threadId = ( (ThreadInfoStruct *)( arg ) )->ThreadID;
+      threadCount = ( (ThreadInfoStruct *)( arg ) )->NumberOfThreads;
+      nbBands = ( (ThreadInfoStruct *)( arg ) )->NumberOfBands;
+      nbPixels = ( (ThreadInfoStruct *)( arg ) )->NumberOfPixels;
+
+
+      str = (machin<TInputImage,TOutputImage> *)( ( (ThreadInfoStruct *)( arg ) )->UserData );
+      //Do bidule on the machin
+      vnsLogDebugMacro("Starting thread number "<<threadId<<" / "<<threadCount);
+      str->doBidule(nbBands, nbPixels, threadId);
+      vnsLogDebugMacro("Finished thread number "<<threadId<<" / "<<threadCount);
+      return ITK_THREAD_RETURN_VALUE;
+    }
 
 } // End namespace vns
 
-#endif /* __vnsMultiplyByScalarVectorImageFilter_txx */
+#endif /* __vnsBenchRH7Filter_txx */

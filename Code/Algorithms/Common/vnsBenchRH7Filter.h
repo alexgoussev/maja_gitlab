@@ -30,7 +30,7 @@
  ************************************************************************************************************ 
  * HISTORIQUE                                                                                               *
  *                                                                                                          *
- * VERSION : 1.0.0 : FA : LAIG-FA-MAC-1988-CNES : 21 octobre 2016 : Correction qualite (code mort)          *
+ * VERSION : 5-1-0 : FA : LAIG-FA-MAC-145739-CS : 27 juin 2016 : Audit code - Supp de la macro ITK_EXPORT   *
  * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 11 mai 2010 : Creation                                                           
  *                                                                                                          *
  * FIN-HISTORIQUE                                                                                           *
@@ -38,97 +38,69 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsMultiplyByScalarVectorImageFilter_txx
-#define __vnsMultiplyByScalarVectorImageFilter_txx
+#ifndef __vnsBenchRH7_h
+#define __vnsBenchRH7_h
 
-#include "vnsMultiplyByScalarVectorImageFilter.h"
-
-#include "itkImageRegionIterator.h"
-#include "itkImageRegionConstIterator.h"
-#include "itkNumericTraits.h"
+#include "itkImageSource.h"
+#include "vnsMacro.h"
 
 namespace vns
 {
+/** \class  MultiplyByScalarToVectorImageFilter
+ * \brief Multiply each component of a vector image by a given scalar
+ *
+ *
+ * \author CS Systemes d'Information
+ *
+ * \sa ImageToImageFilter
+ * \sa BenchRH7
+ *
+ *
+ */
+template <class TInputImage, class TOutputImage>
+class BenchRH7
+{
+public:
+    /** Standard class typedefs. */
+    typedef BenchRH7                              Self;
+
+    /** Some convenient typedefs. */
+    typedef TInputImage                  InputImageType;
+    typedef typename InputImageType::ConstPointer InputImageConstPointer;
+    typedef typename InputImageType::RegionType   RegionType;
+    typedef typename InputImageType::PixelType    InputImagePixelType;
+    typedef typename InputImageType::SizeType     SizeType;
+    typedef TOutputImage  OutputImageType;
+    typedef typename OutputImageType::Pointer     OutputImagePointer;
+    typedef typename OutputImageType::PixelType   OutputImagePixelType;
+    typedef typename OutputImageType::InternalPixelType   OutputImageInternalPixelType;
+
+    void Update();
 
     /** Constructor */
-    template<class TInputImage, class TOutputImage>
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::MultiplyByScalarVectorImageFilter() : m_Coeff(1.0)
-        {
-        }
+    BenchRH7(const unsigned int nbThreads, const unsigned int nbBands, const unsigned int nbPixels);
 
     /** Destructor */
-    template<class TInputImage, class TOutputImage>
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::~MultiplyByScalarVectorImageFilter()
-        {
-        }
+    virtual ~BenchRH7();
 
-    template<class TInputImage, class TOutputImage>
-        void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::GenerateOutputInformation()
-        {
-            // Call to the superclass implementation
-            Superclass::GenerateOutputInformation();
+private:
+    BenchRH7(const Self&); //purposely not implemented
+    void operator=(const Self&); //purposely not implemented
 
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
+    /** Scalar factor top apply */
+    unsigned int m_nbThreads;
+    unsigned int m_nbBands;
+    unsigned int m_nbPixels;
 
-            // initialize the number of channels of the output image
-            outputPtr->SetNumberOfComponentsPerPixel(inputPtr->GetNumberOfComponentsPerPixel());
-        }
-
-    template<class TInputImage, class TOutputImage>
-        void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::ThreadedGenerateData(
-                const RegionType& outputRegionForThread, itk::ThreadIdType /*threadId*/)
-        {
-            // Grab the input and output
-            typename Superclass::OutputImagePointer outputPtr = this->GetOutput();
-            typename Superclass::InputImageConstPointer inputPtr = this->GetInput();
-
-            // Define the iterators
-            itk::ImageRegionConstIterator<InputImageType> inputIt(inputPtr, outputRegionForThread);
-            itk::ImageRegionIterator<OutputImageType> outputIt(outputPtr, outputRegionForThread);
-
-
-            // Iterator initialization
-            inputIt.GoToBegin();
-            outputIt.GoToBegin();
-
-            OutputImagePixelType outputVectorValue;
-
-            outputVectorValue.SetSize(inputPtr->GetNumberOfComponentsPerPixel());
-            outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
-            const unsigned int nbValue = outputVectorValue.GetSize();
-
-            // Pixel loop
-            while (inputIt.IsAtEnd() == false)
-            {
-                const InputImagePixelType& inputValue = inputIt.Get();
-
-                // Band loop
-
-                for (unsigned int j = 0 ; j < nbValue ; j++)
-                {
-                    // Set to one the bit to the associated band
-                    outputVectorValue[j] = static_cast<OutputImageInternalPixelType> (m_Coeff * inputValue[j]);
-                }
-
-                // Set the output pixel value
-                outputIt.Set(outputVectorValue);
-
-                ++inputIt;
-                ++outputIt;
-            }
-        }
-
-    /** PrintSelf method */
-    template<class TInputImage, class TOutputImage>
-        void
-        MultiplyByScalarVectorImageFilter<TInputImage, TOutputImage>::PrintSelf(std::ostream& os, itk::Indent indent) const
-        {
-            Superclass::PrintSelf(os, indent);
-        }
+    /** Static function used as a "callback" by the MultiThreader.  The threading
+     * library will call this routine for each thread, which will delegate the
+     * control to ThreadedGenerateData(). */
+    static ITK_THREAD_RETURN_TYPE ThreaderCallback(void *arg);
+};
 
 } // End namespace vns
+#ifndef VNS_MANUAL_INSTANTIATION
+#include "vnsBenchRH7Filter.txx"
+#endif
 
-#endif /* __vnsMultiplyByScalarVectorImageFilter_txx */
+#endif /* __vnsMultiplyByScalarVectorImageFilter_h */

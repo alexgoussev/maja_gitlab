@@ -143,7 +143,7 @@ class MajaCirrusCorrection(MajaModule):
                                    "interp": "bco",
                                    "out": l1cirrus_resampled
                                    }
-        app_l1cirrus_resamp = OtbAppHandler("Resampling", param_l1cirrus_resample, write_output=False)
+        app_l1cirrus_resamp = OtbAppHandler("Resampling", param_l1cirrus_resample, write_output=True)
 
         # ---------- Resample Cirrus cloud to resolution ---------------
         cld_cirrus_resampled = dict_of_output[CLOUD_MASK_CIRRUS + "_" + l_res]

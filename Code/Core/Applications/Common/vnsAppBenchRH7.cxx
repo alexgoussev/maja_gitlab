@@ -39,7 +39,7 @@
  ************************************************************************************************************/
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "vnsMultiplyByScalarVectorImageFilter.h"
+#include "vnsBenchRH7Filter.h"
 #include "vnsLoggers.h"
 #include <string>
 
@@ -51,11 +51,11 @@ namespace Wrapper
 
 using namespace otb::Wrapper;
 
-class MultiplyByScalar: public Application
+class BenchRH7: public Application
 {
 public:
 	/** Standard class typedefs. */
-	typedef MultiplyByScalar  	 		  Self;
+	typedef BenchRH7  	 		  Self;
 	typedef otb::Wrapper::Application     Superclass;
 	typedef itk::SmartPointer<Self>       Pointer;
 	typedef itk::SmartPointer<const Self> ConstPointer;
@@ -63,34 +63,31 @@ public:
 	/** Standard macro */
 	itkNewMacro(Self);
 
-	itkTypeMacro(MultiplyByScalar, otb::Wrapper::Application);
+	itkTypeMacro(BenchRH7, otb::Wrapper::Application);
 
 	/** Some convenient typedefs. */
-	typedef DoubleVectorImageType ImageType;
-	typedef vns::MultiplyByScalarVectorImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
+	typedef DoubleVectorImageType InImageType;
+	typedef FloatVectorImageType OutImageType;
+	typedef vns::BenchRH7<InImageType, OutImageType> MachinFilterType;
 
 
 private:
 	void DoInit()
 	{
-		SetName("MultiplyByScalar");
-		SetDescription("Multiply by scalar algo.");
+		SetName("BenchRH7");
+		SetDescription("BenchRH7");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocLongDescription("This application multiply each image of a vector image by a factor");
+		SetDocLongDescription("BenchRH7 test the bug on rh7");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
 		SetDocSeeAlso("MAJA Doc");
 
-		AddDocTag("Statistics");
+		AddDocTag("Benchmark");
 
-		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
-		AddParameter(ParameterType_Float, "coef","Coeff to multiply");
-		AddParameter(ParameterType_OutputImage, "out", "image");
-		SetParameterDescription("out","output image");
-
-		AddRAMParameter("ram");
-		SetDefaultParameterInt("ram",2048);
+		AddParameter(ParameterType_Int, "nbthreads","nbthreads");
+		AddParameter(ParameterType_Int, "nbpixels","nbpixels");
+		AddParameter(ParameterType_Int, "nbbands","nbbands");
 
 	}
 
@@ -102,25 +99,18 @@ private:
 
 	void DoExecute()
 	{
+		//Get param
+		const unsigned int l_nbBands = this->GetParameterFloat("nbbands");
+		const unsigned int l_nbPixels = this->GetParameterFloat("nbpixels");
+		const unsigned int l_nbThreads = this->GetParameterFloat("nbthreads");
 		// Init filters
-		m_filter = RealToRealScalarVectorImageFilterType::New();
-
-		//Get Image
-		ImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
-		const double l_coeff = this->GetParameterFloat("coef");
-		m_filter->SetInput(l_im);
-		m_filter->SetCoeff(l_coeff);
-		SetParameterOutputImagePixelType("out", ImagePixelType_double);
-		SetParameterOutputImage<ImageType>("out",m_filter->GetOutput());
-
+		MachinFilterType filter(l_nbThreads,	l_nbBands, l_nbPixels);
+		filter.Update();
 	}
 
-
-	/** Filters declaration */
-	 RealToRealScalarVectorImageFilterType::Pointer m_filter;
 };
 
 }
 }
 
-OTB_APPLICATION_EXPORT(vns::Wrapper::MultiplyByScalar)
+OTB_APPLICATION_EXPORT(vns::Wrapper::BenchRH7)

@@ -169,4 +169,4 @@ if l1_reader.has_value("L1TOAImageList") and l1_reader.get_value("L1TOAImageList
                                os.path.join(args.output_dir,"L1TOAImageList_R"+str(i+1)+".tif"))
 # Log system infos
 
-app_handler.get_directory_manager().clean(True)
+#app_handler.get_directory_manager().clean(True)

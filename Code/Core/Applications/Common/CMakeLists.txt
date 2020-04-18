@@ -119,3 +119,7 @@ OTB_CREATE_APPLICATION(NAME           ChangeValues
                        SOURCES        vnsAppChangeValues.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
                        
+OTB_CREATE_APPLICATION(NAME           BenchRH7
+                      SOURCES        vnsAppBenchRH7.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                       

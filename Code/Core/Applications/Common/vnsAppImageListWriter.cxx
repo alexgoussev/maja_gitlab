@@ -188,7 +188,7 @@ private:
 		//Setup and execute the multiwriter
 		double l_deviation = l_nb_strip_square - (1.0*l_nb_strip*l_nb_strip)/static_cast<double>(GetNumberOfElementsInParameterInputImageList("il"));
 		l_deviation = std::sqrt(std::abs(l_deviation/static_cast<double>(GetNumberOfElementsInParameterInputImageList("il"))));
-		l_nb_strip = std::ceil(1.0 * l_nb_strip / GetNumberOfElementsInParameterInputImageList("il") + 3.0*l_deviation);
+		l_nb_strip = std::ceil(1.0 * l_nb_strip / GetNumberOfElementsInParameterInputImageList("il") + 1.0*l_deviation);
 		vnsLogInfoMacro("Number of split computed : "<<l_nb_strip);
 		l_multi_writer->SetNumberOfDivisionsStrippedStreaming(l_nb_strip);
 		l_multi_writer->Update();
