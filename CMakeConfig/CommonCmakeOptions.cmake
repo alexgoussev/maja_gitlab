@@ -94,7 +94,3 @@ if(ENABLE_TU)
   endif()
   message(STATUS "MAJADATA_SOURCE_DIR       = ${MAJADATA_SOURCE_DIR}")
 endif()
-
-
-
-
