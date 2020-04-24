@@ -119,6 +119,10 @@ def get_matching_dirs(context_dir, pattern):
     return results
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print("Usage:", sys.argv[0], " <path-to-TV-input-context>  <product_type> [output_dir] [offset](default is 10) [crop_size](default is 480)")
+        print("Usage:", sys.argv[0], "/data/TV/Input/L8-V-L2INIT-001-F-N-LANDSAT8-GENERAL LANDSAT8")
+        sys.exit(1)
     context_dir = sys.argv[1]
     product_type = sys.argv[2]
     output_dir = None if len(sys.argv) < 4 else sys.argv[3]
