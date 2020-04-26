@@ -141,11 +141,17 @@ private:
 		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataBeforeUpdateFlag(true);
 		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataFlag(true);
 		//Get image pointers
+		std::cout<<"Plop"<<std::endl;
 		InputVectorImageConstPointerType l_RhoEnvPtr = this->GetParameterDoubleVectorImage("rhoenvsub");
+		std::cout<<"Plop"<<std::endl;
 		InputVectorImageConstPointerType l_TdirPtr = this->GetParameterDoubleVectorImage("tdir");
+		std::cout<<"Plop"<<std::endl;
 		InputVectorImageConstPointerType l_TdifPtr = this->GetParameterDoubleVectorImage("tdif");
+		std::cout<<"Plop"<<std::endl;
 		InputVectorImageConstPointerType l_SatmPtr = this->GetParameterDoubleVectorImage("albd");
+		std::cout<<"Plop"<<std::endl;
 		InputVectorImageConstPointerType l_IPTOCPtr = this->GetParameterDoubleVectorImage("toc");
+		std::cout<<"Plop"<<std::endl;
 		InputMaskConstPointerType l_L2EDGPtr = this->GetParameterUInt8Image("edg");
 
         //GetParams

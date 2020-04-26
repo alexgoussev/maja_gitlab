@@ -85,29 +85,29 @@ class Landsat8MuscateL1ImageFileReader(MuscateL1ImageFileReaderBase):
         # At L2 resolution
         l_NbL2Res = len(l_ListOfL2Resolution)
         # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
-        out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
-        m_L2EDGThresholdApp = binary_threshold(self._edgsubmask,
-                                                 lower_threshold=0,
-                                                 inside_value=10000,
-                                                 outside_value=0,
-                                                 output_image=out_thresh + ":double",
-                                                 write_output=False)  # //l_ThresholdImageFilter
-        self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp)
+        #out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
+        #m_L2EDGThresholdApp = binary_threshold(self._edgsubmask,
+        #                                         lower_threshold=0,
+        #                                         inside_value=10000,
+        #                                         outside_value=0,
+        #                                         output_image=out_thresh + ":double",
+        #                                         write_output=False)  # //l_ThresholdImageFilter
+        #self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp)
         for r in range(l_NbL2Res):
             res_str = l_ListOfL2Resolution[r]
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            l2_edg_resamp_app = resample(m_L2EDGThresholdApp.getoutput().get("out"),
-                                         self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR)
+            l2_edg_resamp_app = resample(self._edgsubmask,
+                                         self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR,threshold=0.0001)
             self._l2edg_pipeline.add_otb_app(l2_edg_resamp_app)
             # Set Threshold value to one because the expand filter interpolates values set to 0
             # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
-            m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdApp2 = binary_threshold(l2_edg_resamp_app.getoutput().get("out"),
-                                                      lower_threshold=1.,
-                                                      inside_value=1,
-                                                      outside_value=0,
-                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8",
-                                                      write_output=False)
-            self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp2)
-            self._l2edgmasklist.append(m_L2EDGThresholdApp2.getoutput().get("out"))
+            #m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
+            #m_L2EDGThresholdApp2 = binary_threshold(l2_edg_resamp_app.getoutput().get("out"),
+            #                                          lower_threshold=1.,
+            #                                          inside_value=1,
+            #                                          outside_value=0,
+            #                                          output_image=m_L2EDGThresholdImage2_out + ":uint8",
+            #                                          write_output=False)
+            #self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp2)
+            self._l2edgmasklist.append(l2_edg_resamp_app.getoutput().get("out"))

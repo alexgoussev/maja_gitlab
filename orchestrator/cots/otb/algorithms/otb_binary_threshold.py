@@ -25,7 +25,7 @@ It defines method mandatory for a processor
 
 ###################################################################################################
 """
-from orchestrator.cots.otb.algorithms.otb_band_math import band_math
+from orchestrator.cots.otb.algorithms.otb_band_math import band_math_mask
 from orchestrator.common.maja_exceptions import MajaProcessingError
 
 
@@ -54,6 +54,6 @@ def binary_threshold(input_image, inside_value, outside_value,
         expression = "(im1b1>{low}&&im1b1<{up})?{in_v}:{out_v}".format(low=lower_threshold, up=upper_threshold,
                                                                        in_v=inside_value, out_v=outside_value)
 
-    out = band_math([input_image], expression, output_image=output_image, write_output=write_output)
+    out = band_math_mask([input_image], expression, output_image=output_image, write_output=write_output)
 
     return out

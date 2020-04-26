@@ -94,6 +94,7 @@ private:
 		AddParameter(ParameterType_Float, "outsidevalue","Outside value for output");
 		AddParameter(ParameterType_OutputImage, "out", "image");
 		SetParameterDescription("out","output image");
+		SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
 
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram",2048);
@@ -123,7 +124,6 @@ private:
 		m_filter->GetFunctor().SetEqualValue(l_equalValue); // 255
 		m_filter->GetFunctor().SetOutsideValue(l_outsideValue); //0
 		m_filter->UpdateOutputInformation();
-		SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
 		SetParameterOutputImage<MaskType>("out",m_filter->GetOutput());
 
 	}

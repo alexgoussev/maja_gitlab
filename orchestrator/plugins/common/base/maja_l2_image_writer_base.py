@@ -29,6 +29,7 @@ from orchestrator.common.maja_exceptions import MajaNotYetImplemented
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
 from orchestrator.cots.otb.algorithms.otb_rescale import rescale_intensity
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 import orchestrator.common.file_utils as file_utils
@@ -334,18 +335,20 @@ class L2ImageWriterBase(object):
     def write_qlt_product(self, p_res, p_qlt_image_filename, working_dir):
         raise MajaNotYetImplemented("Could not instanciate base class")
 
-    def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename):
+    def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename, use_filenames=False):
         il = []
         for c in p_clddatabandsselected:
-            band = PluginBase.get_cld_algoindex_from_bandname(c)
+            band = self._plugin.get_cld_algoindex_from_bandname(c)
             il.append(p_cldimages[band])
 
         param_concat = {
                         "il": il,
                         "out": "tmp.tif:uint8"
                         }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=False)
-
+        if not use_filenames:
+            concat_app = OtbAppHandler("ConcatenateMaskImages", param_concat,write_output=False)
+        else:
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat, write_output=False)
         param_bin_concat = {"im": concat_app.getoutput().get("out"),
                             "out": cld_image_filename + ":uint8"+file_utils.get_extended_filename_write_image_file_standard()
                             }
@@ -406,21 +409,9 @@ class L2ImageWriterBase(object):
 
             # START WRITING STO Image file DATA
             # Scalar filter
-
-            tmp_sto_bandmath = os.path.join(working_dir, "tmp_sto_bandmath.tif")
-            param_scaled_sto = {
-                "im": self._sto,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_sto_bandmath
-            }
-            OtbAppHandler("MultiplyByScalar", param_scaled_sto)
-
-            param_round_sto = {
-                "im": param_scaled_sto.get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_sto_image_filename() +
-                file_utils.get_extended_filename_write_image_file_standard()
-            }
-            OtbAppHandler("RoundVectorImage", param_round_sto)
+            multiply_by_scalar(self._sto,p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_sto_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard() + ":int16")
 
 
             # START WRITING NDT Image file DATA
@@ -429,7 +420,7 @@ class L2ImageWriterBase(object):
             otb_file_utils.otb_copy_image_to_file(
                 self._ndt,
                 p_L2PrivateImageFilenamesProvider.get_ndt_image_filename() +
-                file_utils.get_extended_filename_write_image_file_standard())
+                file_utils.get_extended_filename_write_image_file_standard()+":uint16")
 
             # START WRITING LTC Image file DATA
             # Create the image list
@@ -438,64 +429,26 @@ class L2ImageWriterBase(object):
                                              p_L2PrivateImageFilenamesProvider.get_ltc_image_filename())
 
             # START WRITING RTA Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rta = os.path.join(working_dir, "tmp_bandmath_rta.tif")
-            param_scaled_rta = {
-                "im": self._rta,
-                "coef": p_ReflectanceQuantificationValue,
-                "out":  tmp_bandmath_rta}
-            rta_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rta)
-
-            param_round_rta = {
-                "im": rta_scal_app.getoutput().get("out"),
-                "out":  p_L2PrivateImageFilenamesProvider.get_rta_image_filename()+
-                file_utils.get_extended_filename_write_image_file_standard()}
-            OtbAppHandler("RoundVectorImage", param_round_rta)
-
+            multiply_by_scalar(self._rta, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rta_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
             # START WRITING RTC Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rtc = os.path.join(working_dir, "tmp_bandmath_rtc.tif")
-            param_scaled_rtc = {
-                "im": self._rtc,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_bandmath_rtc
-            }
-
-            rtc_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rtc)
-
-            param_round_rtc = {
-                "im": rtc_scal_app.getoutput().get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_rtc_image_filename() +
-            file_utils.get_extended_filename_write_image_file_standard()
-            }
-
-            OtbAppHandler("RoundVectorImage", param_round_rtc)
-
+            multiply_by_scalar(self._rtc, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rtc_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
             # START WRITING RCR Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rcr = os.path.join(working_dir, "tmp_bandmath_rcr.tif")
-            param_scaled_rcr = {
-                "im": self._rcr,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_bandmath_rcr
-            }
-            rcr_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rcr)
-
-            param_round_rcr = {
-                "im": rcr_scal_app.getoutput().get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_rcr_image_filename()+
-                file_utils.get_extended_filename_write_image_file_standard()
-            }
-            OtbAppHandler("RoundVectorImage", param_round_rcr)
+            multiply_by_scalar(self._rcr, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rcr_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
 
         # End od condition
         self.write_cld_image(
             self._cld,
             p_CLDDataBandsSelected,
-            p_L2PrivateImageFilenamesProvider.get_cld_image_filename())
+            p_L2PrivateImageFilenamesProvider.get_cld_image_filename(), use_filenames=True)
 
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
         # START WRITING CLA Sub Image file DATA
@@ -559,7 +512,7 @@ class L2ImageWriterBase(object):
                 "out": tmp_qlk,
                 "ram": str(OtbAppHandler.ram_to_use / 3)
                 }
-            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=True)
+            concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concat,write_output=True)
 
             # Rescale between 0 and 255
             rescale_intensity(

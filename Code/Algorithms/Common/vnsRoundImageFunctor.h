@@ -30,77 +30,56 @@
  ************************************************************************************************************ 
  * HISTORIQUE                                                                                               *
  *                                                                                                          *
- * VERSION : 5-1-0 : FA : LAIG-FA-MAC-145739-CS : 27 juin 2016 : Audit code - Supp de la macro ITK_EXPORT   *
- * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 11 mai 2010 : Creation                                                           
+ * VERSION : 5-1-0 : FA : LAIG-FA-MAC-145739-CS : 13 juillet 2016 : Audit code - initialisation membre      *
+ * VERSION : 1-0-0 : <TypeFT> : <NumFT> : 23 avr. 2010 : Creation                                                           
  *                                                                                                          *
  * FIN-HISTORIQUE                                                                                           *
  *                                                                                                          *
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-#ifndef __vnsBenchRH7_h
-#define __vnsBenchRH7_h
+#ifndef __vnsRoundImageFunctor_h
+#define __vnsRoundImageFunctor_h
 
-#include "itkImageSource.h"
-#include "vnsMacro.h"
+#include "itkMath.h"
 
 namespace vns
 {
-/** \class  MultiplyByScalarToVectorImageFilter
- * \brief Multiply each component of a vector image by a given scalar
- *
- *
- * \author CS Systemes d'Information
- *
- * \sa ImageToImageFilter
- * \sa BenchRH7
- *
- *
- */
-template <class TInputImage, class TOutputImage>
-class BenchRH7
-{
-public:
-    /** Standard class typedefs. */
-    typedef BenchRH7                              Self;
+     namespace Functor
+     {
+         template< typename TInput, typename TOutput >
+         class RoundImage
+         {
+             public:
+             RoundImage() : m_Coef(1.0)
+             {};
+             ~RoundImage() = default;
 
-    /** Some convenient typedefs. */
-    typedef TInputImage                  InputImageType;
-    typedef typename InputImageType::ConstPointer InputImageConstPointer;
-    typedef typename InputImageType::RegionType   RegionType;
-    typedef typename InputImageType::PixelType    InputImagePixelType;
-    typedef typename InputImageType::SizeType     SizeType;
-    typedef TOutputImage  OutputImageType;
-    typedef typename OutputImageType::Pointer     OutputImagePointer;
-    typedef typename OutputImageType::PixelType   OutputImagePixelType;
-    typedef typename OutputImageType::InternalPixelType   OutputImageInternalPixelType;
+             void SetCoef(const double acoef)
+             {
+            	 m_Coef = acoef;
+             }
 
-    void Update();
+             bool operator!=(const RoundImage &) const
+             {
+                return false;
+             }
 
-    /** Constructor */
-    BenchRH7(const unsigned int nbThreads, const unsigned int nbBands, const unsigned int nbPixels);
+             bool operator==(const RoundImage & other) const
+             {
+                 return !( *this != other );
+             }
 
-    /** Destructor */
-    virtual ~BenchRH7();
+             inline TOutput
+             operator()(const TInput & A) const
+             {
+            	return itk::Math::Round<TOutput,TInput>(m_Coef * A );
+             }
+            // unsigned int m_OutputSize;
+            double  m_Coef;
+         };
+     }
 
-private:
-    BenchRH7(const Self&); //purposely not implemented
-    void operator=(const Self&); //purposely not implemented
+} // end namespace vns
 
-    /** Scalar factor top apply */
-    unsigned int m_nbThreads;
-    unsigned int m_nbBands;
-    unsigned int m_nbPixels;
-
-    /** Static function used as a "callback" by the MultiThreader.  The threading
-     * library will call this routine for each thread, which will delegate the
-     * control to ThreadedGenerateData(). */
-    static ITK_THREAD_RETURN_TYPE ThreaderCallback(void *arg);
-};
-
-} // End namespace vns
-#ifndef VNS_MANUAL_INSTANTIATION
-#include "vnsBenchRH7Filter.txx"
 #endif
-
-#endif /* __vnsMultiplyByScalarVectorImageFilter_h */

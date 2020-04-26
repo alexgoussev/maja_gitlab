@@ -29,6 +29,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.gipp_utils import uncompress_dbl_product
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
+from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_stats import stats
 from orchestrator.cots.gdal.gdal_dataset_info import GdalDatasetInfo
 from orchestrator.common.maja_exceptions import MajaDataException
@@ -188,8 +189,11 @@ class DEMBase(object):
                     "' of the DTM doesn't exist !")
             else:
                 LOGGER.debug("Starting multiply " + self.__SLPListInternal[resol] + " * " + str(self._coeff))
+                slp_out_roi = os.path.join(working_dir, "tmp_dem_slp_roi_{}.tif".format(resol))
+                slp_roi_app = extract_roi(self.__SLPListInternal[resol], [0], slp_out_roi, write_output=False)
+                self._apps.add_otb_app(slp_roi_app)
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__SLPListInternal[resol]))
-                slp_mul_app = multiply_by_scalar(self.__SLPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                slp_mul_app = multiply_by_scalar(slp_roi_app.getoutput().get("out"), self._coeff, output_image=tmp,write_output=False)
                 self._apps.add_otb_app(slp_mul_app)
                 mtdat = GdalDatasetInfo(self.__SLPListInternal[resol])
                 l2area = Area()
@@ -213,8 +217,11 @@ class DEMBase(object):
                     "' of the DTM doesn't exist !")
             else:
                 LOGGER.debug("Starting multiply " + self.__ASPListInternal[resol] + " * " + str(self._coeff))
+                asp_out_roi = os.path.join(working_dir, "tmp_dem_asp_roi_{}.tif".format(resol))
+                asp_roi_app = extract_roi(self.__ASPListInternal[resol], [0], asp_out_roi, write_output=False)
+                self._apps.add_otb_app(asp_roi_app)
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__ASPListInternal[resol]))
-                asp_mul_app = multiply_by_scalar(self.__ASPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                asp_mul_app = multiply_by_scalar(asp_roi_app.getoutput().get("out"), self._coeff, output_image=tmp,write_output=False)
                 self._apps.add_otb_app(asp_mul_app)
                 LOGGER.debug("Done")
                 self.ASPList.append(asp_mul_app.getoutput().get("out"))

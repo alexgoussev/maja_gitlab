@@ -39,13 +39,9 @@
  ************************************************************************************************************/
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "vnsRoundVectorImageFunctor.h"
-#include "vnsRoundImageFunctor.h"
-#include "otbUnaryFunctorVectorImageFilter.h"
+#include "vnsThresholdImageFunctor.h"
 #include "itkUnaryFunctorImageFilter.h"
 #include <string>
-#include "vnsLoggers.h"
-#include "vnsMacro.h"
 
 namespace vns
 {
@@ -55,11 +51,11 @@ namespace Wrapper
 
 using namespace otb::Wrapper;
 
-class RoundImage : public Application
+class ThresholdImage : public Application
 {
 public:
 	/** Standard class typedefs. */
-	typedef RoundImage			 		  Self;
+	typedef ThresholdImage                Self;
 	typedef otb::Wrapper::Application     Superclass;
 	typedef itk::SmartPointer<Self>       Pointer;
 	typedef itk::SmartPointer<const Self> ConstPointer;
@@ -67,85 +63,60 @@ public:
 	/** Standard macro */
 	itkNewMacro(Self);
 
-	itkTypeMacro(RoundImage, otb::Wrapper::Application);
+	itkTypeMacro(ThresholdImage, otb::Wrapper::Application);
 
 	/** Some convenient typedefs. */
-	typedef DoubleVectorImageType InputImageType;
-
-	typedef vns::Functor::RoundVectorImage<InputImageType::PixelType, InputImageType::PixelType> RoundVectorImageFunctor;
-	typedef otb::UnaryFunctorVectorImageFilter<InputImageType, InputImageType, RoundVectorImageFunctor> RealToRealRoundVectorImageFilterType;
-
-	typedef vns::Functor::RoundImage<DoubleImageType::PixelType, DoubleImageType::PixelType> RoundImageFunctor;
-	typedef itk::UnaryFunctorImageFilter<DoubleImageType, DoubleImageType, RoundImageFunctor> RealToRealRoundImageFilterType;
-
+	typedef itk::BinaryThresholdImageFilter<DoubleImageType, UInt8ImageType> BinaryThresholdImageFilterType;
+	typedef BinaryThresholdImageFilterType::Pointer BinaryThresholdImageFilterPointer;
 
 private:
 	void DoInit()
 	{
-		SetName("RoundImage");
-		SetDescription("Round the image to the closest int value.");
+		SetName("BinaryConcatenate");
+		SetDescription("BinaryConcatenate algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocLongDescription("If one band equal threshold the band equal value");
+		SetDocLongDescription("This application concatenate each image of a vector image into one");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
 		SetDocSeeAlso("MAJA Doc");
 
-		AddDocTag("Mask");
+		AddDocTag("Statistics");
 
-		AddParameter(ParameterType_InputImage,  "im",   "image");
+		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
 		AddParameter(ParameterType_OutputImage, "out", "image");
-		SetParameterOutputImagePixelType("out", ImagePixelType_double);
 		SetParameterDescription("out","output image");
-		AddParameter(ParameterType_Float,"coef","multiplication coeff");
-		MandatoryOff("coef");
+		SetParameterOutputImagePixelType("out", ImagePixelType_uint16);
+
 		AddRAMParameter("ram");
-		SetDefaultParameterInt("ram", 2048);
+		SetDefaultParameterInt("ram",2048);
 
 	}
 
 	void DoUpdateParameters()
 	{
+
 	}
 
 
 	void DoExecute()
 	{
-		// Get input image pointers
-		ImageBaseType* l_inPtr = GetParameterImageBase("im",0);
-		// Guess the image type
-		std::string className(l_inPtr->GetNameOfClass());
+		// Init filters
+		m_concatenater = BinaryConcatenationVectorImageFilterType::New();
 
+		//Get Image
+		MaskVectorConstPointerType l_im = this->GetParameterUInt8VectorImage("im");
+		m_concatenater->SetInput(l_im);
+		SetParameterOutputImage<UnsignedImageType>("out",m_concatenater->GetOutput());
 
-		if (className == "VectorImage") {
-			// Init filters
-			DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
-			m_filter = RealToRealRoundVectorImageFilterType::New();
-			m_filter->SetInput(l_im);
-			if(HasValue("coef"))
-			{
-				m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
-			}
-			SetParameterOutputImage<InputImageType>("out", m_filter->GetOutput());
-		} else {
-			// Init filters
-			DoubleImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
-			m_single_filter = RealToRealRoundImageFilterType::New();
-			m_single_filter->SetInput(l_im);
-			if(HasValue("coef"))
-			{
-				m_single_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
-			}
-			SetParameterOutputImage<DoubleImageType>("out", m_single_filter->GetOutput());
-		}
 	}
 
+
 	/** Filters declaration */
-	 RealToRealRoundVectorImageFilterType::Pointer m_filter;
-	 RealToRealRoundImageFilterType::Pointer m_single_filter;
+	BinaryConcatenationVectorImageFilterPointer m_concatenater;
 };
 
 }
 }
 
-OTB_APPLICATION_EXPORT(vns::Wrapper::RoundImage)
+OTB_APPLICATION_EXPORT(vns::Wrapper::ThresholdImage)

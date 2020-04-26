@@ -40,7 +40,7 @@ def band_math_or(input_file_path_list, output_image, write_output=True):
     for i in range(2, len(input_file_path_list) + 1):
         exp += " || im{}b1".format(i)
 
-    return band_math(input_file_path_list, exp, output_image, write_output)
+    return band_math_mask(input_file_path_list, exp, output_image, write_output)
 
 
 def band_math(input_file_path_list, exp, output_image, write_output=True):
@@ -49,6 +49,16 @@ def band_math(input_file_path_list, exp, output_image, write_output=True):
                   "il": input_file_path_list,
                   "out": output_image}
 
-    app = OtbAppHandler("BandMath", parameters, write_output)
+    app = OtbAppHandler("BandMathDouble", parameters, write_output)
+
+    return app
+
+
+def band_math_mask(input_file_path_list, exp, output_image, write_output=True):
+    parameters = {"exp": exp,
+                  "il": input_file_path_list,
+                  "out": output_image}
+
+    app = OtbAppHandler("BandMathDouble", parameters, write_output)
 
     return app

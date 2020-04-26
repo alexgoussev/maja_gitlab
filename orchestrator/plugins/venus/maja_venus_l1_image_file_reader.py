@@ -32,7 +32,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.plugins.venus.maja_venus_plugin import MajaVenusPlugin
 from orchestrator.common.constants import ReadL1Mode
 import orchestrator.common.xml_tools as xml_tools
-from orchestrator.cots.otb.algorithms.otb_band_math import band_math
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_apply_mask import apply_mask
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
@@ -196,7 +195,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
         tmp_l1pix_roi = os.path.join(working_dir, "l1pix.tif")
         app_l1_pix_roi = extract_roi(l_FilenameProvider.m_TOAImageFileName,
                                      [VenusL1ImageFileReader.PIXChannel-1],
-                                     tmp_l1pix_roi, write_output=False)
+                                     tmp_l1pix_roi + ":uint16", write_output=False)
         self._l1pix_pipeline.add_otb_app(app_l1_pix_roi)
         self._l1pix = app_l1_pix_roi.getoutput().get("out")
 
@@ -211,7 +210,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # Before resample, binarytovector -> resample -> vectortobinary
             tmp_l2pix_bin2vec = os.path.join(working_dir, "l2pix_bin2vec.tif")
             param_l2pix_bin2vec = {"im": app_l1_pix_roi.getoutput().get("out"),
-                                 "out": tmp_l2pix_bin2vec,
+                                 "out": tmp_l2pix_bin2vec + ":uint8",
                                  "nbcomp": VenusL1ImageFileReader.PIXNumberOfComponentsPerPixel
                                  }
             app_l2pix_bin2vec = OtbAppHandler("BinaryToVector", param_l2pix_bin2vec, write_output=False)
@@ -227,7 +226,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             #L2 PIX is concatenate
             tmp_l2pix_binconcat = os.path.join(working_dir, "l2pix.tif")
             param_l2pix_binconcat = {"im": app_l2pix_resample.getoutput().get("out"),
-                                   "out": tmp_l2pix_binconcat}
+                                   "out": tmp_l2pix_binconcat + ":uint16"}
             app_l2pix_binconcat = OtbAppHandler("BinaryConcatenate", param_l2pix_binconcat, write_output=False)
             self._l2pix = app_l2pix_binconcat.getoutput().get("out")
             self._l2pix_pipeline.add_otb_app(app_l2pix_binconcat)
@@ -240,14 +239,15 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                          "thresholdvalue": l_RealL1NoData,
                          "equalvalue": 255,
                          "outsidevalue": 0,
-                         "out": tmp_edg_thresholder
+                         "out": tmp_edg_thresholder + ":uint8"
                          }
             app_edg_thresholder1 = OtbAppHandler("OneBandEqualThreshold", param_edg_thresholder1, write_output=True)
             self._edg_pipeline.add_otb_app(app_edg_thresholder1)
 
             tmp_edg_resample = os.path.join(working_dir, "edg_resample.tif")
-            app_edg_resample = resample(app_edg_thresholder1.getoutput().get("out"), self._dem.ALTList[0], tmp_edg_resample,
-                                            OtbResampleType.BCO, padradius=4.0, write_output=True)
+            app_edg_resample = resample(app_edg_thresholder1.getoutput().get("out"), self._dem.ALTList[0],
+                                        tmp_edg_resample,
+                                        OtbResampleType.BCO, padradius=4.0,  write_output=True)
             self._edg_pipeline.add_otb_app(app_edg_resample)
 
             # Threshold the output
@@ -334,19 +334,19 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # *********************************************************************************************************
             # L2EDG - Actualization of the L2 edge mask
             # *********************************************************************************************************
-            tmp_l2edg_threshold = os.path.join(working_dir, "l2edg_threshold.tif")
-            app_l2edg_threshold = binary_threshold(self._edgsub,
-                                                     lower_threshold=0,
-                                                     inside_value=1000,
-                                                     outside_value=0,
-                                                     output_image=tmp_l2edg_threshold,
-                                                     write_output=True)
-            self._l2edg_pipeline.add_otb_app(app_l2edg_threshold)
+            #tmp_l2edg_threshold = os.path.join(working_dir, "l2edg_threshold.tif")
+            #app_l2edg_threshold = binary_threshold(self._edgsub,
+            #                                         lower_threshold=0,
+            #                                         inside_value=1000,
+            #                                         outside_value=0,
+            #                                         output_image=tmp_l2edg_threshold + ":uint8",
+            #                                         write_output=True)
+            #self._l2edg_pipeline.add_otb_app(app_l2edg_threshold)
             tmp_l2edg_resample = os.path.join(working_dir, "l2edg.tif")
-            app_l2edg_resample = resample(app_l2edg_threshold.getoutput().get("out"),
-                                           self._dem.ALTList[0],
-                                          tmp_l2edg_resample,
-                                           OtbResampleType.LINEAR, padradius=4.0, threshold=1.0,write_output=True)
+            app_l2edg_resample = resample(self._edgsub,
+                                          self._dem.ALTList[0],
+                                          tmp_l2edg_resample + ":uint8",
+                                          OtbResampleType.LINEAR, padradius=4.0, threshold=0.001,write_output=True)
             self._l2edg = app_l2edg_resample.getoutput().get("out")
             self._l2edg_pipeline.add_otb_app(app_l2edg_resample)
 
@@ -355,9 +355,9 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             # *********************************************************************************************************
             tmp_sat_bin2vec = os.path.join(working_dir, "sat_bin2vec.tif")
             param_sat_bin2vec = {"im": tmp_sat_roi,
-                                   "out": tmp_sat_bin2vec,
-                                   "nbcomp": VenusL1ImageFileReader.SATNumberOfComponentsPerPixel
-                                   }
+                                 "out": tmp_sat_bin2vec + ":uint8",
+                                 "nbcomp": VenusL1ImageFileReader.SATNumberOfComponentsPerPixel
+                                 }
             app_sat_bin2vec = OtbAppHandler("BinaryToVector", param_sat_bin2vec, write_output=False)
             self._sat_pipeline.add_otb_app(app_sat_bin2vec)
 
@@ -366,7 +366,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sat_resample = os.path.join(working_dir, "l2sat.tif")
             app_sat_resample = resample(app_sat_bin2vec.getoutput().get("out"),
                                         self._dem.ALTList[0],
-                                        tmp_sat_resample,
+                                        tmp_sat_resample + ":uint8",
                                         OtbResampleType.BCO, padradius=4.0,
                                         threshold=l_l2sat_thresholdvalue,write_output=False)
             self._l2sat = app_sat_resample.getoutput().get("out")
@@ -379,7 +379,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_satsub_resample = os.path.join(working_dir, "satsub.tif")
             app_satsub_resample = resample(app_sat_bin2vec.getoutput().get("out"),
                                         self._dem.ALC,
-                                        tmp_satsub_resample,
+                                        tmp_satsub_resample + ":uint8",
                                         OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,
                                         threshold=l_sat_subthresholdvalue)
             self._satsub = app_satsub_resample.getoutput().get("out")
@@ -426,7 +426,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol1_concat = os.path.join(working_dir, "sol1_concat.tif")
             param_sol1_concat = {"il": [app_sol1_b1.getoutput().get("out"), app_sol1_b2.getoutput().get("out")],
                                  "out": tmp_sol1_concat}
-            app_sol1_concat = OtbAppHandler("ConcatenateImages", param_sol1_concat)
+            app_sol1_concat = OtbAppHandler("ConcatenateDoubleImages", param_sol1_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol1_concat.getoutput().get("out"),
                                    l_L1SOLSubsamplingFactor)
 
@@ -453,7 +453,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol2_concat = os.path.join(working_dir, "sol2_concat.tif")
             param_sol2_concat = {"il": [app_sol2_b1.getoutput().get("out"), app_sol2_b2.getoutput().get("out")],
                                  "out": tmp_sol2_concat}
-            app_sol2_concat = OtbAppHandler("ConcatenateImages", param_sol2_concat)
+            app_sol2_concat = OtbAppHandler("ConcatenateDoubleImages", param_sol2_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol2_concat.getoutput().get("out"),
                               l_L1SOLSubsamplingFactor)
             self._sol_pipeline.add_otb_app(app_sol2_concat)
@@ -504,7 +504,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                           app_vieb6b1_mult.getoutput().get("out"),
                                           app_vieb6b2_mult.getoutput().get("out")],
                                  "out": tmp_dtmvie_concat}
-            app_dtmvie_concat = OtbAppHandler("ConcatenateImages", param_dtmvie_concat)
+            app_dtmvie_concat = OtbAppHandler("ConcatenateDoubleImages", param_dtmvie_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_dtmvie_concat.getoutput().get("out"),
                               l_L1VIESubsamplingFactor)
             self._dtmvie_pipeline.add_otb_app(app_dtmvie_concat)
@@ -525,7 +525,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             param_shadowvie_concat = {"il": [app_vieb5b1_mult.getoutput().get("out"),
                                           app_vieb5b2_mult.getoutput().get("out")],
                                    "out": tmp_shadowvie_concat}
-            app_shadowvie_concat = OtbAppHandler("ConcatenateImages", param_shadowvie_concat)
+            app_shadowvie_concat = OtbAppHandler("ConcatenateDoubleImages", param_shadowvie_concat)
             self._shadowvie_pipeline.add_otb_app(app_shadowvie_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_shadowvie_concat.getoutput().get("out"),
                               l_L1VIESubsamplingFactor)

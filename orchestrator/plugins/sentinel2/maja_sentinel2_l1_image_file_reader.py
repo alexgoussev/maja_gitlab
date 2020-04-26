@@ -127,7 +127,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         param_oneband_concat = {"il": m_ResamplingList,
                              "out": out_concat + ":uint8"
                              }
-        qoth_concat_app = OtbAppHandler("ConcatenateImages", param_oneband_concat, write_output=False)
+        qoth_concat_app = OtbAppHandler("ConcatenateMaskImages", param_oneband_concat, write_output=False)
         tmp_edg_pipe.add_otb_app(qoth_concat_app)
         out_or0 = os.path.join(working, "MaskOrMask_0.tif")
         band_math_or_b1 = one_band_equal_value(qoth_concat_app.getoutput().get("out"),
@@ -157,7 +157,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             # to identify the pixel contaminated by an edge pixel after resampling
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working, "IPEDGRealL2_{}.tif".format(res_str))
-            l2edg_resamp_app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling,
+            l2edg_resamp_app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling + ":uint8",
                                         OtbResampleType.LINEAR, threshold=0.0,
                                         write_output=(False or is_croco_on("sentinel2.l1reader.l2edg")))
             self._l2edg_pipeline.add_otb_app(l2edg_resamp_app)

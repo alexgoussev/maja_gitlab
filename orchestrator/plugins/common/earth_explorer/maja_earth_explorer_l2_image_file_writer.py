@@ -163,7 +163,7 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         param_qoth_concat = {"il": QOTHImageList,
                              "out": qoth_tmp_concat + ":uint8"
                              }
-        qoth_concat_app = OtbAppHandler("ConcatenateImages", param_qoth_concat, write_output=False)
+        qoth_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_qoth_concat, write_output=False)
         qoth_tmp_binconcat = os.path.join(working_dir, "tmp_binqoth_" + l_StrRes + ".tif")
         param_qoth_binconcat = {"im": qoth_concat_app.getoutput().get("out"),
                                "out": qoth_tmp_binconcat + ":uint8"
@@ -188,7 +188,7 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         param_qlt_concat = {"il": QLTImageList,
                             "out": p_qlt_image_filename + ":uint8"
                             }
-        OtbAppHandler("ConcatenateImages", param_qlt_concat)
+        OtbAppHandler("ConcatenateDoubleImages", param_qlt_concat)
 
     def write_public_images(
             self,
@@ -318,23 +318,23 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                     "exp": "(im2b1 == 1)?" +
                     str(p_VAPNodataValue) +
                     ":" +
-                    "rint(im1b1)*" +
-                    str(p_VAPQuantificationValue),
+                    "rint(im1b1*" +
+                    str(p_VAPQuantificationValue)+")",
                     "out": tmp_vap}
-                vap_scal_app = OtbAppHandler("BandMath", param_bandmath_vap, write_output=False)
+                vap_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_vap, write_output=False)
                 tmp_aot = os.path.join(working_dir, "tmp_aot_scaled_" + l_StrResolution + ".tif")
                 param_bandmath_aot = {"il": [self._l2aotlist[resol], self._l2edgimagelist[resol]],
-                                      "exp": "(im2b1 == 1)?" + str(p_AOTNodataValue) + ":" + "rint(im1b1)*" + str(
-                                          p_AOTQuantificationValue),
+                                      "exp": "(im2b1 == 1)?" + str(p_AOTNodataValue) + ":" + "rint(im1b1*" + str(
+                                          p_AOTQuantificationValue)+")",
                                       "out": tmp_aot
                                       }
-                aot_scal_app = OtbAppHandler("BandMath", param_bandmath_aot, write_output=False)
+                aot_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_aot, write_output=False)
                 tmp_l2_pipe.add_otb_app(aot_scal_app)
                 atb_filename = p_L2ImageFilenamesProvider.get_atb_image_filename()[resol]
                 param_atb_concat = {"il": [vap_scal_app.getoutput().get("out"), aot_scal_app.getoutput().get("out")],
                                     "out": atb_filename + ":uint8"
                                     }
-                atb_concat_app = OtbAppHandler("ConcatenateImages", param_atb_concat,
+                atb_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_atb_concat,
                                                write_output=is_croco_on("earthexplorer.l2writer.atb"))
                 tmp_l2_image_list.append(atb_concat_app.getoutput().get("out"))
                 tmp_l2_filename_list.append(atb_filename)
@@ -381,7 +381,7 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                                      "out": moth_tmp_concat
                                      }
                 # Concatenate to produce the MOTH file
-                app_moth_concat = OtbAppHandler("ConcatenateImages", param_moth_concat, write_output=False)
+                app_moth_concat = OtbAppHandler("ConcatenateMaskImages", param_moth_concat, write_output=False)
                 tmp_l2_pipe.add_otb_app(app_moth_concat)
                 # Binary concatenation of WAT, HID, SHD, STL and TGS masks
                 msk_filename = p_L2ImageFilenamesProvider.get_msk_filename()[resol]

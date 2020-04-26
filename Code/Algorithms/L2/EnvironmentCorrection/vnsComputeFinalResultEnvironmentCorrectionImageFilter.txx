@@ -113,8 +113,6 @@ namespace vns
                         const InputPixelType & pTdif = TdifIt.Get();
                         const InputPixelType & pSatm = SatmIt.Get();
 
-                        InputPixelType pT = pTdir;
-                        pT += pTdif;
                         // Band Loop
                         for (unsigned int bd = 0; bd < lNbOfBands; bd++)
                         {
@@ -127,7 +125,7 @@ namespace vns
                             }
 
                             // Compute the numerator
-                            const double lNumerator = pRhoSurf[bd] * pT[bd] * lFraction - pRhoEnv[bd] * pTdif[bd];
+                            const double lNumerator = pRhoSurf[bd] * (pTdir[bd] + pTdif[bd]) * lFraction - pRhoEnv[bd] * pTdif[bd];
 
                             // Computes the Rho surf cor env
                             double lRhoSurfCorEnv = lNumerator;

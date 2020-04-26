@@ -129,10 +129,6 @@ namespace vns
             typedef otb::ThresholdVectorImageFilter<OutputVectorImageType> ThresholdVectorImageFilterType;
             typedef typename ThresholdVectorImageFilterType::Pointer ThresholdVectorImageFilterPointer;
 
-            /* Reader filter */
-            typedef otb::ImageFileReader<OutputVectorImageType> VectorImageReaderType;
-            typedef typename VectorImageReaderType::Pointer VectorImageReaderPointerType;
-
             /** Inputs */
             vnsSetGetInputRawMacro( IPTOC, InputVectorImageType, 0)
             vnsSetGetInputRawMacro( RhoEnvSub, InputVectorImageType, 1)
@@ -189,10 +185,6 @@ namespace vns
             /** Outputs */
             OutputVectorImagePointerType m_RhoEnv;
             OutputVectorImagePointerType m_L2SRE;
-
-            /* Associated Readers */
-            VectorImageReaderPointerType m_RhoEnvReader;
-            VectorImageReaderPointerType m_L2SREReader;
 
             NoDataType m_NoData;
         };

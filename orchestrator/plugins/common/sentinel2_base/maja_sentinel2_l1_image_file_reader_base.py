@@ -174,7 +174,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._toa_sub_list,
                              "out": toa_sub_image
                              }
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sub_toa = toa_sub_image
         tmp_sub_toa_pipe.free_otb_app()
 
@@ -397,7 +397,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_concatenate = {"il": self._l2zonemasklist[l2res],
                                      "out": zone_mask+":uint8"
                                      }
-                l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+                l2zoneimage_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,
                                                 write_output=(False or is_croco_on("sentinel2.l1reader.l2zone")))
                 self._l2zoneimagelist.append(l2zoneimage_app.getoutput().get("out"))
                 self._pipeline.add_otb_app(l2zoneimage_app)
@@ -410,12 +410,12 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 # Compress (concatenate the vector image to binary image)
                 pix_vector_mask = os.path.join(working, "Masks_Defect_Vector_{}.tif".format(l2res))
                 param_concatenate = {"il": self._l2defectmasklist[l2res],
-                                     "out": pix_vector_mask
+                                     "out": pix_vector_mask + ":uint8"
                                      }
-                pix_vector = OtbAppHandler("ConcatenateImages", param_concatenate)
+                pix_vector = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
                 pix_mask = os.path.join(working, "Masks_Defect_{}.tif".format(l2res))
                 param_binconcatenate = {"im": pix_vector.getoutput().get("out"),
-                                        "out": pix_mask + ":uint8"
+                                        "out": pix_mask + ":uint16"
                                         }
                 pix = OtbAppHandler("BinaryConcatenate", param_binconcatenate,
                                     write_output=(False or is_croco_on("sentinel2.l1reader.l2pix")))
@@ -468,7 +468,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
 
         # Set a constant image if the gml masks are empty
         tmp_constant_filename = os.path.join(working, "Masks_sat_const.tif")
-        constant_image(dtm_coarse, 0, tmp_constant_filename, write_output=True)
+        constant_image(dtm_coarse, 0, tmp_constant_filename + ":uint8", write_output=True)
 
         # -----------------------------------------------------------------------------------
         # Rasterize all the gml maks at L2 coarse resolution
@@ -527,7 +527,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                     working,
                     "SubZoneMaskChanged_band_id_{}.tif".format(band))
                 change_values_param = {"im": l_image_raster_filename,
-                                       "out": l_image_changed_filename,
+                                       "out": l_image_changed_filename + ":uint8",
                                        "invals": [str(a) for a in l_fid_dets.keys()],
                                        "outvals": [str(a) for a in l_fid_dets.values()]
                                        }
@@ -718,7 +718,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
 
         #OR filter
         out_edg = os.path.join(working_dir, "IPEDGubMask.tif")
-        or_edg_sub_app = band_math_or(m_OrFilter2List,out_edg, write_output=True)
+        or_edg_sub_app = band_math_or(m_OrFilter2List,out_edg + ":uint8", write_output=True)
         # Allocation of 7 Go in S2 MUSCATE case
         self._edgsubmask = or_edg_sub_app.getoutput().get("out")
         self._subedg_pipeline.free_otb_app()
@@ -738,31 +738,34 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             res_str = l_ListOfL2Resolution[r]
             # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
             out_thresh = os.path.join(working_dir, "EDGThreshL2_{}.tif".format(res_str))
-            m_L2EDGThreshold_app = binary_threshold(self._edgsubmask,
-                                                     lower_threshold=0,
-                                                     inside_value=0,
-                                                     outside_value=1000,
-                                                     output_image=out_thresh + ":uint8",
-                                                     write_output=False)
-            self._pipeline.add_otb_app(m_L2EDGThreshold_app)
+            #m_L2EDGThreshold_app = binary_threshold(self._edgsubmask,
+            #                                         lower_threshold=0,
+            #                                         inside_value=0,
+            #                                         outside_value=1000,
+            #                                         output_image=out_thresh + ":uint8",
+            #                                         write_output=False)
+            #self._pipeline.add_otb_app(m_L2EDGThreshold_app)
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            resamp_app = resample(m_L2EDGThreshold_app.getoutput().get("out"), self._dem.ALTList[r], out_ressampling,
-                     OtbResampleType.LINEAR, write_output=False)
+            resamp_app = resample(self._edgsubmask, self._dem.ALTList[r],
+                                  out_ressampling + ":uint8",
+                                  OtbResampleType.LINEAR,
+                                  threshold=0.000001,
+                                  write_output=False)
             self._pipeline.add_otb_app(resamp_app)
 
             # Set Threshold value to one because the expand filter interpolates values set to 0
             # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
-            m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdImageApp2 = binary_threshold(
-                resamp_app.getoutput().get("out"),
-                lower_threshold=0.,
-                inside_value=0,
-                outside_value=1,
-                output_image=m_L2EDGThresholdImage2_out +
-                ":uint8",write_output=False)
-            self._pipeline.add_otb_app(m_L2EDGThresholdImageApp2)
-            self._l2edgmasklist.append(m_L2EDGThresholdImageApp2.getoutput().get("out"))
+            #m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
+            #m_L2EDGThresholdImageApp2 = binary_threshold(
+            #    resamp_app.getoutput().get("out"),
+            #    lower_threshold=0.,
+            #    inside_value=0,
+            #    outside_value=1,
+            #    output_image=m_L2EDGThresholdImage2_out + ":uint8",
+            #    write_output=False)
+            #self._pipeline.add_otb_app(m_L2EDGThresholdImageApp2)
+            self._l2edgmasklist.append(resamp_app.getoutput().get("out"))
 
     def generate_l2_toa_images(self, working_dir):
         """
@@ -790,7 +793,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            l2toa_concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+            l2toa_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,
                                              write_output=(False or is_croco_on("sentinel2.l1reader.l2toa")))
             self._pipeline.add_otb_app(l2toa_concat_app)
             self._l2toaimagelist.append(l2toa_concat_app.getoutput().get("out"))
@@ -808,7 +811,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._satmasksublist,
                              "out": out_concatenate + ":uint8"
                              }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
         # *******************************************************************************************************
         # L2SAT image pipeline connection
@@ -823,7 +826,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             param_concatenate = {"il": self._l2satimagelist[i],
                                  "out": out_concatenate + ":uint8"
                                  }
-            sat_image = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+            sat_image = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
             self._pipeline.add_otb_app(sat_image)
             self._l2satmasklist.append(sat_image.getoutput().get("out"))
 

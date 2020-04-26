@@ -71,9 +71,6 @@ namespace vns
 
             m_RhoEnv = OutputVectorImageType::New();
             m_L2SRE = OutputVectorImageType::New();
-            // readers used for the "caching"
-            m_RhoEnvReader = VectorImageReaderType::New();
-            m_L2SREReader = VectorImageReaderType::New();
 
             // Instantiate Filters
             // Expand filters used to resample the image at L2 resolution

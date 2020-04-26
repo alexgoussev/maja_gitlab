@@ -117,7 +117,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "sol1_concat.tif")
         param_concatenate = {"il": [cla_app_1.getoutput().get("out"), cla_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sol1image = out_concatenate
 
     def generate_sol2_image(self, sol_h2, working_dir):
@@ -137,7 +137,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "cla_constant.tif")
         param_concatenate = {"il": [vie_app_1.getoutput().get("out"), vie_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         l_BandsDefinitions = self._plugin.BandsDefinitions
         self._vieimagelist.append(out_concatenate)
 
@@ -206,7 +206,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+            concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,write_output=False)
             self._toa_pipeline.add_otb_app(concat_app)
             self._l2toaimagelist.append(concat_app.getoutput().get("out"))
 
@@ -219,7 +219,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "L1TOAVector.tif")
         param_concatenate = {"il": self._toa_scalar_list,
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
         self._l1toa_pipeline.add_otb_app(app)
         self._l1toaimagelist.append(app.getoutput()["out"])
 
@@ -244,7 +244,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._toa_sub_list,
                              "out": toa_sub_image
                              }
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sub_toa = toa_sub_image
         toa_sub_mini_pipe.free_otb_app()
 
@@ -306,7 +306,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                     dtm_coarse, 0, tmp_constant_coarse_filename, write_output=False)
                 if curL1Res in l_ListOfL2Resolution:
                     tmp_constant_L2_filename = os.path.join(working, "Masks_const_.tif")
-                    tmp_constant_L2_app = constant_image(self._dem.ALTList[l1res], 0, tmp_constant_L2_filename,
+                    tmp_constant_L2_app = constant_image(self._dem.ALTList[l1res], 0, tmp_constant_L2_filename + ":uint8",
                                                          write_output=False)
                     self._l2_sat_pipeline.add_otb_app(tmp_constant_L2_app)
 
@@ -342,7 +342,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                                           "out": sat_mask,
                                           "nbcomp": nbL1Bands
                                           }
-                    sat_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=True)
+                    sat_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=False)
                     self._satmask_pipeline.add_otb_app(sat_mask_app)
 
                     if curL1Res in l_ListOfL2Resolution:
@@ -372,7 +372,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                                 curL1Res)] = resamp_l2_app.getoutput().get("out")
                         else:
                             resamp_l2_app = resample(sat_mask_app.getoutput()["out"], self._dem.ALTList[l1res],
-                                                     tmp_sat_l2_resample,
+                                                     tmp_sat_l2_resample+ ":uint8",
                                                      OtbResampleType.LINEAR_WITH_RADIUS,
                                                      threshold=0.25, padradius=4,write_output=False)
                             self._satmask_pipeline.add_otb_app(resamp_l2_app)
@@ -385,9 +385,11 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                     tmp_sat_roi = os.path.join(working, "tmp_l1_extract_roi_sat_{}.tif".format(l1res))
                     tmp_sat_roi_app = extract_roi(
                         sat_mask_app.getoutput()["out"], tmp_l1_band_idx_list, tmp_sat_roi, write_output=False)
+                    l_sat_subthresholdvalue = self._GIPPL2COMMHandler.get_value_f("SaturationThresholdSub")
                     tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1res))
                     app_resample = resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
-                                            OtbResampleType.LINEAR_WITH_RADIUS, write_output=True)
+                                            OtbResampleType.LINEAR_WITH_RADIUS, threshold=l_sat_subthresholdvalue,
+                                            padradius=4,write_output=True)
                     self._satmasksublist[l1res] = app_resample.getoutput()["out"]
 
                 else:
@@ -425,7 +427,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
 
                         dfp_mask = os.path.join(working, "L1_DFP_Masks_{}.tif".format(curL1Res))
                         param_bintovec_dfp = {"im": defectivPixFileNames[l1BandIdx],
-                                              "out": dfp_mask + ":uint8",
+                                              "out": dfp_mask + ":double",
                                               "nbcomp": nbL1Bands
                                               }
 
@@ -433,7 +435,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                         self._l2_dfp_pipeline.add_otb_app(dfp_mask_app)
                         tmp_dfp_l2_resample = os.path.join(working, "tmp_dfp_resample_{}.tif".format(l1res))
                         resamp_l2_dfp_app = resample(dfp_mask_app.getoutput().get("out"), self._dem.ALTList[l1res],
-                                                     tmp_dfp_l2_resample,
+                                                     tmp_dfp_l2_resample + ":uint8",
                                                      OtbResampleType.LINEAR_WITH_RADIUS, threshold=0.25, padradius=4,
                                                      write_output=False)
                         self._l2dfpimagelist[l_ListOfL2Resolution.index(
@@ -458,9 +460,9 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         # *******************************************************************************************************
         out_concatenate = os.path.join(working_dir, "SubSatVector.tif")
         param_concatenate = {"il": self._satmasksublist,
-                             "out": out_concatenate
+                             "out": out_concatenate + ":uint8"
                              }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
 
     def generate_edg_images(self, working_dir):
@@ -505,32 +507,36 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         # At L2 resolution
         l_NbL2Res = len(l_ListOfL2Resolution)
         # Set 1000 to edge pixels to identify the pixel contaminated by an edge pixel after resampling
-        out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
-        m_L2EDGThresholdApp = binary_threshold(self._edgsubmask,
-                                                 lower_threshold=0,
-                                                 inside_value=1000,
-                                                 outside_value=0,
-                                                 output_image=out_thresh + ":double",
-                                                 write_output=False)# //l_ThresholdImageFilter
-        self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp)
+        #out_thresh = os.path.join(working_dir, "EDGThreshL2.tif")
+        #m_L2EDGThresholdApp = binary_threshold(self._edgsubmask,
+        #                                         lower_threshold=0,
+        #                                         inside_value=1000,
+        #                                         outside_value=0,
+        #                                         output_image=out_thresh + ":uint8",
+        #                                         write_output=False)# //l_ThresholdImageFilter
+        #self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp)
         for r in range(l_NbL2Res):
             res_str = l_ListOfL2Resolution[r]
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
+            out_roi = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
+            roi_app = extract_roi(self._edgsubmask, [0], out_roi,write_output=False)
+            self._l2edg_pipeline.add_otb_app(roi_app)
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
-            resamp_app = resample(m_L2EDGThresholdApp.getoutput().get("out"),
-                                  self._dem.ALTList[r], out_ressampling, OtbResampleType.LINEAR,write_output=False)
+            resamp_app = resample(roi_app.getoutput().get("out"),
+                                  self._dem.ALTList[r], out_ressampling,
+                                  OtbResampleType.LINEAR,threshold=0.001,write_output=False)
             self._l2edg_pipeline.add_otb_app(resamp_app)
             # Set Threshold value to one because the expand filter interpolates values set to 0
             # or 1000 in the first threshold and adds systematically CONST_EPSILON to the output value.
-            m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
-            m_L2EDGThresholdApp2 = binary_threshold(resamp_app.getoutput().get("out"),
-                                                      lower_threshold=1,
-                                                      inside_value=1,
-                                                      outside_value=0,
-                                                      output_image=m_L2EDGThresholdImage2_out + ":uint8",
-                                                    write_output=False)
-            self._l2edgmasklist.append(m_L2EDGThresholdApp2.getoutput().get("out"))
-            self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp2)
+            #m_L2EDGThresholdImage2_out = os.path.join(working_dir, "IPEDGMaskL2_{}.tif".format(res_str))
+            #m_L2EDGThresholdApp2 = binary_threshold(resamp_app.getoutput().get("out"),
+            #                                          lower_threshold=1,
+            #                                          inside_value=1,
+            #                                          outside_value=0,
+            #                                          output_image=m_L2EDGThresholdImage2_out + ":uint8",
+            #                                        write_output=False)
+            self._l2edgmasklist.append(resamp_app.getoutput().get("out"))
+            #self._l2edg_pipeline.add_otb_app(m_L2EDGThresholdApp2)
 
     def read(self, product_info, app_handler, l2comm, dem, pReadL1Mode):
         """product_info,plugin, l2comm,mode

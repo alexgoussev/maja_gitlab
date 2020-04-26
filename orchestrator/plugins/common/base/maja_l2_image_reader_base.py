@@ -32,9 +32,11 @@ from orchestrator.common.earth_explorer.gipp_lut_earch_explorer_xml_file_handler
     import GippLUTEarthExplorerXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
+from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.maja_utils as maja_utils
 import orchestrator.common.file_utils as file_utils
-from orchestrator.cots.otb.algorithms.otb_band_math import *
+from orchestrator.common.logger.maja_logging import configure_logger
+from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.common.interfaces.maja_xml_app_lutmap import *
 import orchestrator.common.date_utils as date_utils
 import os
@@ -273,8 +275,8 @@ class L2ImageReaderBase(object):
         tmp_cld_zero = os.path.join(working_dir, "tmp_cld_zero.tif")
         cld_const_zero_app = None
         if len(p_PluginBase.CLDCoreAlgorithmsMapBand) > len(p_PluginBase.CLDDataBandsSelected):
-            cld_const_zero_app = band_math(
-                [cld_vec_image], "0", os.path.join(
+            cld_const_zero_app = constant_image(
+                cld_vec_image, 0, os.path.join(
                     working_dir, "tmp_zero_cld.tif"), write_output=False)
             self._coarse_pipeline.add_otb_app(cld_const_zero_app)
         self.dict_of_vals["VectorizedCLDSubOutput"] = {}

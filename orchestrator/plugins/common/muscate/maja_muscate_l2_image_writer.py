@@ -232,11 +232,18 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 #Extract each channel for each file
                 tmp_l2_filename_list = []
                 tmp_l2_image_list = []
+                tmp_sre_scaled = os.path.join(working_dir, "tmp_sre_multi_round_" + l_StrResolution + ".tif")
+                param_scaled_sre = {"im": self._sre_list[resol],
+                                    "coef": p_ReflectanceQuantificationValue,
+                                    "out": tmp_sre_scaled
+                                    }
+                scaled_sre_app = OtbAppHandler("RoundImage", param_scaled_sre, write_output=False)
+                sre_pipeline.add_otb_app(scaled_sre_app)
                 for i in range(l_NumberOfBands):
-                    tmp_sre_roi = os.path.join(working_dir, "tmp_sre_roi_" + l_ListOfBand[i] + ".tif")
-                    tmp_sre_roi_app = extract_roi(self._sre_list[resol], [i],
-                                                  tmp_sre_roi, write_output=False)
                     if resol == resol_QLK and (l_RedBandId == i or l_GreenBandId == i or l_BlueBandId == i):
+                        tmp_sre_roi = os.path.join(working_dir, "tmp_sre_roi_" + l_ListOfBand[i] + ".tif")
+                        tmp_sre_roi_app = extract_roi(self._sre_list[resol], [i],
+                                                      tmp_sre_roi, write_output=False)
                         tmp_l2_image_list.append(tmp_sre_roi_app.getoutput().get("out"))
                         tmp_l2_filename_list.append(tmp_sre_roi)
                         if l_RedBandId == i:
@@ -245,17 +252,15 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                             self._qckl_green_image = tmp_sre_roi
                         elif l_BlueBandId == i:
                             self._qckl_blue_image = tmp_sre_roi
-                    sre_pipeline.add_otb_app(tmp_sre_roi_app)
-                    tmp_sre_scaled = os.path.join(working_dir, "tmp_sre_multi_round_" + l_ListOfBand[i] + ".tif")
-                    param_scaled_sre = {"im": tmp_sre_roi_app.getoutput().get("out"),
-                                        "coef": p_ReflectanceQuantificationValue,
-                                        "out": tmp_sre_scaled+ ":int16"
-                                        }
-                    scaled_sre_app = OtbAppHandler("RoundVectorImage", param_scaled_sre, write_output=False)
-                    sre_pipeline.add_otb_app(scaled_sre_app)
-                    tmp_l2_image_list.append(scaled_sre_app.getoutput().get("out"))
-                    tmp_l2_filename_list.append(l_BaseL2FullFilename + "_SRE_" + l_ListOfBand[i] + ".tif"+
-                                                 file_utils.get_extended_filename_write_image_file_standard())
+                        sre_pipeline.add_otb_app(tmp_sre_roi_app)
+                    tmp_sre_scaled_roi = os.path.join(working_dir, "tmp_sre_scaled_roi_" + l_ListOfBand[i] + ".tif")
+                    tmp_sre_scaled_roi_app = extract_roi(scaled_sre_app.getoutput().get("out"), [i],
+                                                         tmp_sre_scaled_roi + ":int16", write_output=False)
+                    tmp_l2_image_list.append(tmp_sre_scaled_roi_app.getoutput().get("out"))
+                    sre_pipeline.add_otb_app(tmp_sre_scaled_roi_app)
+                    tmp_l2_filename_list.append(l_BaseL2FullFilename + "_SRE_" + l_ListOfBand[i] + ".tif" +
+                                                file_utils.get_extended_filename_write_image_file_standard())
+
 
                 # START WRITING FRE Image file DATA
                 tmp_tgs_filename = os.path.join(working_dir, "tmp_tgs_" + l_StrResolution + ".tif")
@@ -266,9 +271,9 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     tmp_fre_scaled = os.path.join(working_dir, "tmp_fre_multi_round_" + l_StrResolution + ".tif")
                     param_scaled_fre = {"im": self._fre_list[resol],
                                         "coef": p_ReflectanceQuantificationValue,
-                                        "out": tmp_fre_scaled + ":int16"
+                                        "out": tmp_fre_scaled
                                         }
-                    scaled_fre_app = OtbAppHandler("RoundVectorImage", param_scaled_fre, write_output=False)
+                    scaled_fre_app = OtbAppHandler("RoundImage", param_scaled_fre, write_output=False)
                     fre_pipeline.add_otb_app(scaled_fre_app)
                     # Extract each channel for each file
                     for i in range(l_NumberOfBands):
@@ -302,14 +307,14 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                           p_VAPQuantificationValue),
                                       "out": tmp_vap
                                       }
-                vap_scal_app = OtbAppHandler("BandMath", param_bandmath_vap, write_output=False)
+                vap_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_vap, write_output=False)
                 atb_pipeline.add_otb_app(vap_scal_app)
 
                 tmp_round_vap = os.path.join(working_dir, "tmp_vap_round_" + l_StrResolution + ".tif")
                 param_round_vap = {"im": vap_scal_app.getoutput().get("out"),
                                     "out": tmp_round_vap
                                   }
-                vap_round_app = OtbAppHandler("RoundVectorImage", param_round_vap, write_output=False)
+                vap_round_app = OtbAppHandler("RoundImage", param_round_vap, write_output=False)
                 atb_pipeline.add_otb_app(vap_round_app)
                 tmp_aot = os.path.join(working_dir, "tmp_aot_scaled_" + l_StrResolution + ".tif")
                 param_bandmath_aot = {"il": [self._l2aotlist[resol], self._l2edgimagelist[resol]],
@@ -317,13 +322,13 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                          p_AOTQuantificationValue),
                                       "out": tmp_aot
                                       }
-                aot_scal_app = OtbAppHandler("BandMath", param_bandmath_aot, write_output=False)
+                aot_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_aot, write_output=False)
                 atb_pipeline.add_otb_app(aot_scal_app)
                 tmp_round_aot = os.path.join(working_dir, "tmp_aot_round_" + l_StrResolution + ".tif")
                 param_round_aot = {"im": aot_scal_app.getoutput().get("out"),
                                    "out": tmp_round_aot
                                    }
-                aot_round_app = OtbAppHandler("RoundVectorImage", param_round_aot, write_output=False)
+                aot_round_app = OtbAppHandler("RoundImage", param_round_aot, write_output=False)
                 atb_pipeline.add_otb_app(aot_round_app)
                 atb_filename = l_BaseL2FullFilename + "_ATB_" + l_grpSuffix + ".tif"
                 param_atb_concat = {
@@ -342,7 +347,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_iab = os.path.join(working_dir, "tmp_iab_concat_" + l_StrResolution + ".tif")
                 param_iab_concat = {
                     "il": [self._l2iwcmasklist[resol], self._l2taomasklist[resol]],
-                    "out": tmp_iab
+                    "out": tmp_iab + ":uint8"
                 }
                 tmp_iab_concat_app = OtbAppHandler("ConcatenateImages", param_iab_concat,write_output=False)
                 iab_pipeline.add_otb_app(tmp_iab_concat_app)
@@ -377,15 +382,6 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 l_cm2_index = p_CLDCoreAlgorithmsMapBand[CLOUD_MASK_ALL_CLOUDS]
                 l_shadows_index = p_CLDCoreAlgorithmsMapBand[CLOUD_MASK_SHADOWS]
                 l_shadvar_index = p_CLDCoreAlgorithmsMapBand[CLOUD_MASK_SHADVAR]
-                tmp_all_cloud = os.path.join(working_dir, "allcloud_resampled_" + l_StrResolution + ".tif")
-                tmp_shadow_cloud = os.path.join(working_dir, "shadow_resampled_" + l_StrResolution + ".tif")
-                tmp_shadvar_cloud = os.path.join(working_dir, "shadvar_resampled_" + l_StrResolution + ".tif")
-                write_images([self._l2cldlist[resol][l_cm2_index],self._l2cldlist[resol][l_shadows_index],
-                              self._l2cldlist[resol][l_shadvar_index]],
-                             [tmp_all_cloud,tmp_shadow_cloud,tmp_shadvar_cloud])
-                self._l2cldlist[resol][l_cm2_index] = tmp_all_cloud
-                self._l2cldlist[resol][l_shadvar_index] = tmp_shadvar_cloud
-                self._l2cldlist[resol][l_shadows_index] = tmp_shadow_cloud
 
                 # START WRITING MG2 Image file DATA
                 l_mg2_image_list = []
@@ -410,7 +406,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 else:
                     # Add a constant mask
                     tmp_constant_filename = os.path.join(working_dir, "Const_shd_masks.tif")
-                    cst_snw_app = constant_image(self._dtm.ALTList[resol], 0, tmp_constant_filename, write_output=False)
+                    cst_snw_app = constant_image(self._dtm.ALTList[resol], 0, tmp_constant_filename+":uint8", write_output=False)
                     l_mg2_image_list.append(cst_snw_app.getoutput().get("out"))
                     mg2_pipeline.add_otb_app(cst_snw_app)
 
@@ -420,7 +416,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_band_math_app = band_math([self._l2cldlist[resol][l_shadows_index],
                                                self._l2cldlist[resol][l_shadvar_index]],
                                               "im1b1 || im2b1",
-                                              tmp_shador_bandmath,write_output=False)
+                                              tmp_shador_bandmath + ":uint8",write_output=False)
                 l_mg2_image_list.append(tmp_band_math_app.getoutput().get("out"))
                 mg2_pipeline.add_otb_app(tmp_band_math_app)
                 # Connect the HID image

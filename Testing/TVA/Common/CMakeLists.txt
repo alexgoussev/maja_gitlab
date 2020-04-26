@@ -243,7 +243,7 @@ maja_test_application(NAME apTvRoundImage
 
 
 maja_test_application(NAME apTvRoundVectorImage
-                     APP RoundVectorImage
+                     APP RoundImage
                      OPTIONS
                      -im ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif?&bands=1,2
                      -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundVectorImage.tif uint8

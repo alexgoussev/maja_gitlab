@@ -38,7 +38,6 @@ from orchestrator.cots.otb.algorithms.otb_apply_mask import apply_mask
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
-from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.plugins.common.base.maja_l1_image_reader_base import L1ImageReaderBase
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
@@ -96,14 +95,14 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             curL1Res = l_ListOfL1Resolution[l1res]
             dtm = self._dem.ALTList[l1res]
             tmp_constant_filename = os.path.join(working_dir, "PIX_Masks_const_{}.tif".format(curL1Res))
-            app = constant_image(dtm, 0, tmp_constant_filename, write_output=False)
+            app = constant_image(dtm, 0, tmp_constant_filename + ":uint8", write_output=False)
             self._l2piximagelist.append(app.getoutput().get("out"))
             self._pix_pipeline.add_otb_app(app)
 
     def generate_qb_mask(self, qb_filename, working_dir):
         img_binaryqb = os.path.join(working_dir, "NoDataFromQBFilter.tif")
         param_bintovec_qb = {"im": qb_filename,
-                             "out": img_binaryqb,
+                             "out": img_binaryqb + ":uint8",
                              "nbcomp": 16
                              }
         app = OtbAppHandler("BinaryToVector", param_bintovec_qb, write_output=False)
@@ -135,7 +134,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             img_concatenate_toa = os.path.join(working_dir, "l1toa_{}.tif".format(l1res))
             param_concatenate_toa = {"il": self._toascalarlist,
                                  "out": img_concatenate_toa}
-            app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa,write_output=True)
+            app_concatenate_toa = OtbAppHandler("ConcatenateDoubleImages", param_concatenate_toa,write_output=True)
             self._l1toaimagelist.append(app_concatenate_toa.getoutput()["out"])
             self._qb_pipeline.free_otb_app()
             self._toa_pipeline.free_otb_app()
@@ -156,7 +155,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         param_concatenate = {"il": self._toasublist,
                              "out": toa_sub_image
                              }
-        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        app_concatenate = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
         self._toa_sub_pipeline.add_otb_app(app_concatenate)
         #apply edg
         #invert EDG for masking
@@ -205,14 +204,15 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
                      "thresholdvalue": self._reall1nodata,
                      "equalvalue": 255,
                      "outsidevalue": 0,
-                     "out": out_edg + ":uint8"
+                     "out": out_edg + ":double"
                      }
         onebandequal_app = OtbAppHandler("OneBandEqualThreshold", param_edg,write_output=False)
         self._edg_pipeline.add_otb_app(onebandequal_app)
         # Resample to coarse
         LOGGER.debug("Start IPEDGSub.")
         tmp_edg_sub_resample = os.path.join(working_dir, "tmp_edg_sub.tif")
-        edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse, tmp_edg_sub_resample,
+        edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse,
+                                        tmp_edg_sub_resample,
                                         OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,write_output=False)
         # Threshold the output
         out_sub_edg = os.path.join(working_dir, "IPEDGSubOutput.tif")
@@ -241,7 +241,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             # ExpandFilterPointer => PadAndResampleImageFilter => app ressampling
             out_ressampling = os.path.join(working_dir, "IPEDGRealL2_{}.tif".format(res_str))
             #threshold to 0.001 has the same result as multiplynig by 1000 and threshold to 1 after
-            app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling,
+            app = resample(self._edgsubmask, self._dem.ALTList[r], out_ressampling + ":uint8",
                            OtbResampleType.LINEAR,threshold=0.001,write_output=False)
             self._edg_pipeline.add_otb_app(app)
             self._l2edgmasklist.append(app.getoutput().get("out"))
@@ -262,8 +262,8 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
 
             out_sat_concatenate = os.path.join(working_dir, "SATVectorImageList{}.tif".format(l1res))
             param_concatenate_sat = {"il": self._satmasklist,
-                                     "out": out_sat_concatenate}
-            concatenate_sat_app = OtbAppHandler("ConcatenateImages", param_concatenate_sat, write_output=False)
+                                     "out": out_sat_concatenate + ":uint8"}
+            concatenate_sat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate_sat, write_output=False)
             self._sat_pipeline.add_otb_app(concatenate_sat_app)
             # L2SAT
             self._l2satmasklist.append(concatenate_sat_app.getoutput().get("out"))
@@ -275,7 +275,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
 
         l_ListOfCoarseBandCode = self._plugin.BandsDefinitions.get_list_of_band_id_in_l2_coarse()
         tmp_constant_sat_filename = os.path.join(working, "SATSub_constant_image.tif")
-        app_constant_sat_app = constant_image(dtm_coarse, 0, tmp_constant_sat_filename, write_output=False)
+        app_constant_sat_app = constant_image(dtm_coarse, 0, tmp_constant_sat_filename+ ":uint8", write_output=False)
         self._sat_sub_pipeline.add_otb_app(app_constant_sat_app)
         # ******************************************************************************************************
         # Sub SAT image pipeline connection
@@ -286,9 +286,9 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         #concatenate const image to have the vector image with coarse nb bands
         sat_sub_image = os.path.join(working, "sat_sub.tif")
         param_concatenate = {"il": self._satsublist,
-                             "out": sat_sub_image
+                             "out": sat_sub_image+ ":uint8"
                              }
-        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate)
+        app_concatenate = OtbAppHandler("ConcatenateMaskImages", param_concatenate)
         self._subsatimage = app_concatenate.getoutput().get("out")
         self._sat_sub_pipeline.add_otb_app(app_concatenate)
         self._sat_sub_pipeline.free_otb_app()
@@ -310,7 +310,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "sol1_concat.tif")
         param_concatenate = {"il": [cla_app_1.getoutput().get("out"), cla_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sol1image = app.getoutput().get("out")
         self._sol1_pipeline.add_otb_app(app)
 
@@ -325,7 +325,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "vie_concat.tif")
         param_concatenate = {"il": [app_1.getoutput().get("out"), app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._vieimage.append(app.getoutput().get("out"))
         self._vie_pipeline.add_otb_app(app)
 
