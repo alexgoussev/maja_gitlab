@@ -5,6 +5,7 @@ variables:
 stages:
   - prepare
   - build
+  - validation
 
 prepare-centos7:
   stage: prepare
@@ -38,14 +39,32 @@ build-centos7:
   tags:
     - docker
   script:
+    - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build && ctest -j 4 -R apTv
+    - ctest -V -N -R pyTv- > ../tv_content.txt
     - cd .. && ls -lh build/Testing/*-*/
     - ctest -V -S CI/maja_pkg.cmake
   artifacts:
     expire_in: 5 days
-    name: "$CI_COMMIT_REF_NAME"
     paths:
+      - sha1.txt
+      - tv_content.txt
       - build-pkg/*.run
+
+tv-centos7:
+  stage: validation
+  image: $BUILD_ENV_REGISTRY/maja-env-centos:7
+  timeout: 20h
+  tags:
+    - docker
+    - heavy-task
+  script:
+    # TODO: get latest active branch ? or stick to develop
+    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
+    - unzip artifacts.zip
+    - pwd
+    - ls
+    - head tv_content.txt
