@@ -14,6 +14,8 @@ prepare-centos7:
     entrypoint: [""]
   tags:
     - docker
+  except:
+    - ci-heavy
   before_script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
            > /kaniko/.docker/config.json
@@ -38,6 +40,8 @@ build-centos7:
   image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
   tags:
     - docker
+  except:
+    - ci-heavy
   script:
     - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
@@ -61,9 +65,11 @@ tv-centos7:
   tags:
     - docker
     - heavy-task
+  #~ only:
+    #~ - schedules
   script:
     # TODO: get latest active branch ? or stick to develop
-    #~ - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
+    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
     #~ - unzip artifacts.zip
     - pwd
     - ls
