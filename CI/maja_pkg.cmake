@@ -1,5 +1,4 @@
 get_filename_component(MAJA_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
-get_filename_component(CI_BASE_DIR ${MAJA_SOURCE_DIR} DIRECTORY)
 
 set (CTEST_PROJECT_NAME "maja-pkg")
 set ( CTEST_BUILD_CONFIGURATION "Release" )
@@ -9,7 +8,7 @@ set ( CTEST_BUILD_FLAGS "-j3")
 
 set ( PROJECT_SOURCE_DIR "${MAJA_SOURCE_DIR}" )
 set ( CTEST_SOURCE_DIRECTORY "${MAJA_SOURCE_DIR}/Packaging" )
-set ( CTEST_BINARY_DIRECTORY "${CI_BASE_DIR}/build-pkg/" )
+set ( CTEST_BINARY_DIRECTORY "${MAJA_SOURCE_DIR}/build-pkg/" )
 
 find_program(CTEST_GIT_COMMAND NAMES git git.cmd)
 
@@ -33,17 +32,17 @@ message(STATUS "Maja version: ${MAJA_VERSION}")
 
 set (CTEST_BUILD_NAME ${ci_short_sha})
 
-set (CTEST_INSTALL_DIRECTORY "${CI_BASE_DIR}/pkg")
+set (CTEST_INSTALL_DIRECTORY "${MAJA_SOURCE_DIR}/pkg")
 set (CMAKE_COMMAND "cmake")
 
 set(CTEST_GIT_UPDATE_CUSTOM "${CMAKE_COMMAND}" "-E" "echo" "No update")
 
 # TODO : git clone maja-data 
-if(NOT EXISTS "${CI_BASE_DIR}/data")
-  file(MAKE_DIRECTORY "${CI_BASE_DIR}/data")
+if(NOT EXISTS "${MAJA_SOURCE_DIR}/data")
+  file(MAKE_DIRECTORY "${MAJA_SOURCE_DIR}/data")
 endif()
-if(NOT EXISTS "${CI_BASE_DIR}/superbuild-archives")
-  file(MAKE_DIRECTORY "${CI_BASE_DIR}/superbuild-archives")
+if(NOT EXISTS "${MAJA_SOURCE_DIR}/superbuild-archives")
+  file(MAKE_DIRECTORY "${MAJA_SOURCE_DIR}/superbuild-archives")
 endif()
 
 ctest_start (Experimental)
@@ -53,9 +52,9 @@ ctest_update( SOURCE "${MAJA_SOURCE_DIR}" )
 set (MAJA_PKG_CONFIGURE_OPTIONS
 "-DCMAKE_BUILD_TYPE=${CTEST_BUILD_CONFIGURATION}"
 "-DCMAKE_INSTALL_PREFIX:PATH=${CTEST_INSTALL_DIRECTORY}"
-"-DMAJADATA_SOURCE_DIR:PATH=${CI_BASE_DIR}/data"
-"-DSUPERBUILD_BINARY_DIR:PATH=${CI_BASE_DIR}/build"
-"-DDOWNLOAD_DIR:PATH=${CI_BASE_DIR}/superbuild-archives"
+"-DMAJADATA_SOURCE_DIR:PATH=${MAJA_SOURCE_DIR}/data"
+"-DSUPERBUILD_BINARY_DIR:PATH=${MAJA_SOURCE_DIR}/build"
+"-DDOWNLOAD_DIR:PATH=${MAJA_SOURCE_DIR}/superbuild-archives"
 "-DSUPERBUILD_INSTALL_DIR:PATH=/opt/cots"
 )
 
@@ -85,5 +84,3 @@ if ( ( NOT "${_build_nb_err}" EQUAL 0 ) OR ( "${_build_error}" EQUAL -1 ))
 endif()
 
 #~ ctest_submit()
-
-file(INSTALL "${CTEST_BINARY_DIRECTORY}/" DESTINATION "${CTEST_INSTALL_DIRECTORY}" FILES_MATCHING PATTERN "*.run")
