@@ -70,7 +70,12 @@ tv-centos7:
   script:
     # TODO: get latest active branch ? or stick to develop
     - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
-    #~ - unzip artifacts.zip
+    - file artifacts.zip
+    - unzip artifacts.zip
     - pwd
     - ls
-    #~ - head tv_content.txt
+    - head tv_content.txt
+    - mkdir /opt/cots
+    - chmod +x build-pkg/*.run
+    - $(ls build-pkg/*.run) --target /opt/cots
+    - ls /opt/cots/maja
