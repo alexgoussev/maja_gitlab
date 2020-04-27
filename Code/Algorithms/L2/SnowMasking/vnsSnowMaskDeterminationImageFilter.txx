@@ -207,7 +207,6 @@ namespace vns
                 if (vnsEqualsDoubleMacro(l_denom, 0.0) == true)
                 {
                     l_OutputIt.Set(0);
-                    std::cout<<"l_denom is null"<<std::endl;
                 }
                 else
                 {

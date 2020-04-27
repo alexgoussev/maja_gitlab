@@ -327,9 +327,7 @@ private:
         m_CompositeImage->SetSTOBandNumber(l_STOBandNumber);
         m_CompositeImage->SetSTOBandIndex(l_STOBandIndex);
         m_CompositeImage->SetSEAOTRadius(l_SEAOTRadius);
-
         m_CompositeImage->UpdateWithCaching();
-        std::cout << "====> Composite Image Filter " << m_CompositeImage << std::endl;
 
 		//Set the outputs
 		SetParameterOutputImage<OutputImageType>("rta",m_CompositeImage->GetL2RTAOutput());

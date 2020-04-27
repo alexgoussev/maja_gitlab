@@ -83,7 +83,6 @@ class MajaSentinel2L1GranuleXmlReader(EarthExplorerXMLFileHandler):
         if not "GRANULE/" in l_FirstFilename:
             l_PsdNewVersion = False
             LOGGER.debug("The Sentinel2 XML Tile <"+granule_xml_file+"> has been detected OLD PSD version (PSD<14).")
-        print(os.path.dirname(granule_xml_file))
         productPath = os.path.join(os.path.dirname(granule_xml_file),"QI_DATA")
         if l_PsdNewVersion:
             # return to the ROOT path

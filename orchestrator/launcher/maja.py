@@ -23,6 +23,9 @@ orchestrator.launcher.maja is the entry point of Maja
 ###################################################################################################
 """
 
+import os
+os.environ["OTB_LOGGER_LEVEL"] = "CRITICAL"
+
 import shutil
 from orchestrator.launcher.app_handler import AppHandler
 from orchestrator.processor.base_processor import BaseProcessor

@@ -37,25 +37,29 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
-
-
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "vnsComputeEnvironmentCorrectionImageFilter.h"
-#include "vnsUtilities.h"
+#include "vnsThresholdImageFunctor.h"
+#include "vnsThresholdVectorImageFunctor.h"
+#include "otbUnaryFunctorVectorImageFilter.h"
+#include "itkUnaryFunctorImageFilter.h"
+#include <string>
+#include "vnsLoggers.h"
+#include "vnsMacro.h"
 
 namespace vns
 {
+
 namespace Wrapper
 {
 
 using namespace otb::Wrapper;
 
-class EnvCorrection : public Application
+class ThresholdImage : public Application
 {
 public:
 	/** Standard class typedefs. */
-	typedef EnvCorrection Self;
+	typedef ThresholdImage			 		  Self;
 	typedef otb::Wrapper::Application     Superclass;
 	typedef itk::SmartPointer<Self>       Pointer;
 	typedef itk::SmartPointer<const Self> ConstPointer;
@@ -63,117 +67,85 @@ public:
 	/** Standard macro */
 	itkNewMacro(Self);
 
-	itkTypeMacro(EnvCorrection, otb::Wrapper::Application);
+	itkTypeMacro(ThresholdImage, otb::Wrapper::Application);
 
-	/** Image typedef */
-	typedef VNSRealVectorImageType InputVectorImageType;
-    typedef InputVectorImageType::ConstPointer InputVectorImageConstPointerType;
-    typedef InputVectorImageType::Pointer InputVectorImagePointerType;
+	/** Some convenient typedefs. */
+	typedef DoubleVectorImageType InputImageType;
 
-	typedef VNSMaskImageType InputMaskType;
-	typedef InputMaskType::Pointer InputMaskPointerType;
-	typedef InputMaskType::ConstPointer InputMaskConstPointerType;
-	typedef VNSMaskImageType OutputMaskType;
-	typedef OutputMaskType::Pointer OutputMaskPointerType;
-	typedef OutputMaskType::ConstPointer OutputMaskConstPointerType;
-	typedef OutputMaskType::PixelType OutputMaskPixelType;
+	typedef vns::Functor::ThresholdVectorImageFunctor<InputImageType::PixelType, InputImageType::PixelType> ThresholdVectorImageFunctor;
+	typedef otb::UnaryFunctorVectorImageFilter<InputImageType, InputImageType, ThresholdVectorImageFunctor> RealToRealThresholdVectorImageFilterType;
 
-	typedef VNSRealVectorImageType OutputVectorImageType;
-	typedef OutputVectorImageType::Pointer OutputVectorImagePointerType;
-	typedef OutputVectorImageType::ConstPointer OutputVectorImageConstPointerType;
-	typedef OutputVectorImageType::RegionType OutputVectorImageRegionType;
-
-	typedef ComputeEnvironmentCorrectionImageFilter<InputVectorImageType, OutputVectorImageType, InputMaskType> ComputeEnvironmentCorrectionImageFilterType;
-    typedef ComputeEnvironmentCorrectionImageFilterType::Pointer ComputeEnvironmentCorrectionImageFilterPointer;
+	typedef vns::Functor::ThresholdImageFunctor<DoubleImageType::PixelType, DoubleImageType::PixelType> ThresholdImageFunctor;
+	typedef itk::UnaryFunctorImageFilter<DoubleImageType, DoubleImageType, ThresholdImageFunctor> RealToRealThresholdImageFilterType;
 
 
 private:
 	void DoInit()
 	{
-		SetName("EnvCorrection");
-		SetDescription("Generate the EnvCorrection.");
+		SetName("ThresholdImage");
+		SetDescription("Round the image to the closest int value.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocLongDescription("This application computes the EnvCorrection");
+		SetDocLongDescription("If one band equal threshold the band equal value");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
 		SetDocSeeAlso("MAJA Doc");
 
-		AddDocTag("Statistics");
+		AddDocTag("Mask");
 
-		AddParameter(ParameterType_InputImage,  "tdir",   "TDIR");
-		SetParameterDescription("tdir", "TDIR");
-		AddParameter(ParameterType_InputImage,  "tdif",   "TDIF");
-		SetParameterDescription("tdif", "TDIF");
-		AddParameter(ParameterType_InputImage,  "albd",   "ALBD");
-		SetParameterDescription("albd", "Albedo");
-		AddParameter(ParameterType_InputImage,  "toc",   "TOC image");
-		SetParameterDescription("toc", "TOC image at coarse");
-		AddParameter(ParameterType_InputImage,  "edg",   "EDG image");
-		SetParameterDescription("edg", "Image used as EDG at coarse");
-		AddParameter(ParameterType_InputImage,  "rhoenvsub",   "RhoEnv image");
-		SetParameterDescription("rhoenvsub", "Image used as RhoEnv at coarse");
-
-
-		AddParameter(ParameterType_Float, "nodata", "NoData");
-
-		AddParameter(ParameterType_OutputImage, "sre", "Computed SRE");
-		SetParameterDescription("sre","Computed SRE");
-		SetParameterOutputImagePixelType("sre", ImagePixelType_double);
-		AddParameter(ParameterType_OutputImage, "rhoenv", "Computed RhoEnv");
-		SetParameterDescription("rhoenv","Computed rhoenv");
-		SetParameterOutputImagePixelType("rhoenv", ImagePixelType_double);
-
+		AddParameter(ParameterType_InputImage,  "im",   "image");
+		AddParameter(ParameterType_OutputImage, "out", "image");
+		SetParameterOutputImagePixelType("out", ImagePixelType_double);
+		SetParameterDescription("out","output image");
+		AddParameter(ParameterType_Float,"threshold","threshold");
+		AddParameter(ParameterType_Float,"abovevalue","abovevalue");
+		AddParameter(ParameterType_Float,"undervalue","undervalue");
 		AddRAMParameter("ram");
-		SetDefaultParameterInt("ram",2048);
+		SetDefaultParameterInt("ram", 2048);
+
 	}
 
 	void DoUpdateParameters()
 	{
-
 	}
 
 
 	void DoExecute()
 	{
-		// Init filters
-		m_ComputeEnvironmentCorrectionImageFilter = ComputeEnvironmentCorrectionImageFilterType::New();
-		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataBeforeUpdateFlag(true);
-		m_ComputeEnvironmentCorrectionImageFilter->SetReleaseDataFlag(true);
-		//Get image pointers
-		InputVectorImageConstPointerType l_RhoEnvPtr = this->GetParameterDoubleVectorImage("rhoenvsub");
-		InputVectorImageConstPointerType l_TdirPtr = this->GetParameterDoubleVectorImage("tdir");
-		InputVectorImageConstPointerType l_TdifPtr = this->GetParameterDoubleVectorImage("tdif");
-		InputVectorImageConstPointerType l_SatmPtr = this->GetParameterDoubleVectorImage("albd");
-		InputVectorImageConstPointerType l_IPTOCPtr = this->GetParameterDoubleVectorImage("toc");
-		InputMaskConstPointerType l_L2EDGPtr = this->GetParameterUInt8Image("edg");
-
-        //GetParams
-		const double l_NoData = this->GetParameterFloat("nodata");
-
-		//Configure filter
-        m_ComputeEnvironmentCorrectionImageFilter->SetRhoEnvSub(l_RhoEnvPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetLUT_Tdir(l_TdirPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetLUT_Tdif(l_TdifPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetLUT_Satm(l_SatmPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetIPTOC(l_IPTOCPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetL2EDG(l_L2EDGPtr);
-        m_ComputeEnvironmentCorrectionImageFilter->SetNoData(l_NoData);
-        m_ComputeEnvironmentCorrectionImageFilter->UpdateWithCaching();
-		//Set the output
-		SetParameterOutputImage<OutputVectorImageType>("sre",m_ComputeEnvironmentCorrectionImageFilter->GetL2SRE());
-		SetParameterOutputImage<OutputVectorImageType>("rhoenv",m_ComputeEnvironmentCorrectionImageFilter->GetRhoEnv());
+		// Get input image pointers
+		ImageBaseType* l_inPtr = GetParameterImageBase("im",0);
+		// Guess the image type
+		std::string className(l_inPtr->GetNameOfClass());
 
 
+		if (className == "VectorImage") {
+			// Init filters
+			DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
+			m_filter = RealToRealThresholdVectorImageFilterType::New();
+			m_filter->SetInput(l_im);
+			m_filter->GetFunctor().SetThresholdValue(this->GetParameterFloat("threshold"));
+			m_filter->GetFunctor().SetOutputValue(this->GetParameterFloat("abovevalue"));
+			m_filter->GetFunctor().SetInsideValue(this->GetParameterFloat("undervalue"));
+			SetParameterOutputImage<InputImageType>("out", m_filter->GetOutput());
+		} else {
+			// Init filters
+			DoubleImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
+			m_single_filter = RealToRealThresholdImageFilterType::New();
+			m_single_filter->SetInput(l_im);
+			m_single_filter->GetFunctor().SetThresholdValue(this->GetParameterFloat("threshold"));
+			m_single_filter->GetFunctor().SetOutputValue(this->GetParameterFloat("abovevalue"));
+			m_single_filter->GetFunctor().SetInsideValue(this->GetParameterFloat("undervalue"));
+
+			SetParameterOutputImage<DoubleImageType>("out", m_single_filter->GetOutput());
+		}
 	}
 
 	/** Filters declaration */
-	ComputeEnvironmentCorrectionImageFilterPointer m_ComputeEnvironmentCorrectionImageFilter;
-
-
+	 RealToRealThresholdVectorImageFilterType::Pointer m_filter;
+	 RealToRealThresholdImageFilterType::Pointer m_single_filter;
 };
 
 }
 }
 
-OTB_APPLICATION_EXPORT(vns::Wrapper::EnvCorrection)
+OTB_APPLICATION_EXPORT(vns::Wrapper::ThresholdImage)

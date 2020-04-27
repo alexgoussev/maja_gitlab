@@ -136,8 +136,6 @@ namespace vns
                     this->m_Spacing[i] = spacingArray[i];
                 }
             }
-
-            std::cout<<"===== SetSpacing Constant : " << this->m_Spacing << std::endl ;
         }
 
     template<class TOutputImage>

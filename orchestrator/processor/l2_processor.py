@@ -112,6 +112,7 @@ class L2Processor(BaseProcessor):
         LOGGER.info("There is(are) " + str(len(list_of_unique_sat)) + " meteo files (EXO METDTA)")
         for met in list_of_meteo_files:
             met_dbl = os.path.splitext(met)[0] + ".DBL"
+            met_dbl = os.path.splitext(met)[0] + ".DBL"
             gipp_utils.uncompress_dbl_product(met_dbl)
             # retrieve the mission in HDR file
             if self._validate_schemas:
@@ -655,7 +656,7 @@ class L2Processor(BaseProcessor):
                             LOGGER.warning(
                                 "Last product in backward mode is cloudy. It will be considered as a valid product.")
             #Log system infos
-            LOGGER.info(self._apphandler.get_system_infos())
+            LOGGER.progress(self._apphandler.get_system_infos())
             if not l_StopLevel2Processing:
                 if p_checking_conditional_clouds[0] or p_finalize_backward:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
@@ -825,7 +826,7 @@ class L2Processor(BaseProcessor):
         LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(p_checking_conditional_clouds[0]))
         LOGGER.debug("  ->  use_cams_datas                       = " + str(l_UseCamsData))
         # Log system infos
-        LOGGER.info(self._apphandler.get_system_infos())
+        LOGGER.progress(self._apphandler.get_system_infos())
         for mod in l_module_list:
             LOGGER.debug("Deleting module : "+mod.NAME)
             mod.cleanup()
@@ -836,7 +837,7 @@ class L2Processor(BaseProcessor):
             LOGGER.debug(self._apphandler.get_directory_manager())
             self._apphandler.get_directory_manager().clean()
             # Log system infos
-            LOGGER.info(self._apphandler.get_system_infos())
+            LOGGER.progress(self._apphandler.get_system_infos())
 
     def scientific_processing(self):
         raise NotImplementedError

@@ -162,7 +162,7 @@ private:
 		//*************************************************************************************************************
 		// Read the GIPP file "GIP_L2SMAC"
 		//*************************************************************************************************************
-		vnsLogProgressMacro("Starting SMAC reading ...");
+		vnsLogInfoMacro("Starting SMAC reading ...");
 		std::string l_GIPPFilename = GetParameterString("smac");
 
 		// Load the xml file

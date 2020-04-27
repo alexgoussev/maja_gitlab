@@ -141,10 +141,9 @@ class AppHandler:
         return self._validate_schemas
 
     def get_system_infos(self):
-        return "System infos : RAM max : " + str(int(memory_used_by_process2(os.getpid()))) + " MB, DiskUsage : " + str(
-            int(disk_space_used(self._workingDirectory))) + " MB, Elapsed time: " + time.strftime("%H hour %M min %S seconds",
-                                                                                                  time.gmtime(
-                                                                                                      time.time() - self._start_time))
+        total_time =time.gmtime(time.time() - self._start_time)
+        return "System infos (RAM;DISK;TIME) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
+            int(disk_space_used(self._workingDirectory))) + ";" + str(float(total_time.tm_hour) + float(total_time.tm_min / 60.0) + float(total_time.tm_sec / 3600.0))
 
     def initialize(self):
         maja_description = """ ./maja [options] \n\n
@@ -339,6 +338,23 @@ class AppHandler:
             LOGGER.info("Maja Software Version: "+version.MAJA_VERSION)
             exit(0)
 
+        # Set the log level
+        self._logLevel = args.loglevel
+        os.environ["MAJA_LOGGER_LEVEL"] = args.loglevel
+        if args.loglevel == "INFO":
+            LOGGER.setLevel(logging.INFO)
+        elif args.loglevel == "PROGRESS":
+            LOGGER.setLevel(logging.PROGRESS)
+        elif args.loglevel == "WARNING":
+            LOGGER.setLevel(logging.WARNING)
+        elif args.loglevel == "DEBUG":
+            LOGGER.setLevel(logging.DEBUG)
+            os.environ["OTB_LOGGER_LEVEL"] = "DEBUG"
+        elif args.loglevel == "ERROR":
+            LOGGER.setLevel(logging.ERROR)
+
+        LOGGER.info("Logger in %s mode ( %s )", args.loglevel, LOGGER.getEffectiveLevel())
+
         if args.output is not None:
             self._outputDirectory = args.output + os.path.sep
         else:
@@ -425,24 +441,6 @@ class AppHandler:
         # Load the file
         self._adminConf = admin_conf.parse(self._adminConfigSystemFileName, True)
 
-        # Set the log level
-        self._logLevel = args.loglevel
-        os.environ["OTB_LOGGER_LEVEL"] = "CRITICAL"
-        os.environ["MAJA_LOGGER_LEVEL"] = args.loglevel
-        if args.loglevel == "INFO":
-            LOGGER.setLevel(logging.INFO)
-        elif args.loglevel == "PROGRESS":
-            LOGGER.setLevel(logging.INFO)
-        elif args.loglevel == "WARNING":
-            LOGGER.setLevel(logging.WARNING)
-        elif args.loglevel == "DEBUG":
-            LOGGER.setLevel(logging.DEBUG)
-            os.environ["OTB_LOGGER_LEVEL"] = "DEBUG"
-        elif args.loglevel == "ERROR":
-            LOGGER.setLevel(logging.ERROR)
-
-        LOGGER.info("Logger in %s mode ( %s )", args.loglevel, LOGGER.getEffectiveLevel())
-
         if args.mode is not None:
             lProcessorName = args.mode
         else:
@@ -459,6 +457,7 @@ class AppHandler:
             raise MajaDataException("Unknown mode in parameters")
 
         LOGGER.info("Processor is %s", self._processorName)
+        LOGGER.progress("Starting " + self._processorName)
 
         LOGGER.info("Number of theads %i", self._nbThreads)
 

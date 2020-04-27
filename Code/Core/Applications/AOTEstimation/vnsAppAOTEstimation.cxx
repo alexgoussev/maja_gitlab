@@ -847,7 +847,6 @@ private:
 				SetParameterOutputImage<OutputImageType>("aotcams",m_MTComputeAOTImageFilter->GetIPAOTCams());
 				m_AOTSelectionFilter->SetInput(1,m_MTComputeAOTImageFilter->GetIPAOTCams());
 			}
-			std::cout<<m_MTComputeAOTImageFilter<<std::endl;
 
 		} // end MULTITEMPORAL METHOD
 

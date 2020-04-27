@@ -115,6 +115,10 @@ OTB_CREATE_APPLICATION(NAME           ChangeValues
                        SOURCES        vnsAppChangeValues.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
                        
+OTB_CREATE_APPLICATION(NAME           ThresholdImage
+                       SOURCES        vnsAppThresholdImage.cxx
+                       LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                       
 OTB_CREATE_APPLICATION(NAME           ExtractChannels
                       SOURCES        vnsAppExtractChannels.cxx
                       LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
