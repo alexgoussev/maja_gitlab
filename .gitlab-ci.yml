@@ -42,7 +42,7 @@ build-centos7:
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build && ctest -j 4 -R apTv
-    - ls -lh build/Testing/*-*/
+    - cd $CI_BUILDS_DIR && ls -lh build/Testing/*-*/
     - ctest -VV -S CI/maja_pkg.cmake
   artifacts:
     when: always
