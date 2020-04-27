@@ -30,7 +30,7 @@ prepare-centos7:
       - SuperBuild/**/*
       - CMakeConfig/CommonCmakeOptions.cmake
       - CMakeConfig/MAJAConfigurationSetting.cmake
-      - .gitlab-ci.yml
+      #~ - .gitlab-ci.yml
 
 build-centos7:
   stage: build
@@ -38,14 +38,14 @@ build-centos7:
   tags:
     - docker
   script:
-    - ctest -VV -S CI/maja_build.cmake
+    - ctest -V -S CI/maja_build.cmake
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build && ctest -j 4 -R apTv
     - cd .. && ls -lh build/Testing/*-*/
-    - ctest -VV -S CI/maja_pkg.cmake
+    - ctest -V -S CI/maja_pkg.cmake
   artifacts:
-    when: always
     expire_in: 5 days
+    name: "$CI_COMMIT_REF_NAME"
     paths:
       - build-pkg/*.run
