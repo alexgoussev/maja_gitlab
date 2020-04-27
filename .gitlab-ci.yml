@@ -69,7 +69,7 @@ tv-centos7:
     #~ - schedules
   script:
     # TODO: get latest active branch ? or stick to develop
-    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
+    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $MAJA_ARTIFACTS" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
     - file artifacts.zip
     - unzip artifacts.zip
     - pwd
