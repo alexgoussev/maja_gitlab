@@ -80,4 +80,4 @@ tv-centos7:
     - chmod +x build-pkg/*.run
     - $(ls build-pkg/*.run) --target /opt/maja
     - source /opt/maja/bin/.majaenv.sh
-    - /opt/maja/bin/maja
+    - maja
