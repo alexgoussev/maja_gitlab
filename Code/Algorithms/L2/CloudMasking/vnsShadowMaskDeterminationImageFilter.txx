@@ -57,7 +57,7 @@ namespace vns
     // Constructor
     template<class TInputImage, class TInputMask, class TLabelImage, class TGRIDImage, class TCLAImage, class TDTMImage, class TOutputImage>
         ShadowMaskDeterminationImageFilter<TInputImage, TInputMask, TLabelImage, TGRIDImage, TCLAImage, TDTMImage, TOutputImage>::ShadowMaskDeterminationImageFilter() :
-                m_L2CoarseResolution(1), m_InitMode(false), m_RefinementOption(true), m_DeltaHMax(0), m_DeltaHMin(0), m_DeltaHStep(0), m_SOLH1(
+                m_InitMode(false), m_RefinementOption(true), m_DeltaHMax(0), m_DeltaHMin(0), m_DeltaHStep(0), m_SOLH1(
                         0.), m_SOLH2(0.), m_VIEHRef(0.), m_SOLHRef(0.), m_AbsNbpixThreshold(0), m_ThresholdDiffImage(0), m_ShadowBandTOCR(
                         0), m_ShadowBandRCR(0)
         {
@@ -203,7 +203,6 @@ namespace vns
 
             // Set parameters
             l_AltitudeRefinementFilter->SetNoData(m_NoData);
-            l_AltitudeRefinementFilter->SetL2CoarseResolution(m_L2CoarseResolution);
             l_AltitudeRefinementFilter->SetDeltaHMax(m_DeltaHMax);
             l_AltitudeRefinementFilter->SetDeltaHMin(m_DeltaHMin);
             l_AltitudeRefinementFilter->SetDeltaHStep(m_DeltaHStep);
@@ -275,7 +274,6 @@ namespace vns
             m_FinalShadowProjectionFilter->SetDTMInput(this->GetDTMInput());
             m_FinalShadowProjectionFilter->SetIPVIEInput(this->GetIPVIEInput());
             m_FinalShadowProjectionFilter->SetIPCLAInput(m_IPCLAOutput);
-            m_FinalShadowProjectionFilter->SetL2CoarseResolution(m_L2CoarseResolution);
             m_FinalShadowProjectionFilter->SetI3D(&m_I3D);
             m_FinalShadowProjectionFilter->SetVIEHRef(m_VIEHRef);
 
@@ -330,7 +328,6 @@ namespace vns
             os << "m_AbsNbpixThreshold:    " << m_AbsNbpixThreshold << std::endl;
             os << "m_ThresholdDiffImage:    " << m_ThresholdDiffImage << std::endl;
 
-            os << "m_L2CoarseResolution:    " << m_L2CoarseResolution << std::endl;
             os << "m_ShadowBandTOCR:    " << m_ShadowBandTOCR << std::endl;
             os << "m_ShadowBandRCR:    " << m_ShadowBandRCR << std::endl;
         }

@@ -154,7 +154,6 @@ maja_test_application(NAME apTvCloudShadVar
                      -l2shad ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_shad.tif
                      -l2shadvar ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_shad_var.tif
                      -l2sto ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_l2sto.tif
-                     -l2coarseres 96
                      -shadbandtocr 2
                      -shadbandrcr 2
                      -viehref 3000
@@ -231,7 +230,6 @@ maja_test_application(NAME apTvCloudShadowWithAltitudeFilterInit
                      -solhref 1000
                      -defaultalt 500
                      -ksigma 3
-                     -l2coarseres 96
                      -deltahmax 8000
                      -deltahmin 0
                      -deltahstep 500
@@ -280,7 +278,6 @@ maja_test_application(NAME apTvCloudShadowWithoutAltitudeFilterNominal
                      -solhref 4000
                      -defaultalt 500
                      -ksigma 0
-                     -l2coarseres 96
                      -deltahmax 8000
                      -deltahmin 0
                      -deltahstep 250

@@ -320,8 +320,6 @@ class MajaCloudMaskComputation(MajaModule):
                         "sol1.h": grid_ref_alt.get_SOLH1(),
                         "solhref": grid_ref_alt.get_SOLHRef(),
                         "defaultalt": dict_of_input.get("L2COMM").get_value_i("DefaultAltitude"),
-                        "l2coarseres": dict_of_input.get(
-                            "Plugin").ConfigUserCamera.get_Business().get_L2CoarseResolution(),
                         "deltahmax": dict_of_input.get("L2COMM").get_value_i("DeltaHMax"),
                         "deltahmin": dict_of_input.get("L2COMM").get_value_i("DeltaHMin"),
                         "deltahstep": dict_of_input.get("L2COMM").get_value_i("DeltaHStep"),
@@ -404,8 +402,6 @@ class MajaCloudMaskComputation(MajaModule):
                                  "l2shadvar": dict_of_input.get("L2Reader").get_value("VectorizedCLDSubOutput")[
                                      constants.CLOUD_MASK_SHADVAR],
                                  "l2sto": dict_of_input.get("L2Reader").get_value("STOImage"),
-                                 "l2coarseres": dict_of_input.get(
-                                     "Plugin").ConfigUserCamera.get_Business().get_L2CoarseResolution(),
                                  "shadbandtocr": shadowbandtocr_idx,
                                  "shadbandrcr": shadowbandrcr_idx,
                                  "viehref": grid_ref_alt.get_VIEHRef(),

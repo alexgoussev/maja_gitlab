@@ -231,11 +231,6 @@ namespace vns
 
             itkGetConstReferenceMacro(NoData, RealNoDataType)
 
-            // L2 coarse Resolution accessors
-            itkSetMacro(L2CoarseResolution, unsigned int)
-
-            itkGetConstReferenceMacro(L2CoarseResolution, unsigned int)
-
             // Init mode parameter accessors
             itkSetMacro(InitMode, bool)
 
@@ -380,8 +375,6 @@ namespace vns
             /** Parameters declaration */
             /** No_data value declaration*/
             RealNoDataType m_NoData;
-            /** L2 coarse resolution */
-            unsigned int m_L2CoarseResolution;
             /** Init mode declaration */
             bool m_InitMode;
             /** Refinement option declaration */

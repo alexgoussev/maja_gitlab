@@ -106,9 +106,6 @@ namespace vns
 
             typedef DEMDataManager<DTMImageType> Intersector3DType;
 
-            // L2CoarseResolution accessors
-            itkSetMacro(L2CoarseResolution, unsigned int)
-            itkGetConstReferenceMacro(L2CoarseResolution, unsigned int)
 
             // Max cloud altitude accessors
             itkSetMacro(MaxCLA, double)
@@ -161,9 +158,6 @@ namespace vns
             OutsideCloudsShadowMaskGenerator(const Self&); //purposely not implemented
             void
             operator=(const Self&); //purposely not implemented
-
-            /** L2 coarse resolution */
-            unsigned int m_L2CoarseResolution;
 
             /** Reference altitude for viewing direction declaration */
             double m_VIEHRef;

@@ -155,10 +155,6 @@ namespace vns
             /** Set the cloud altitude image */
             vnsSetGetInputMacro( IPCLA , CLAImageType , 5)
 
-            // L2 Coarse Resolution accessors
-            itkSetMacro(L2CoarseResolution, unsigned int)
-            itkGetConstReferenceMacro(L2CoarseResolution, unsigned int)
-
             /** Intersector 3D object accessor */
             virtual void
             SetI3D(Intersector3DType* i3d)
@@ -223,9 +219,6 @@ namespace vns
             Intersector3DType* m_I3D;
 
             LabelVectorMapType m_ShadowVectorMap;
-
-            /** L2 coarse resolution */
-            unsigned int m_L2CoarseResolution;
 
         };
     // end of class PersistentShadowProjectionImageFilter
@@ -402,16 +395,6 @@ namespace vns
                 return this->GetFilter()->GetSOLHRef();
             }
             /** Set L2 Coarse Resolution.*/
-            void
-            SetL2CoarseResolution(const unsigned int & res)
-            {
-                this->GetFilter()->SetL2CoarseResolution(res);
-            }
-            unsigned int
-            GetL2CoarseResolution()
-            {
-                return this->GetFilter()->GetL2CoarseResolution();
-            }
 
             /** Intersector 3D object accessor */
             virtual void

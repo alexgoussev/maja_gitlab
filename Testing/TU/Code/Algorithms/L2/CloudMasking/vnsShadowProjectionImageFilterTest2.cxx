@@ -171,8 +171,6 @@ int vnsShadowProjectionImageFilterTest2(int argc, char * argv [])
     l_Filter->SetIPSOLInput(l_IPSOLInput->GetOutput());
     l_Filter->SetIPCLAInput(l_IPCLAInput->GetOutput());
 
-    l_Filter->SetL2CoarseResolution(96);
-
     l_Filter->SetI3D( & l_I3D);
 
     l_Filter->SetVIEHRef(l_VIEHRef);

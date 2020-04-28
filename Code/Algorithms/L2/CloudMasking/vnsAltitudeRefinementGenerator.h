@@ -169,11 +169,6 @@ namespace vns
 
             itkGetConstReferenceMacro(NoData, RealNoDataType)
 
-            // L2 coarse Resolution accessors
-            itkSetMacro(L2CoarseResolution, unsigned int)
-
-            itkGetConstReferenceMacro(L2CoarseResolution, unsigned int)
-
             // DeltaHMax parameter accessors
             itkSetMacro(DeltaHMax, short)
 
@@ -290,8 +285,6 @@ namespace vns
             /** Parameters declaration */
             /** No_data value declaration*/
             RealNoDataType m_NoData;
-            /** L2 coarse resolution */
-            unsigned int m_L2CoarseResolution;
 
             /** Altitude excursion around the L1 altitude */
             short m_DeltaHMax;

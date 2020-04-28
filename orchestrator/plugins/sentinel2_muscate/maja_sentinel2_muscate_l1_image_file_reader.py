@@ -628,11 +628,6 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         l_ListOfTOABandCode = product_info.HeaderHandler.get_list_of_band_code()  # ListOfStrings
         l_ListOfL1Resolution = l_BandsDefinitions.ListOfL1Resolution  # ListOfStrings
         l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
-        l_L2CoarseResolution = self._plugin.ConfigUserCamera.get_Business().get_L2CoarseResolution()  # int
-        l_Areas = dem.L2Areas
-        l_L2CoarseArea = dem.CoarseArea
-        l_NbL1Res = len(l_ListOfL1Resolution)  # int
-        l_NbL2Res = len(l_ListOfL2Resolution)  # int
         l_NbBand = len(l_ListOfTOAImageFileNames)  # int
 
         l_L1NoData = product_info. L1NoData
