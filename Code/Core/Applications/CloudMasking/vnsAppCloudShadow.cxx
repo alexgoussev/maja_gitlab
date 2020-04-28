@@ -185,7 +185,7 @@ private:
 		SetParameterDescription("solhref","solar height ref");
 		AddParameter(ParameterType_Int,  "defaultalt","defaultalt");
 		AddParameter(ParameterType_Int,  "ksigma","ksigma");
-		AddParameter(ParameterType_Int,  "l2coarseres","l2coarseres");
+
 		AddParameter(ParameterType_Int,  "deltahmax","deltahmax");
 		AddParameter(ParameterType_Int,  "deltahmin","deltahmin");
 		AddParameter(ParameterType_Int,  "deltahstep","deltahstep");
@@ -275,7 +275,6 @@ private:
 		const short m_DefaultAltitude = static_cast<short>(this->GetParameterInt("defaultalt"));
 		const double l_SOLHRef = this->GetParameterFloat("solhref");
 		const double l_SOLH1 = this->GetParameterFloat("sol1.h");
-		const unsigned short m_L2CoarseResolution = static_cast<unsigned short>(this->GetParameterInt("l2coarseres"));
 		const short m_DeltaHMax = static_cast<short>(this->GetParameterInt("deltahmax"));
 		const short m_DeltaHMin = static_cast<short>(this->GetParameterInt("deltahmin"));
 		const short m_DeltaHStep = static_cast<short>(this->GetParameterInt("deltahstep"));
@@ -371,7 +370,6 @@ private:
 
 			// parameters
 			m_ShadowMaskDeterminationFilter->SetNoData(l_NoData);
-			m_ShadowMaskDeterminationFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 			m_ShadowMaskDeterminationFilter->SetInitMode(m_InitMode);
 			m_ShadowMaskDeterminationFilter->SetRefinementOption(m_RefinementOption);
 			m_ShadowMaskDeterminationFilter->SetDeltaHMax(m_DeltaHMax);
@@ -422,7 +420,6 @@ private:
 
 				//Shadow filter
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetNoData(l_NoData);
-				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHMin(m_DeltaHMin);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHMax(m_DeltaHMax);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHStep(m_DeltaHStep);

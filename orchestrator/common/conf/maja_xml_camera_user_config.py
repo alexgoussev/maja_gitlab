@@ -1023,18 +1023,14 @@ class BusinessType(GeneratedsSuper):
     member_data_items_ = {
         'ImageDivision': MemberSpec_(
             'ImageDivision', 'ImageDivision_Type', 0, 0, {
-                'type': 'ImageDivision_Type', 'name': 'ImageDivision'}, None), 'L2CoarseResolution': MemberSpec_(
-            'L2CoarseResolution', [
-                'NonNegativeInteger_Type', 'xs:nonNegativeInteger'], 0, 0, {
-                'type': 'xs:nonNegativeInteger', 'name': 'L2CoarseResolution'}, None), }
+                'type': 'ImageDivision_Type', 'name': 'ImageDivision'}, None) }
     subclass = None
     superclass = None
 
-    def __init__(self, ImageDivision=None, L2CoarseResolution=None):
+    def __init__(self, ImageDivision=None):
         self.original_tagname_ = None
         self.ImageDivision = ImageDivision
-        self.L2CoarseResolution = L2CoarseResolution
-        self.validate_NonNegativeInteger_Type(self.L2CoarseResolution)
+        self.validate_NonNegativeInteger_Type(self.ImageDivision)
 
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
@@ -1053,10 +1049,6 @@ class BusinessType(GeneratedsSuper):
 
     def set_ImageDivision(self, ImageDivision): self.ImageDivision = ImageDivision
 
-    def get_L2CoarseResolution(self): return self.L2CoarseResolution
-
-    def set_L2CoarseResolution(self, L2CoarseResolution): self.L2CoarseResolution = L2CoarseResolution
-
     def validate_NonNegativeInteger_Type(self, value):
         # Validate type NonNegativeInteger_Type, a restriction on xs:nonNegativeInteger.
         if value is not None and Validate_simpletypes_:
@@ -1064,8 +1056,7 @@ class BusinessType(GeneratedsSuper):
 
     def hasContent_(self):
         if (
-            self.ImageDivision is not None or
-            self.L2CoarseResolution is not None
+            self.ImageDivision is not None
         ):
             return True
         else:
@@ -1117,10 +1108,6 @@ class BusinessType(GeneratedsSuper):
             eol_ = ''
         if self.ImageDivision is not None:
             self.ImageDivision.export(outfile, level, namespace_, name_='ImageDivision', pretty_print=pretty_print)
-        if self.L2CoarseResolution is not None:
-            showIndent(outfile, level, pretty_print)
-            outfile.write('<maja:L2CoarseResolution>%s</maja:L2CoarseResolution>%s' %
-                          (self.gds_format_integer(self.L2CoarseResolution, input_name='L2CoarseResolution'), eol_))
 
     def build(self, node):
         already_processed = set()
@@ -1139,18 +1126,6 @@ class BusinessType(GeneratedsSuper):
             obj_.build(child_)
             self.ImageDivision = obj_
             obj_.original_tagname_ = 'ImageDivision'
-        elif nodeName_ == 'L2CoarseResolution':
-            sval_ = child_.text
-            try:
-                ival_ = int(sval_)
-            except (TypeError, ValueError) as exp:
-                raise_parse_error(child_, 'requires integer: %s' % exp)
-            if ival_ < 0:
-                raise_parse_error(child_, 'requires nonNegativeInteger')
-            ival_ = self.gds_validate_integer(ival_, node, 'L2CoarseResolution')
-            self.L2CoarseResolution = ival_
-            # validate type NonNegativeInteger_Type
-            self.validate_NonNegativeInteger_Type(self.L2CoarseResolution)
 # end class BusinessType
 
 

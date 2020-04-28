@@ -59,7 +59,6 @@ namespace vns
 
             // Parameters initialization
             m_NoData = static_cast<RealNoDataType>(0);
-            m_L2CoarseResolution = 1;
 
             m_DeltaHMax = 0;
             m_DeltaHMin = 0;
@@ -164,7 +163,6 @@ namespace vns
                 m_ShadowProjectionFilter->SetDTMInput(this->GetDTMInput());
                 m_ShadowProjectionFilter->SetIPVIEInput(this->GetIPVIEInput());
                 m_ShadowProjectionFilter->SetIPCLAInput(m_AddConstantFilter->GetOutput());
-                m_ShadowProjectionFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 
                 m_ShadowProjectionFilter->SetI3D(m_I3D);
 
@@ -271,7 +269,6 @@ namespace vns
             os << "m_AbsNbpixThreshold:    " << m_AbsNbpixThreshold << std::endl;
             os << "m_ThresholdDiffImage:    " << m_ThresholdDiffImage << std::endl;
 
-            os << "m_L2CoarseResolution:    " << m_L2CoarseResolution << std::endl;
             os << "m_ShadowBand:    " << m_ShadowBand << std::endl;
         }
 

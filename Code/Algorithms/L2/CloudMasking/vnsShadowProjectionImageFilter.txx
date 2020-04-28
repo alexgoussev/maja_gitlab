@@ -57,7 +57,7 @@ namespace vns
 
     template<class TInputMask, class TLabelImage, class TDTMImage, class TGRIDImage, class TCLAImage>
         PersistentShadowProjectionImageFilter<TInputMask, TLabelImage, TDTMImage, TGRIDImage, TCLAImage>::PersistentShadowProjectionImageFilter() :
-                m_VIEHRef(0.), m_SOLHRef(0.), m_ShadowVectorMap(), m_L2CoarseResolution(1)
+                m_VIEHRef(0.), m_SOLHRef(0.), m_ShadowVectorMap()
         {
             this->SetNumberOfRequiredInputs(6);
             this->SetNumberOfIndexedInputs(6);

@@ -69,8 +69,6 @@ namespace vns
             this->SetNumberOfIndexedOutputs(1);
 
             this->SetNthOutput(0, OutputImageType::New());
-
-            m_L2CoarseResolution = 1;
             m_MaxCLA = 0.;
             m_VIEHRef = 0.;
             m_SOLHRef = 0.;

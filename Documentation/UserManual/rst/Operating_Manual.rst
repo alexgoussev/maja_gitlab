@@ -84,8 +84,6 @@ Note:
    The “MAJAUserConfig_<MISSION>.xml” contains for example the following
    parameters:
 
--  L2 coarse resolution set in the “L2CoarseResolution” field
-
 -  | The option parameter that defines if a default constant value is
      used to set the ozone content
      (“Use_Default_Constant_Ozone_Amount”).
@@ -147,10 +145,6 @@ Note:
    </NbStrips>
 
    </ImageDivision>
-
-   <!-- L2 coarse resolution in meter -->
-
-   <L2CoarseResolution>240</L2CoarseResolution>
 
    </Business>
 

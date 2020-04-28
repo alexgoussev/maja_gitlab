@@ -581,12 +581,6 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                 l_ListOfTOAImageFileNamesInHeader[self._header_handler.get_index_of_band_code(band)])
         l_ListOfL1Resolution = l_BandsDefinitions.ListOfL1Resolution  # ListOfStrings
         l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
-        l_L2CoarseResolution = self._plugin.ConfigUserCamera.get_Business().get_L2CoarseResolution()  # int
-        l_Areas = dem.L2Areas
-        l_L2CoarseArea = dem.CoarseArea
-        l_NbL1Res = len(l_ListOfL1Resolution)  # int
-        l_NbL2Res = len(l_ListOfL2Resolution)  # int
-        l_NbBand = len(l_ListOfTOAImageFileNames)  # int
 
         l_L1NoData = product_info.L1NoData
         l_ReflectanceQuantificationValue = product_info.ReflectanceQuantification

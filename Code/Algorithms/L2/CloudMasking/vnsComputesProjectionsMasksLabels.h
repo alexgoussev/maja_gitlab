@@ -176,9 +176,6 @@ namespace vns
             // No_data pixel value accessors
             vnsMemberAndSetAndGetConstReferenceMacro(NoData, RealNoDataType)
 
-            // L2 coarse Resolution accessors
-            vnsMemberAndSetAndGetConstReferenceMacro(L2CoarseResolution, unsigned int)
-
             // DeltaHMax parameter accessors
             vnsMemberAndSetAndGetConstReferenceMacro(DeltaHMax, short)
 

@@ -192,7 +192,6 @@ private:
 		SetParameterDescription("l2sto", "L2 STO");
 		//Set parameters
 		AddParameter(ParameterType_Bool,  "initmode","InitMode");
-		AddParameter(ParameterType_Int,  "l2coarseres","l2coarseres");
 		AddParameter(ParameterType_Int,  "shadbandtocr","ShadBandTOCR");
 		AddParameter(ParameterType_Int,  "shadbandrcr","ShadBandRCR");
 		AddParameter(ParameterType_Float, "viehref","viehref");
@@ -257,7 +256,6 @@ private:
 		GRIDImageConstPointer l_IPVIEPtr = this->GetParameterDoubleVectorImage("vie");
 		//Get parameters
 		const double m_NoData = GetParameterFloat("nodata");
-		const unsigned short m_L2CoarseResolution = static_cast<unsigned short>(this->GetParameterInt("l2coarseres"));
 		const double m_VIEHRef = GetParameterFloat("viehref");
 		const unsigned int m_ShadowBandTOCR = GetParameterInt("shadbandtocr");
 		const unsigned int m_ShadowBandRCR = GetParameterInt("shadbandrcr");
@@ -283,7 +281,6 @@ private:
 		m_OutsideCloudShadowMaskFilter->SetIPEDGInput(l_IPEDGPtr);
 		m_OutsideCloudShadowMaskFilter->SetDTMInput(l_DTMPtr);
 		m_OutsideCloudShadowMaskFilter->SetIPVIEInput(l_IPVIEPtr);
-		m_OutsideCloudShadowMaskFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 		m_OutsideCloudShadowMaskFilter->SetMaxCLA(m_MaxCLA);
 		m_OutsideCloudShadowMaskFilter->SetVIEHRef(m_VIEHRef);
 		m_OutsideCloudShadowMaskFilter->UpdateOutputInformation();

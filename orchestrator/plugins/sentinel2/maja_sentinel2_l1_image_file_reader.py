@@ -223,9 +223,12 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         l_NbBand = len(l_ListOfTOAImageFileNames)  # int
         # TODO: check ConfigUserCameraXMLFileHandler
         # TODO; check GetL2CoarseResolution grep L2CoarseResolution
-        l_L2CoarseResolution = self._plugin.ConfigUserCamera.get_Business().get_L2CoarseResolution()  # int
+
         l_Areas = dem.L2Areas
         l_L2CoarseArea = dem.CoarseArea
+        l_L2CoarseResolution = int(round(dem.CoarseArea.spacing[0]))
+        LOGGER.debug(l_L2CoarseResolution)
+
         l_L1NoData = product_info.L1NoData
         l_ReflectanceQuantificationValue = product_info.ReflectanceQuantification
         l_RealL1NoData = l_L1NoData * l_ReflectanceQuantificationValue  # RealNoDataType
