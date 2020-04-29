@@ -149,7 +149,7 @@ class AppHandler:
         self._max_disc = max(total_disc,self._max_disc)
         return "System infos (RAM;DISK;HOUR;MIN;SEC) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
             int(self._max_disc)) + ";" + str(int(total_time.tm_hour)) + ";" + str(
-            int(total_time.tm_min)) + ";" + str(int(total_time.tm_sec)) + ";" + str(cpu_load[0] / cpu_nb)
+            int(total_time.tm_min)) + ";" + str(int(total_time.tm_sec)) + ";" + str(int(100.0 * cpu_load[0] / self._nbThreads))
 
     def initialize(self):
         maja_description = """ ./maja [options] \n\n
