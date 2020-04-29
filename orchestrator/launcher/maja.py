@@ -82,6 +82,7 @@ def main():
         LOGGER.info("Cleaning Temporary datas : Done")
 
     LOGGER.info("Process ok")
+    LOGGER.progress("Nominal end of computation")
     return
 
 

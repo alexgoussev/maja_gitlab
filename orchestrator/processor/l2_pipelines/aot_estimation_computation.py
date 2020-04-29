@@ -279,7 +279,7 @@ class ModuleAOTEstimationComputation(MajaModule):
                            "out": aot_smoothed_image,
                            "type": "gaussian",
                            "type.gaussian.radius": dict_of_input.get("L2COMM").get_value_f("SigmaSmoothingAOT"),
-                           "type.gaussian.maxkernelwidth": 4.0 * dict_of_input.get("L2COMM").get_value_f(
+                           "type.gaussian.maxkernelwidth": 20.0 * dict_of_input.get("L2COMM").get_value_f(
                                "SigmaSmoothingAOT"),
                            "type.gaussian.maxerror": 1e-15
                            }

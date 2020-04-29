@@ -43,34 +43,59 @@
 #include "vnsBinaryThresholdVectorImageFilter.h"
 #include "otbVectorImageToImageListFilter.h"
 #include "itkBinaryThresholdImageFilter.h"
+#include "vnsGDALLogInit.h"
 #include <string>
 
 
-#define CAST_AND_RES_VECTOR_IMAGE_BASE(Tin, Tout, image_base)     \
-		{                                                \
+#define CAST_AND_RES_VECTOR_IMAGE_BASE(Tin, Tout, image_base, out_thresh_type)     \
+{                                                \
 	Tin* img = dynamic_cast<Tin*>(image_base);         \
 	\
 	if (img)                                       \
 	{                                              \
-		DoResampleVector<Tin, Tout>(img, l_outArea, l_interpolator, l_padradius); \
-		return;                                      \
-		\
+	DoResampleVector<Tin, Tout>(img, l_outArea, l_interpolator, l_padradius, out_thresh_type); \
+	return;                                      \
+	\
 	}                                              \
-		} \
+} \
 
 
-#define CAST_AND_RES_IMAGE_BASE(Tin, Tout, image_base)     \
-		{                                                \
-			Tin* img = dynamic_cast<Tin*>(image_base);         \
-			\
-			if (img)                                       \
-			{                                              \
-				DoResample<Tin, Tout>(img, l_outArea, l_interpolator, l_padradius); \
-				return;                                      \
-				\
-			}                                              \
-		} \
+#define CAST_AND_RES_IMAGE_BASE(Tin, Tout, image_base, out_thresh_type)     \
+{                                                \
+	Tin* img = dynamic_cast<Tin*>(image_base);         \
+	\
+	if (img)                                       \
+	{                                              \
+	DoResample<Tin, Tout>(img, l_outArea, l_interpolator, l_padradius, out_thresh_type); \
+	return;                                      \
+	\
+	}                                              \
+} \
 
+#define THRESHOLD_VECTOR_IMAGE_BASE(Tin, Tout, image_base, out_type, out_thresh_type)     \
+{                                                \
+	Tin* img = dynamic_cast<Tin*>(image_base);         \
+	\
+	if (img)                                       \
+	{                                              \
+	DoThresholdVector<Tin, Tout>(img, out_type, out_thresh_type); \
+	return;                                      \
+	\
+	}                                              \
+} \
+
+
+#define THRESHOLD_IMAGE_BASE(Tin, Tout, image_base, out_type, out_thresh_type)     \
+{                                                \
+	Tin* img = dynamic_cast<Tin*>(image_base);         \
+	\
+	if (img)                                       \
+	{                                              \
+	DoThreshold<Tin, Tout>(img, out_type, out_thresh_type); \
+	return;                                      \
+	\
+	}                                              \
+} \
 
 
 namespace vns
@@ -124,20 +149,13 @@ public:
 	typedef MaskType::ConstPointer MaskConstPointer;
 
 
-	/** PadFilter used to manipulate real data */
-	typedef BinaryThresholdVectorImageFilter<VectorImageType, MaskVectorType> BinaryThresholdVectorImageFilterType;
-	typedef BinaryThresholdVectorImageFilterType::Pointer BinaryThresholdVectorImageFilterPointer;
-	typedef itk::BinaryThresholdImageFilter<ImageType, MaskType> BinaryThresholdImageFilterType;
-	typedef BinaryThresholdImageFilterType::Pointer BinaryThresholdImageFilterPointer;
-
-
-
 private:
 	void DoInit()
 	{
 		SetName("Resampling");
 		SetDescription("Resampling algo.");
 		Loggers::GetInstance()->Initialize(GetName());
+		GDALInit();
 		// Documentation
 		SetDocLongDescription("This application resample the image according to the dtm");
 		SetDocLimitations("None");
@@ -197,7 +215,7 @@ private:
 
 	template <typename TInputImage, typename TOutputImage>
 	void DoResampleVector(TInputImage* in, const Area& l_outArea, const typename ResamplerHelper::InterpolatorType& l_interpolator,
-			const unsigned int l_padradius)
+			const unsigned int l_padradius, const ImagePixelType& out_thresh_type)
 	{
 		/** PadFilter used to manipulate real data */
 		typedef PadAndResampleImageFilter<TInputImage, DoubleVectorImageType> PadAndResampleImageFilterType;
@@ -237,13 +255,14 @@ private:
 			l_ThresholderMask->ThresholdAbove(GetParameterFloat("threshold"));
 			l_ThresholderMask->SetInsideValue(0);
 			l_ThresholderMask->SetOutsideValue(1);
-			SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
+			SetParameterOutputImagePixelType("out", out_thresh_type);
 			SetParameterOutputImage<TOutputImage>("out",l_ThresholderMask->GetOutput());
 			m_Thresholder = l_ThresholderMask;
 			m_PadAndResampleFilter = l_PadAndResampleFilter;
 		}
 		else
 		{
+			SetParameterOutputImagePixelType("out", ImagePixelType_double);
 			SetParameterOutputImage<DoubleVectorImageType>("out",l_PadAndResampleFilter->GetOutput());
 			m_PadAndResampleFilter = l_PadAndResampleFilter;
 		}
@@ -251,7 +270,7 @@ private:
 
 	template <typename TInputImage, typename TOutputImage>
 	void DoResample(TInputImage* in, const Area& l_outArea, const typename ResamplerHelper::InterpolatorType& l_interpolator,
-			const unsigned int l_padradius)
+			const unsigned int l_padradius, const ImagePixelType& out_thresh_type)
 	{
 		/** PadFilter used to manipulate real data */
 		typedef PadAndResampleImageFilter<TInputImage, DoubleImageType> PadAndResampleImageFilterType;
@@ -291,15 +310,62 @@ private:
 			l_ThresholderMask->SetUpperThreshold(GetParameterFloat("threshold"));
 			l_ThresholderMask->SetInsideValue(0);
 			l_ThresholderMask->SetOutsideValue(1);
-			SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
+			SetParameterOutputImagePixelType("out", out_thresh_type);
 			SetParameterOutputImage<TOutputImage>("out",l_ThresholderMask->GetOutput());
 			m_Thresholder = l_ThresholderMask;
 			m_PadAndResampleFilter = l_PadAndResampleFilter;
 		}
 		else
 		{
+			SetParameterOutputImagePixelType("out", ImagePixelType_double);
 			SetParameterOutputImage<DoubleImageType>("out",l_PadAndResampleFilter->GetOutput());
 			m_PadAndResampleFilter = l_PadAndResampleFilter;
+		}
+	}
+
+	template <typename TInputImage, typename TOutputImage>
+		void DoThresholdVector(TInputImage* in, const ImagePixelType& out_type, const ImagePixelType& out_thresh_type)
+	{
+		if(HasValue("threshold"))
+		{
+			typedef BinaryThresholdVectorImageFilter<TInputImage, TOutputImage> BinaryThresholdVectorImageFilterType;
+			typedef typename BinaryThresholdVectorImageFilterType::Pointer BinaryThresholdVectorImageFilterPointer;
+			BinaryThresholdVectorImageFilterPointer l_VectorThresholder = BinaryThresholdVectorImageFilterType::New();
+			l_VectorThresholder->SetInput(in);
+			l_VectorThresholder->ThresholdAbove(GetParameterFloat("threshold"));
+			l_VectorThresholder->SetInsideValue(0);
+			l_VectorThresholder->SetOutsideValue(1);
+			SetParameterOutputImagePixelType("out", out_thresh_type);
+			SetParameterOutputImage<TOutputImage>("out",l_VectorThresholder->GetOutput());
+			m_Thresholder = l_VectorThresholder;
+		}
+		else
+		{
+			SetParameterOutputImagePixelType("out", out_type);
+			SetParameterOutputImage<TInputImage>("out", in);
+		}
+	}
+
+	template <typename TInputImage, typename TOutputImage>
+	void DoThreshold(TInputImage* in, const ImagePixelType& out_type, const ImagePixelType& out_thresh_type)
+	{
+		if(HasValue("threshold"))
+		{
+			typedef itk::BinaryThresholdImageFilter<TInputImage, TOutputImage> BinaryThresholdImageFilterType;
+			typedef typename BinaryThresholdImageFilterType::Pointer BinaryThresholdImageFilterPointer;
+			BinaryThresholdImageFilterPointer l_Thresholder = BinaryThresholdImageFilterType::New();
+			l_Thresholder->SetInput(in);
+			l_Thresholder->SetUpperThreshold(GetParameterFloat("threshold"));
+			l_Thresholder->SetInsideValue(0);
+			l_Thresholder->SetOutsideValue(1);
+			SetParameterOutputImagePixelType("out", out_thresh_type);
+			SetParameterOutputImage<TOutputImage>("out",l_Thresholder->GetOutput());
+			m_Thresholder = l_Thresholder;
+		}
+		else
+		{
+			SetParameterOutputImagePixelType("out", out_type);
+			SetParameterOutputImage<TInputImage>("out",in);
 		}
 	}
 
@@ -324,7 +390,6 @@ private:
 		{
 			l_padradius = GetParameterInt("padradius");
 		}
-
 
 		Area l_outArea;
 		l_outArea.Origin = l_dtmPtr->GetOrigin();
@@ -369,39 +434,17 @@ private:
 			vnsLogDebugMacro("No resampling needed");
 
 			if (className == "VectorImage") {
-				if(HasValue("threshold"))
-				{
-					BinaryThresholdVectorImageFilterPointer l_VectorThresholder = BinaryThresholdVectorImageFilterType::New();
-					l_VectorThresholder->SetInput(GetParameterDoubleVectorImage("im"));
-					l_VectorThresholder->ThresholdAbove(GetParameterFloat("threshold"));
-					l_VectorThresholder->SetInsideValue(0);
-					l_VectorThresholder->SetOutsideValue(1);
-					SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
-					SetParameterOutputImage<MaskVectorType>("out",l_VectorThresholder->GetOutput());
-					m_Thresholder = l_VectorThresholder;
-				}
-				else
-				{
-					SetParameterOutputImagePixelType("out", ImagePixelType_double);
-					SetParameterOutputImage<VectorImageType>("out", GetParameterDoubleVectorImage("im"));
-				}
+				vnsLogDebugMacro("VectorImage");
+				THRESHOLD_VECTOR_IMAGE_BASE(DoubleVectorImageType,UInt8VectorImageType,l_inPtr, ImagePixelType_double, ImagePixelType_uint8);
+				THRESHOLD_VECTOR_IMAGE_BASE(FloatVectorImageType,UInt8VectorImageType,l_inPtr, ImagePixelType_float, ImagePixelType_uint8);
+				THRESHOLD_VECTOR_IMAGE_BASE(UInt8VectorImageType, UInt8VectorImageType,l_inPtr, ImagePixelType_uint8, ImagePixelType_uint8);
+				THRESHOLD_VECTOR_IMAGE_BASE(UInt16VectorImageType, UInt16VectorImageType,l_inPtr, ImagePixelType_uint16, ImagePixelType_uint16);
 			} else {
-				if(HasValue("threshold"))
-				{
-					BinaryThresholdImageFilterPointer l_Thresholder = BinaryThresholdImageFilterType::New();
-					l_Thresholder->SetInput(GetParameterDoubleImage("im"));
-					l_Thresholder->SetUpperThreshold(GetParameterFloat("threshold"));
-					l_Thresholder->SetInsideValue(0);
-					l_Thresholder->SetOutsideValue(1);
-					SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
-					SetParameterOutputImage<MaskType>("out",l_Thresholder->GetOutput());
-					m_Thresholder = l_Thresholder;
-				}
-				else
-				{
-					SetParameterOutputImagePixelType("out", ImagePixelType_double);
-					SetParameterOutputImage<ImageType>("out", GetParameterDoubleImage("im"));
-				}
+				vnsLogDebugMacro("SingleImage");
+				THRESHOLD_IMAGE_BASE(DoubleImageType,UInt8ImageType,l_inPtr, ImagePixelType_double, ImagePixelType_uint8);
+				THRESHOLD_IMAGE_BASE(FloatImageType,UInt8ImageType,l_inPtr, ImagePixelType_float, ImagePixelType_uint8);
+				THRESHOLD_IMAGE_BASE(UInt8ImageType, UInt8ImageType,l_inPtr, ImagePixelType_uint8, ImagePixelType_uint8);
+				THRESHOLD_IMAGE_BASE(UInt16ImageType, UInt16ImageType,l_inPtr, ImagePixelType_uint16, ImagePixelType_uint16);
 			}
 		}
 		else
@@ -409,16 +452,16 @@ private:
 			vnsLogDebugMacro("Resampling needed");
 			if (className == "VectorImage") {
 				vnsLogDebugMacro("VectorImage");
-				CAST_AND_RES_VECTOR_IMAGE_BASE(DoubleVectorImageType,UInt8VectorImageType,l_inPtr);
-				CAST_AND_RES_VECTOR_IMAGE_BASE(FloatVectorImageType,UInt8VectorImageType,l_inPtr);
-				CAST_AND_RES_VECTOR_IMAGE_BASE(UInt8VectorImageType, UInt8VectorImageType,l_inPtr);
-				CAST_AND_RES_VECTOR_IMAGE_BASE(UInt16VectorImageType, UInt16VectorImageType,l_inPtr);
+				CAST_AND_RES_VECTOR_IMAGE_BASE(DoubleVectorImageType,UInt8VectorImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_VECTOR_IMAGE_BASE(FloatVectorImageType,UInt8VectorImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_VECTOR_IMAGE_BASE(UInt8VectorImageType, UInt8VectorImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_VECTOR_IMAGE_BASE(UInt16VectorImageType, UInt16VectorImageType,l_inPtr, ImagePixelType_uint16);
 			} else {
 				vnsLogDebugMacro("SingleImage");
-				CAST_AND_RES_IMAGE_BASE(DoubleImageType,UInt8ImageType,l_inPtr);
-				CAST_AND_RES_IMAGE_BASE(FloatImageType,UInt8ImageType,l_inPtr);
-				CAST_AND_RES_IMAGE_BASE(UInt8ImageType, UInt8ImageType,l_inPtr);
-				CAST_AND_RES_IMAGE_BASE(UInt16ImageType, UInt16ImageType,l_inPtr);
+				CAST_AND_RES_IMAGE_BASE(DoubleImageType,UInt8ImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_IMAGE_BASE(FloatImageType,UInt8ImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_IMAGE_BASE(UInt8ImageType, UInt8ImageType,l_inPtr, ImagePixelType_uint8);
+				CAST_AND_RES_IMAGE_BASE(UInt16ImageType, UInt16ImageType,l_inPtr, ImagePixelType_uint16);
 			}
 
 			vnsExceptionDataMacro("Unsuported image type");

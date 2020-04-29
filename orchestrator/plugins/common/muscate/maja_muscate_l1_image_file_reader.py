@@ -427,7 +427,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
 
                         dfp_mask = os.path.join(working, "L1_DFP_Masks_{}.tif".format(curL1Res))
                         param_bintovec_dfp = {"im": defectivPixFileNames[l1BandIdx],
-                                              "out": dfp_mask + ":double",
+                                              "out": dfp_mask,
                                               "nbcomp": nbL1Bands
                                               }
 
@@ -481,18 +481,18 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         LOGGER.debug("Start IPEDGSub.")
         tmp_edg_sub_resample = os.path.join(working_dir, "tmp_edg_sub.tif")
         edg_sub_resample_app = resample(onebandequal_app.getoutput().get("out"), dtm_coarse, tmp_edg_sub_resample,
-                                        OtbResampleType.LINEAR_WITH_RADIUS, padradius=4.0,write_output=False)
+                                        OtbResampleType.LINEAR_WITH_RADIUS, threshold=0.0, padradius=4.0,write_output=True)
         # Threshold the output
-        out_sub_edg = os.path.join(working_dir, "tmp_edg_sub_oneBandEqual.tif")
-        param_sub_edg = {"im": edg_sub_resample_app.getoutput().get("out"),
-                         "thresholdvalue": 0,
-                         "equalvalue": 0,
-                         "outsidevalue": 1,
-                         "out": out_sub_edg + ":uint8"
-                         }
-        onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg)
+        #out_sub_edg = os.path.join(working_dir, "tmp_edg_sub_oneBandEqual.tif")
+        #param_sub_edg = {"im": edg_sub_resample_app.getoutput().get("out"),
+        #                 "thresholdvalue": 0,
+        #                 "equalvalue": 0,
+        #                 "outsidevalue": 1,
+        #                 "out": out_sub_edg + ":uint8"
+        #                 }
+        #onebandequal_sub_app = OtbAppHandler("OneBandEqualThreshold", param_sub_edg)
         # Put in internal data
-        self._edgsubmask = onebandequal_sub_app.getoutput().get("out")
+        self._edgsubmask = edg_sub_resample_app.getoutput().get("out")
         del onebandequal_app
         del edg_sub_resample_app
         LOGGER.debug("Start IPEDGSub done.")

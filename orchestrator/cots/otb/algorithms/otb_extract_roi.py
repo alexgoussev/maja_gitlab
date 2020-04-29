@@ -35,18 +35,11 @@ LOGGER = configure_logger(__name__)
 
 
 def extract_roi(input_file_path, channels, output_image, write_output=True):
-    app = None
-    if len(channels) == 1:
-        parameters = {"in": input_file_path,
-                      "cl": int(channels[0])+1,
-                      "out": output_image}
-        app = OtbAppHandler("ExtractOneChannel", parameters, write_output)
-    else:
-        parameters = {"in": input_file_path,
-                      "cl": ["Channel" + str(idx + 1) for idx in channels],
-                      "out": output_image}
-        if get_test_mode():
-            parameters.pop("cl")
-        app = OtbAppHandler("ExtractChannels", parameters, write_output)
+    parameters = {"in": input_file_path,
+                  "cl": ["Channel" + str(idx + 1) for idx in channels],
+                  "out": output_image}
+    if get_test_mode():
+        parameters.pop("cl")
+    app = OtbAppHandler("ExtractChannels", parameters, write_output)
 
     return app

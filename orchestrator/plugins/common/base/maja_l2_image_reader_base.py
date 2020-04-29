@@ -188,7 +188,7 @@ class L2ImageReaderBase(object):
         # ********************************************************************************************************/
         tmp_pwa = os.path.join(working_dir, "tmp_pwa.tif")
         pwa_image_app = extract_roi(p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
-                                    [1], tmp_pwa, write_output=False)
+                                    [1], tmp_pwa + ":uint8", write_output=False)
         self._coarse_pipeline.add_otb_app(pwa_image_app)
         tmp_vecpwa = os.path.join(working_dir, "tmp_pwa_vec.tif")
         param_binpwa = {"im": pwa_image_app.getoutput()["out"],
@@ -205,7 +205,7 @@ class L2ImageReaderBase(object):
         twa_image = extract_roi(
             p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
             [2],
-            tmp_twa,
+            tmp_twa + ":uint8",
             write_output=False)
         tmp_vectwa = os.path.join(working_dir, "tmp_twa_vec.tif")
         param_bintwa = {"im": twa_image.getoutput().get("out"),

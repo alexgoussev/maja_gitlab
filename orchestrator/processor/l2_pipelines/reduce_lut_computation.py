@@ -81,7 +81,7 @@ class MajaReduceLutComputation(MajaModule):
         OtbAppHandler("ReduceLut", param_cr_lut)
         dict_of_output["cr_lut"] = cr_lut_file
         # Read the input lut header to get indexes
-        old_lut = maja_xml_app_lut.parse(dict_of_input.get("L2TOCR"))
+        old_lut = maja_xml_app_lut.parse(dict_of_input.get("L2TOCR"),True)
         # HR lut if wide field
         l_lutmap = LUTMap()
         # Add cr lut to map
@@ -117,7 +117,6 @@ class MajaReduceLutComputation(MajaModule):
         # Write down the lut map
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
-
         l_lutmap.export(output, 0, name_='LUTMap', namespacedef_='', pretty_print=True)
         l_lutmap_filename = os.path.join(rlc_working, "HR_LutMap.xml")
         with open(l_lutmap_filename, "w") as fh:

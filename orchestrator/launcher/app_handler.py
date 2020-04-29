@@ -73,6 +73,7 @@ class AppHandler:
         self._logLevel = ""
         self._processorName = AppHandler.L2INIT
         self._nbThreads = 4
+        self._max_disc = 0
         self._adminConfigSystemFileName = ""
         self._stylesheet = None
         self._userConf = None
@@ -142,8 +143,13 @@ class AppHandler:
 
     def get_system_infos(self):
         total_time =time.gmtime(time.time() - self._start_time)
-        return "System infos (RAM;DISK;TIME) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
-            int(disk_space_used(self._workingDirectory))) + ";" + str(float(total_time.tm_hour) + float(total_time.tm_min / 60.0) + float(total_time.tm_sec / 3600.0))
+        cpu_load = os.getloadavg()
+        cpu_nb = os.cpu_count()
+        total_disc = disk_space_used(self._workingDirectory)
+        self._max_disc = max(total_disc,self._max_disc)
+        return "System infos (RAM;DISK;HOUR;MIN;SEC) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
+            int(self._max_disc)) + ";" + str(int(total_time.tm_hour)) + ";" + str(
+            int(total_time.tm_min)) + ";" + str(int(total_time.tm_sec)) + ";" + str(cpu_load[0] / cpu_nb)
 
     def initialize(self):
         maja_description = """ ./maja [options] \n\n

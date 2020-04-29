@@ -63,7 +63,35 @@
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
 #include "otbMultiChannelExtractROI.h"
+#include "otbMultiToMonoChannelExtractROI.h"
 #include "otbWrapperListViewParameter.h"
+#include "vnsMacro.h"
+
+#define CAST_AND_EXTRACT_VECTOR_IMAGE_BASE(Tin, Tout, image_base)     \
+{                                                \
+	Tin* img = dynamic_cast<Tin*>(image_base);         \
+	\
+	if (img)                                       \
+	{                                              \
+		DoExtractVector<Tin, Tout>(img); \
+		return;                                      \
+		\
+	}                                              \
+} \
+
+
+#define CAST_AND_EXTRACT_IMAGE_BASE(Tin, Tout, image_base)     \
+{                                                \
+	Tin* img = dynamic_cast<Tin*>(image_base);         \
+	\
+	if (img)                                       \
+	{                                              \
+		DoExtract<Tin, Tout>(img); \
+		return;                                      \
+		\
+	}                                              \
+} \
+
 
 namespace vns
 {
@@ -85,10 +113,6 @@ public:
 
   itkTypeMacro(ExtractChannels, otb::Application);
 
-  /** Filters typedef */
-  typedef otb::MultiChannelExtractROI<DoubleVectorImageType::InternalPixelType, DoubleVectorImageType::InternalPixelType> ExtractROIFilterType;
-
-  typedef ExtractROIFilterType::InputImageType ImageType;
 
 protected:
   ExtractChannels()
@@ -131,7 +155,7 @@ private:
   {
     if (HasValue("in"))
     {
-      ImageType* inImage = GetParameterDoubleVectorImage("in");
+      ImageBaseType* inImage = GetParameterImageBase("in",0);
       unsigned int       nbComponents = inImage->GetNumberOfComponentsPerPixel();
       ListViewParameter* clParam      = dynamic_cast<ListViewParameter*>(GetParameterByKey("cl"));
       // Update the values of the channels to be selected if nbComponents is changed
@@ -151,23 +175,74 @@ private:
 
   }
 
-  void DoExecute() override
+  template <typename TInputImage, typename TOutputImage>
+  void DoExtractVector(TInputImage* in)
   {
-    ImageType* inImage = GetParameterDoubleVectorImage("in");
-    inImage->UpdateOutputInformation();
-
-    ExtractROIFilterType::Pointer extractROIFilter = ExtractROIFilterType::New();
-    extractROIFilter->SetInput(inImage);
-
-    for (unsigned int idx = 0; idx < GetSelectedItems("cl").size(); ++idx)
-    {
-      extractROIFilter->SetChannel(GetSelectedItems("cl")[idx] + 1);
-    }
-
-    SetParameterOutputImage("out", extractROIFilter->GetOutput());
-    RegisterPipeline();
+	  //MultiChannels
+	  typedef otb::MultiChannelExtractROI<typename TInputImage::InternalPixelType, typename TOutputImage::InternalPixelType> ExtractROIFilterType;
+	  typename ExtractROIFilterType::Pointer extractROIFilter = ExtractROIFilterType::New();
+	  extractROIFilter->SetInput(in);
+	  for (unsigned int idx = 0; idx < GetSelectedItems("cl").size(); ++idx)
+	  {
+		  extractROIFilter->SetChannel(GetSelectedItems("cl")[idx] + 1);
+	  }
+	  SetParameterOutputImage<TOutputImage>("out", extractROIFilter->GetOutput());
+	  m_ExtractFilter = extractROIFilter;
   }
 
+
+  template <typename TInputImage, typename TOutputImage>
+  void DoExtract(TInputImage* in)
+  {
+	  //MonoChannel
+	  typedef otb::MultiToMonoChannelExtractROI<typename TInputImage::InternalPixelType, typename TOutputImage::InternalPixelType> MonoChannelExtractROIFilterType;
+	  typename MonoChannelExtractROIFilterType::Pointer extractROIFilter = MonoChannelExtractROIFilterType::New();
+	  extractROIFilter->SetInput(in);
+	  extractROIFilter->SetChannel(GetSelectedItems("cl")[0] + 1);
+	  SetParameterOutputImage<TOutputImage>("out", extractROIFilter->GetOutput());
+	  m_ExtractFilter = extractROIFilter;
+  }
+
+
+
+  void DoExecute() override
+  {
+	  // Get input image pointers
+	  ImageBaseType* l_inPtr = GetParameterImageBase("in",0);
+	  // Guess the image type
+	  std::string className(l_inPtr->GetNameOfClass());
+	  vnsLogDebugMacro("Resampling needed");
+		if (className == "VectorImage") {
+			if (GetSelectedItems("cl").size() == 1)
+			{
+				vnsLogDebugMacro("SingleImage");
+				CAST_AND_EXTRACT_IMAGE_BASE(DoubleVectorImageType,DoubleImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_float);
+				CAST_AND_EXTRACT_IMAGE_BASE(FloatVectorImageType,FloatImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
+				CAST_AND_EXTRACT_IMAGE_BASE(UInt8VectorImageType, UInt8ImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_uint16);
+				CAST_AND_EXTRACT_IMAGE_BASE(UInt16VectorImageType, UInt16ImageType,l_inPtr);
+			} else {
+				vnsLogDebugMacro("VectorImage");
+				CAST_AND_EXTRACT_VECTOR_IMAGE_BASE(DoubleVectorImageType,DoubleVectorImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_float);
+				CAST_AND_EXTRACT_VECTOR_IMAGE_BASE(FloatVectorImageType,FloatVectorImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
+				CAST_AND_EXTRACT_VECTOR_IMAGE_BASE(UInt8VectorImageType, UInt8VectorImageType,l_inPtr);
+				SetParameterOutputImagePixelType("out",ImagePixelType_uint16);
+				CAST_AND_EXTRACT_VECTOR_IMAGE_BASE(UInt16VectorImageType, UInt16VectorImageType,l_inPtr);
+			}
+		} else {
+			vnsExceptionDataMacro("Unsuported image type : only vector supported");
+		}
+		vnsExceptionDataMacro("Unsuported image type");
+
+
+  }
+
+private:
+  itk::ProcessObject::Pointer m_ExtractFilter;
 };
 }
 }
