@@ -13,8 +13,6 @@ prepare-centos7:
     entrypoint: [""]
   tags:
     - docker
-  except:
-    - ci-heavy
   before_script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
            > /kaniko/.docker/config.json
@@ -39,46 +37,22 @@ build-centos7:
   image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
   tags:
     - docker
-  except:
-    - ci-heavy
   script:
     - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
+    - ctest -VV -S CI/maja_pkg.cmake
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
-    - cd build && ctest -j 4 -R apTv
+    - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    - cd .. && ls -lh build/Testing/*-*/
-    - ctest -V -S CI/maja_pkg.cmake
+    - ctest -j 4 -R apTv
+    - cd ..
+    - ls -lh build/Testing/*-*/
+    - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
   artifacts:
     expire_in: 5 days
     paths:
       - sha1.txt
       - tv_content.txt
       - build-pkg/*.run
-
-tv-centos7:
-  stage: validation
-  image: $BUILD_ENV_REGISTRY/maja-env-centos:7
-  timeout: 20h
-  tags:
-    - docker
-    - heavy-task
-  #~ only:
-    #~ - schedules
-  script:
-    # TODO: get latest active branch ? or stick to develop
-    # TODO: download / sync TV data
-    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $MAJA_ARTIFACTS" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
-    - file artifacts.zip
-    - unzip artifacts.zip
-    - pwd
-    - ls
-    - head tv_content.txt
-    - mkdir /opt/maja
-    - chmod +x build-pkg/*.run
-    - $(ls build-pkg/*.run) --target /opt/maja
-    - source /opt/maja/bin/.majaenv.sh
-    - maja
-    # IFS='\n' ; for cmd in $(cat tv_content.txt | cut -d ' ' -f 3-); do bash -c "$cmd"; done
 
