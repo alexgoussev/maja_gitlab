@@ -346,7 +346,7 @@ class L2ImageWriterBase(object):
                         "out": "tmp.tif:uint8"
                         }
         if not use_filenames:
-            concat_app = OtbAppHandler("ConcatenateMaskImages", param_concat,write_output=False)
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=False)
         else:
             concat_app = OtbAppHandler("ConcatenateImages", param_concat, write_output=False)
         param_bin_concat = {"im": concat_app.getoutput().get("out"),
@@ -512,7 +512,7 @@ class L2ImageWriterBase(object):
                 "out": tmp_qlk,
                 "ram": str(OtbAppHandler.ram_to_use / 3)
                 }
-            concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concat,write_output=True)
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=True)
 
             # Rescale between 0 and 255
             rescale_intensity(

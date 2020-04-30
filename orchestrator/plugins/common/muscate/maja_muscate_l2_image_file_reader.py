@@ -248,7 +248,7 @@ class MuscateL2ImageFileReader(L2ImageReaderBase):
                 "il": l_ListOfL2SurfaceReflectanceFilenames,
                 "out": tmp_refl_concat
             }
-            sre_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_reflectance_concat)
+            sre_concat_app = OtbAppHandler("ConcatenateImages", param_reflectance_concat)
             # Multiply by quantification value
             tmp_sre_scale = os.path.join(working_dir, "tmp_sre_scale_" + l_sres + ".tif")
             param_scaled_sre = {"im": sre_concat_app.getoutput().get("out"),
@@ -274,7 +274,7 @@ class MuscateL2ImageFileReader(L2ImageReaderBase):
                     "il": l_ListOfL2FlatReflectanceFilenames,
                     "out": tmp_flat_concat
                 }
-                fre_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_flat_concat)
+                fre_concat_app = OtbAppHandler("ConcatenateImages", param_flat_concat)
                 # Multiply by quantification value
                 tmp_fre_scale = os.path.join(working_dir, "tmp_fre_scale_" + l_sres + ".tif")
                 param_scaled_fre = {"im": fre_concat_app.getoutput().get("out"),

@@ -426,7 +426,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol1_concat = os.path.join(working_dir, "sol1_concat.tif")
             param_sol1_concat = {"il": [app_sol1_b1.getoutput().get("out"), app_sol1_b2.getoutput().get("out")],
                                  "out": tmp_sol1_concat}
-            app_sol1_concat = OtbAppHandler("ConcatenateDoubleImages", param_sol1_concat)
+            app_sol1_concat = OtbAppHandler("ConcatenateImages", param_sol1_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol1_concat.getoutput().get("out"),
                                    l_L1SOLSubsamplingFactor)
 
@@ -453,7 +453,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             tmp_sol2_concat = os.path.join(working_dir, "sol2_concat.tif")
             param_sol2_concat = {"il": [app_sol2_b1.getoutput().get("out"), app_sol2_b2.getoutput().get("out")],
                                  "out": tmp_sol2_concat}
-            app_sol2_concat = OtbAppHandler("ConcatenateDoubleImages", param_sol2_concat)
+            app_sol2_concat = OtbAppHandler("ConcatenateImages", param_sol2_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_sol2_concat.getoutput().get("out"),
                               l_L1SOLSubsamplingFactor)
             self._sol_pipeline.add_otb_app(app_sol2_concat)
@@ -504,7 +504,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
                                           app_vieb6b1_mult.getoutput().get("out"),
                                           app_vieb6b2_mult.getoutput().get("out")],
                                  "out": tmp_dtmvie_concat}
-            app_dtmvie_concat = OtbAppHandler("ConcatenateDoubleImages", param_dtmvie_concat)
+            app_dtmvie_concat = OtbAppHandler("ConcatenateImages", param_dtmvie_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_dtmvie_concat.getoutput().get("out"),
                               l_L1VIESubsamplingFactor)
             self._dtmvie_pipeline.add_otb_app(app_dtmvie_concat)
@@ -525,7 +525,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             param_shadowvie_concat = {"il": [app_vieb5b1_mult.getoutput().get("out"),
                                           app_vieb5b2_mult.getoutput().get("out")],
                                    "out": tmp_shadowvie_concat}
-            app_shadowvie_concat = OtbAppHandler("ConcatenateDoubleImages", param_shadowvie_concat)
+            app_shadowvie_concat = OtbAppHandler("ConcatenateImages", param_shadowvie_concat)
             self._shadowvie_pipeline.add_otb_app(app_shadowvie_concat)
             update_projection(l_FilenameProvider.m_TOAImageFileName, app_shadowvie_concat.getoutput().get("out"),
                               l_L1VIESubsamplingFactor)

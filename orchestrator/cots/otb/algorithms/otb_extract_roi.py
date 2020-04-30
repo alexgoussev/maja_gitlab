@@ -40,6 +40,6 @@ def extract_roi(input_file_path, channels, output_image, write_output=True):
                   "out": output_image}
     if get_test_mode():
         parameters.pop("cl")
-    app = OtbAppHandler("ExtractChannels", parameters, write_output)
+    app = OtbAppHandler("ExtractROI", parameters, write_output)
 
     return app

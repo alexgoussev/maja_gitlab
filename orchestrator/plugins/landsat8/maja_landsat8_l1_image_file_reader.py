@@ -134,7 +134,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             img_concatenate_toa = os.path.join(working_dir, "l1toa_{}.tif".format(l1res))
             param_concatenate_toa = {"il": self._toascalarlist,
                                  "out": img_concatenate_toa}
-            app_concatenate_toa = OtbAppHandler("ConcatenateDoubleImages", param_concatenate_toa,write_output=True)
+            app_concatenate_toa = OtbAppHandler("ConcatenateImages", param_concatenate_toa,write_output=True)
             self._l1toaimagelist.append(app_concatenate_toa.getoutput()["out"])
             self._qb_pipeline.free_otb_app()
             self._toa_pipeline.free_otb_app()
@@ -155,7 +155,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         param_concatenate = {"il": self._toasublist,
                              "out": toa_sub_image
                              }
-        app_concatenate = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
+        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
         self._toa_sub_pipeline.add_otb_app(app_concatenate)
         #apply edg
         #invert EDG for masking
@@ -263,7 +263,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
             out_sat_concatenate = os.path.join(working_dir, "SATVectorImageList{}.tif".format(l1res))
             param_concatenate_sat = {"il": self._satmasklist,
                                      "out": out_sat_concatenate + ":uint8"}
-            concatenate_sat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate_sat, write_output=False)
+            concatenate_sat_app = OtbAppHandler("ConcatenateImages", param_concatenate_sat, write_output=False)
             self._sat_pipeline.add_otb_app(concatenate_sat_app)
             # L2SAT
             self._l2satmasklist.append(concatenate_sat_app.getoutput().get("out"))
@@ -288,7 +288,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         param_concatenate = {"il": self._satsublist,
                              "out": sat_sub_image+ ":uint8"
                              }
-        app_concatenate = OtbAppHandler("ConcatenateMaskImages", param_concatenate)
+        app_concatenate = OtbAppHandler("ConcatenateImages", param_concatenate)
         self._subsatimage = app_concatenate.getoutput().get("out")
         self._sat_sub_pipeline.add_otb_app(app_concatenate)
         self._sat_sub_pipeline.free_otb_app()
@@ -310,7 +310,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "sol1_concat.tif")
         param_concatenate = {"il": [cla_app_1.getoutput().get("out"), cla_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
+        app = OtbAppHandler("ConcatenateImages", param_concatenate)
         self._sol1image = app.getoutput().get("out")
         self._sol1_pipeline.add_otb_app(app)
 
@@ -325,7 +325,7 @@ class Landsat8L1ImageFileReader(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "vie_concat.tif")
         param_concatenate = {"il": [app_1.getoutput().get("out"), app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
+        app = OtbAppHandler("ConcatenateImages", param_concatenate)
         self._vieimage.append(app.getoutput().get("out"))
         self._vie_pipeline.add_otb_app(app)
 

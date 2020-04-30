@@ -62,7 +62,7 @@ def assign_zenith_and_azimuth_image_to_grid_to_image(input_image_zen, input_valu
                                              "exp": "tan(im1b1)*cos(im2b1)"}, write_output=False)
     pipeline.add_otb_app(band_math_2)
 
-    concat = OtbAppHandler("ConcatenateDoubleImages", {"il": [band_math_1.getoutput().get(
+    concat = OtbAppHandler("ConcatenateImages", {"il": [band_math_1.getoutput().get(
         "out"), band_math_2.getoutput().get("out")], "out": output_filename}, write_output=True)
     pipeline.add_otb_app(concat)
 

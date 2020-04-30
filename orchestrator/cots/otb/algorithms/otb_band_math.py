@@ -49,7 +49,7 @@ def band_math(input_file_path_list, exp, output_image, write_output=True):
                   "il": input_file_path_list,
                   "out": output_image}
 
-    app = OtbAppHandler("BandMathDouble", parameters, write_output)
+    app = OtbAppHandler("BandMath", parameters, write_output)
 
     return app
 
@@ -59,6 +59,6 @@ def band_math_mask(input_file_path_list, exp, output_image, write_output=True):
                   "il": input_file_path_list,
                   "out": output_image}
 
-    app = OtbAppHandler("BandMathDouble", parameters, write_output)
+    app = OtbAppHandler("BandMath", parameters, write_output)
 
     return app

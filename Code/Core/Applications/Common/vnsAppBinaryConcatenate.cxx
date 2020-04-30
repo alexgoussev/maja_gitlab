@@ -91,7 +91,7 @@ private:
 		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
 		AddParameter(ParameterType_OutputImage, "out", "image");
 		SetParameterDescription("out","output image");
-		SetParameterOutputImagePixelType("out", ImagePixelType_uint16);
+		SetParameterOutputImagePixelType("out", ImagePixelType_int16);
 
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram",2048);

@@ -40,7 +40,6 @@
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
 #include "vnsMultiplyByScalarVectorImageFilter.h"
-#include "otbMultiplyByScalarImageFilter.h"
 #include "vnsLoggers.h"
 #include <string>
 
@@ -67,10 +66,8 @@ public:
 	itkTypeMacro(MultiplyByScalar, otb::Wrapper::Application);
 
 	/** Some convenient typedefs. */
-	typedef DoubleVectorImageType VectorImageType;
-	typedef vns::MultiplyByScalarVectorImageFilter<VectorImageType, VectorImageType> RealToRealScalarVectorImageFilterType;
-	typedef DoubleImageType ImageType;
-	typedef otb::MultiplyByScalarImageFilter<ImageType, ImageType> RealToRealScalarImageFilterType;
+	typedef DoubleVectorImageType ImageType;
+	typedef vns::MultiplyByScalarVectorImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
 
 
 private:
@@ -90,7 +87,6 @@ private:
 		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
 		AddParameter(ParameterType_Float, "coef","Coeff to multiply");
 		AddParameter(ParameterType_OutputImage, "out", "image");
-		SetParameterOutputImagePixelType("out", ImagePixelType_double);
 		SetParameterDescription("out","output image");
 
 		AddRAMParameter("ram");
@@ -106,38 +102,22 @@ private:
 
 	void DoExecute()
 	{
+		// Init filters
+		m_filter = RealToRealScalarVectorImageFilterType::New();
 
-
-		ImageBaseType* l_baseIm = this->GetParameterImageBase("im",0);
-		// Guess the image type
-		std::string className(l_baseIm->GetNameOfClass());
-
-		if (className == "VectorImage") {
-			// Init filters
-			m_vector_filter = RealToRealScalarVectorImageFilterType::New();
-			//Get Image
-			VectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
-			const double l_coeff = this->GetParameterFloat("coef");
-			m_vector_filter->SetInput(l_im);
-			m_vector_filter->SetCoeff(l_coeff);
-			SetParameterOutputImage<VectorImageType>("out",m_vector_filter->GetOutput());
-		} else {
-			// Init filters
-			m_filter = RealToRealScalarImageFilterType::New();
-			//Get Image
-			ImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
-			const double l_coeff = this->GetParameterFloat("coef");
-			m_filter->SetInput(l_im);
-			m_filter->SetCoef(l_coeff);
-			SetParameterOutputImage<ImageType>("out",m_filter->GetOutput());
-		}
+		//Get Image
+		ImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
+		const double l_coeff = this->GetParameterFloat("coef");
+		m_filter->SetInput(l_im);
+		m_filter->SetCoeff(l_coeff);
+		SetParameterOutputImagePixelType("out", ImagePixelType_double);
+		SetParameterOutputImage<ImageType>("out",m_filter->GetOutput());
 
 	}
 
 
 	/** Filters declaration */
-	RealToRealScalarVectorImageFilterType::Pointer m_vector_filter;
-	RealToRealScalarImageFilterType::Pointer m_filter;
+	 RealToRealScalarVectorImageFilterType::Pointer m_filter;
 };
 
 }
