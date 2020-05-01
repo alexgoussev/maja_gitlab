@@ -91,6 +91,7 @@ tv-centos7:
     - CI/run_tv.sh tv_content.txt
   artifacts:
     expire_in: 5 days
+    when: on_failure
     paths:
       - err_logs/*.log
 
