@@ -71,10 +71,10 @@ tv-centos7:
     MAJA_TEST_OUTPUT_ROOT: "test_output"
     MAJA_BIN: "/opt/maja/bin"
     MAJA_LAUNCHER_PYTHON: "/opt/maja/lib/python/orchestrator/launcher"
+    OTB_MAX_RAM_HINT: 40000
+    ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 16
   script:
     # TODO: get latest active branch ? or stick to develop
-    # TODO: download / sync TV data
-    - mkdir data
     - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $MAJA_ARTIFACTS" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/ci-gpo/download?job=build-centos7"'
     - file artifacts.zip
     - unzip artifacts.zip
@@ -87,6 +87,10 @@ tv-centos7:
     - $(ls build-pkg/*.run) --target /opt/maja
     - ln -s /opt/maja/bin/python3.7 /opt/maja/bin/python3
     - source /opt/maja/bin/.majaenv.sh
-    - maja
-    - OLDIFS=$IFS; IFS=$'\n' ; for cmd in $(cat tv_content.txt | grep 'Test command' | cut -d ' ' -f 4-); do bash -c "$cmd"; done; IFS=$OLDIFS
+    #- time rclone copy s3_otb:maja-data/TV/SENTINEL2_MUSCATE data/TV/SENTINEL2_MUSCATE
+    - CI/run_tv.sh
+  artifacts:
+    expire_in: 5 days
+    paths:
+      - err_logs/*.log
 
