@@ -21,6 +21,7 @@ function(prepare_file_list file_list_result)
   set(file_list
     "${SUPERBUILD_INSTALL_DIR}/bin/xmllint"
     "${SUPERBUILD_INSTALL_DIR}/bin/xsltproc"
+    "${SUPERBUILD_INSTALL_DIR}/bin/python3.7"
     )
   if(WITH_VALIDATION)
     list(APPEND file_list "${MAJA_TEST_EXE_DIR}/vnsDummyProgram")
@@ -29,7 +30,6 @@ function(prepare_file_list file_list_result)
   endif()
   #message(FATAL_ERROR "file_list=${file_list}")
   file(GLOB file_list_glob
-    "${SUPERBUILD_INSTALL_DIR}/bin/python3*"
     "${SUPERBUILD_INSTALL_DIR}/bin/gdal*${EXE_EXT}"
     "${SUPERBUILD_INSTALL_DIR}/bin/ogr*${EXE_EXT}"
     "${SUPERBUILD_INSTALL_DIR}/lib/otb/applications/*${LIB_EXT}"
