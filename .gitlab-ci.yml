@@ -88,7 +88,7 @@ tv-centos7:
     - ln -s /opt/maja/bin/python3.7 /opt/maja/bin/python3
     - source /opt/maja/bin/.majaenv.sh
     #- time rclone copy s3_otb:maja-data/TV/SENTINEL2_MUSCATE data/TV/SENTINEL2_MUSCATE
-    - CI/run_tv.sh
+    - CI/run_tv.sh tv_content.txt
   artifacts:
     expire_in: 5 days
     paths:
