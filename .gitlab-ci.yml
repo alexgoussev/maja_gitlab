@@ -48,7 +48,12 @@ build-centos7:
     - ctest -j 4 -R apTv
     - cd ..
     - ls -lh build/Testing/*-*/
+    # Filter tv_content.txt to be used in a different job
     - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
+    - sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
   artifacts:
     expire_in: 5 days
     paths:
