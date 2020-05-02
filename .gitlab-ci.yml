@@ -1,3 +1,4 @@
+
 variables:
   BUILD_ENV_REGISTRY: $CI_REGISTRY/maja/maja-build-env
 
@@ -5,6 +6,8 @@ stages:
   - prepare
   - build
   - validation
+
+# ---------------------------- fast pipeline ----------------------------------
 
 prepare-centos7:
   stage: prepare
@@ -14,7 +17,7 @@ prepare-centos7:
   tags:
     - docker
   except:
-    - ci-heavy
+    - schedules
   before_script:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
            > /kaniko/.docker/config.json
@@ -40,16 +43,24 @@ build-centos7:
   tags:
     - docker
   except:
-    - ci-heavy
+    - schedules
   script:
     - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
+    - ctest -VV -S CI/maja_pkg.cmake
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
-    - cd build && ctest -j 4 -R apTv
+    - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    - cd .. && ls -lh build/Testing/*-*/
-    - ctest -V -S CI/maja_pkg.cmake
+    - ctest -j 4 -R apTv
+    - cd ..
+    - ls -lh build/Testing/*-*/
+    # Filter tv_content.txt to be used in a different job
+    - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
+    - sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
   artifacts:
     expire_in: 5 days
     paths:
@@ -57,6 +68,7 @@ build-centos7:
       - tv_content.txt
       - build-pkg/*.run
 
+# ---------------------------- heavy pipeline ----------------------------------
 tv-centos7:
   stage: validation
   image: $BUILD_ENV_REGISTRY/maja-env-centos:7
@@ -64,8 +76,8 @@ tv-centos7:
   tags:
     - docker
     - heavy-task
-  #~ only:
-    #~ - schedules
+  only:
+    - schedules
   variables:
     MAJA_DATA: "data"
     MAJA_TEST_OUTPUT_ROOT: "test_output"
