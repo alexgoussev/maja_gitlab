@@ -76,8 +76,11 @@ class L2Processor(BaseProcessor):
         super(L2Processor, self).__init__(apphandler)
 
         # Get the thread value
-        self._nbThreads = 4  # self._apphandler.get_user_conf().get_Computing().get_NbThreads()
-        os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(self._nbThreads)
+        if "ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS" in os.environ:
+            self._nbThreads = int(os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"])
+        else:
+            self._nbThreads = 4  # self._apphandler.get_user_conf().get_Computing().get_NbThreads()
+            os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(self._nbThreads)
 
         LOGGER.info("Using " + str(self._nbThreads) + " Threads")
         # Get the ram value
