@@ -35,7 +35,7 @@ prepare-centos7:
       - SuperBuild/**/*
       - CMakeConfig/CommonCmakeOptions.cmake
       - CMakeConfig/MAJAConfigurationSetting.cmake
-      #~ - .gitlab-ci.yml
+      - .gitlab-ci.yml
 
 build-centos7:
   stage: build
