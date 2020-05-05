@@ -14,7 +14,7 @@
 Software: **MAJA**
 **SETG-**\ **CG-**\ **MAJA-**\ **010-**\ **CS**                       
 Change                                          02 Date              29/11/2019
-Issue                                           01 Date              10/03/2020
+Issue                                           02 Date              05/05/2020
 Distribution Code                               E
 Ref. : CSSI/SPACE/PD&A/MAJA/DCG 
 =============================================== == ================= ============
@@ -22,14 +22,13 @@ Ref. : CSSI/SPACE/PD&A/MAJA/DCG
 **DOCUMENT DE CONCEPTION GLOBALE POUR LES CHAINES MAJA [DCG]**
 
 =================================== ===============
-Rédigé par :                        le : 10/03/2020
+Rédigé par :                        le : 05/05/2020
                                                    
 ESQUIS Benjamin  CSSI/ESPACE/PDA/IP                
-BRICIER Aurélien CSSI/ESPACE/PDA/IP                
-Validé par :                        le : 18/04/2018
+Validé par :                        le : 05/05/2020
                                                    
 OLIVIE Francis CSSI/ESPACE/DSM                     
-Pour application :                  le : 10/03/2020
+Pour application :                  le : 05/05/2020
                                                    
 ESQUIS Benjamin CSSI/ESPACE/PDA/IP                
 =================================== ===============
@@ -105,6 +104,12 @@ PUJOL Mathilde      DNO/DA/AQ
 
 === ==== ========== ================================================================================
 Ed. Rév. Date       Référence, Auteur(s), Causes d’évolution
+02  02   05/05/2020 CSSI/ESPACE/PDA/IP/MAJA/DCG
+                   
+                    ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                   
+                    MAJ pour MAJA 4.2
+
 02  01   10/03/2020 CSSI/ESPACE/PDA/IP/MAJA/DCG
                    
                     ESQUIS Benjamin CSSI/ESPACE/PDA/IP

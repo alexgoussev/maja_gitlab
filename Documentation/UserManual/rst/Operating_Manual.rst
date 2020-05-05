@@ -392,6 +392,8 @@ One log message consists of:
 
 -  The process identifier (PID),
 
+- For Progress : Maximum RAM used during the processing, disk usage in working directory, time spend, cpu average load
+
 -  The type of message in increasing order of severity:
 
 -  [D] for Debug,
