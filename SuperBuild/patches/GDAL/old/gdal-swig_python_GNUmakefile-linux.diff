@@ -1,11 +1,21 @@
-diff -burN gdal-1.10.1.orig/swig/python/GNUmakefile gdal-1.10.1/swig/python/GNUmakefile
---- gdal-2.2.1.orig/swig/python/GNUmakefile	(revision 30563)
-+++ gdal-2.2.1/swig/python/GNUmakefile	(revision 30564)
-@@ -5,4 +5,8 @@
+diff -burN gdal-2.4.1_orig/swig/python/GNUmakefile gdal-2.4.1/swig/python/GNUmakefile
+--- gdal-2.4.1_orig/swig/python/GNUmakefile	2019-03-15 13:30:02.000000000 +0100
++++ gdal-2.4.1/swig/python/GNUmakefile	2020-04-27 18:32:07.572163441 +0200
+@@ -3,9 +3,17 @@
+ include ../../GDALmake.opt
+
  ifndef PYTHON
++	echo "dans if"
          PYTHON=python
-+endif
+ endif
+
++echo "=======toto"
++echo "$(PYTHON)"
 +
 +ifndef DESTDIR
 +    DESTDIR=/
- endif 
++endif
++
+ all: build
+
+ BINDING = python

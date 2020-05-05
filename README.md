@@ -1,4 +1,3 @@
-
 # MAJA
 <img  title="Ambaro Bay, Madagascar" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2017/05/20160406.png" width="300" height="300" align="right"  />
 <img  title="logo MAJA" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/11/logo_maja.png" alt="" width="80"  /> 
@@ -102,11 +101,7 @@ After compiling, you will be able to run maja in the following path: `<path/to/m
 Run `maja --help` to see a full list of parameters.
 
 We recommend the use of a basic orchestrator, called Start_maja in order to process a time-series of images.
-You can find the repo here:
-
-https://github.com/CNES/Start-MAJA
-
-There, you will find a manual on how to set up the software as well as a basic example.
+You can find the code [here](Start-MAJA/Readme.md). There, you will also find a manual on how to set up the software as well as a basic example.
 
 
 <a name="doc"></a>
