@@ -74,9 +74,25 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/folders.txt.in
 
 
 add_test(NAME pyTv_START_MAJA
-	COMMAND ${PYTHON_EXECUTABLE} ${MAJA_SOURCE_DIR}/StartMaja/Start_maja.py -f ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt -t 31UDQ --nbackward 2 -y)
+	COMMAND ${PYTHON_EXECUTABLE} ${MAJA_SOURCE_DIR}/StartMaja/Start_maja.py -f ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt -t 31UDQ --nbackward 2 -y -v)
 
 set_tests_properties(pyTv_START_MAJA PROPERTIES TIMEOUT 300000)
+
+
+add_test(NAME pyTv_START_MAJA_COMP_IMAGE
+        COMMAND ${TEST_DRIVER_MAJA}
+        ${MAJA_BINARY_DIR}/bin/vnsTestMainLauncher.sh
+        "--from-directory-compare-all-images" ${EPSILON_3}
+        ${MAJADATA_TV_STARTMAJA_BASELINE}/SENTINEL2A_20170615-105505-255_L2A_T31UDQ_C_V1-0
+        ${MAJADATA_TV_STARTMAJA_INPUT}/
+        ${MAJA_TEST_OUTPUT_ROOT}/TV_START_MAJA/L2-Products/31UDQ/SENTINEL2A_20170615-105505-255_L2A_T31UDQ_C_V1-0
+        "--recursively" "true" "--output-directory"
+        ${MAJA_TEST_OUTPUT_ROOT}/TV_START_MAJA/L2-Products/31UDQ/testing-compare-output-directory
+        ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
+        )
+
+
+
 
 
 
