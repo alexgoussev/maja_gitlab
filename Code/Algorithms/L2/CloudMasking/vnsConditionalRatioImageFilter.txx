@@ -150,7 +150,7 @@ namespace vns
                 // Test if the pixel is not cloudy for the date D, edges for the date D and D-1
                 // or water for the date D-1
                 if ((l_L2CLDSubValue == 0) && (l_IPEDGValue == 0) && (l_L2inWASValue == 0)
-                        /* && (l_L2inNDTValue == 0) */ && (l_L2inRCRValue != 0) && (l_L2inRCRValue != m_NoData))
+                        /* && (l_L2inNDTValue == 0) */ && !vnsEqualsDoubleMacro(l_L2inRCRValue, 0) && !vnsEqualsDoubleMacro(l_L2inRCRValue,m_NoData))
                 {
                     // Compute difference between the current image of reflectance and
                     // the composite image
