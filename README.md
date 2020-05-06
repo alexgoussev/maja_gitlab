@@ -252,10 +252,11 @@ if you want to use CAMS option, follow [cams_download tool instructions](StartMa
 
 ### Execute start_maja.py
 
-Here is an example of command line
+After compiling, you will be able to run startmaja in the following path: <path/to/maja-install>/maja/4.x/bin/startmaja. Run startmaja --help to see a full list of parameters.
+Here is an example of command line.
 ```
-Usage   : python ./start_maja.py -f <folder_file> -t <tile name> -s <Site Name> -d <start date>
-Example : python ./start_maja.py -f folders.txt -t 31TFJ -s Avignon -d 20170101 -e 20180101
+Usage   : <path/to/maja-install>/maja/4.x/bin/startmaja -f <folder_file> -t <tile name> -s <Site Name> -d <start date>
+Example : <path/to/maja-install>/maja/4.x/bin/startmaja -f folders.txt -t 31TFJ -s Avignon -d 20170101 -e 20180101
 ```
 Description of command line options :
 * -f provides the folders filename
