@@ -219,7 +219,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'PE-@MAJA_VERSION_MAJOR@.@MAJA_VERSION_MINOR@.@MAJA_VERSION_PATCH@.tex', u'Plan d\'essais MAJA ',
+  ('index', 'PlanEssais-@MAJA_VERSION_MAJOR@.@MAJA_VERSION_MINOR@.@MAJA_VERSION_PATCH@.tex', u'Plan d\'essais MAJA ',
    u'MAJA Team', 'manual'),
 ]
 

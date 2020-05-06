@@ -95,7 +95,7 @@ set(MAJA_COPYRIGHT_TEXT "2019 CNES. The MAJA Software is licensed under a Creati
 configure_file(${RST_SOURCE_DIR}/conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY)
 message(${SPHINX_CONF_DIR}/conf.py)
 
- add_custom_target(CookBookTexFromRST
+ add_custom_target(PETexFromRST
    COMMAND sphinx-build
    -b latex
    ${RST_BINARY_DIR}
@@ -108,7 +108,7 @@ message(${SPHINX_CONF_DIR}/conf.py)
 
 set(PE_TEX PlanEssais-${MAJA_VERSION_MAJOR}.${MAJA_VERSION_MINOR}.${MAJA_VERSION_PATCH})
 
- add_custom_target(CookBookPDF
+ add_custom_target(PE_PDF
    ALL
    COMMAND ${PDFLATEX_COMMAND} ${PE_TEX}.tex
    COMMAND ${PDFLATEX_COMMAND} ${PE_TEX}.tex
@@ -116,5 +116,5 @@ set(PE_TEX PlanEssais-${MAJA_VERSION_MAJOR}.${MAJA_VERSION_MINOR}.${MAJA_VERSION
    COMMAND ${PDFLATEX_COMMAND} ${PE_TEX}.tex
    COMMAND ${PDFLATEX_COMMAND} ${PE_TEX}.tex
    WORKING_DIRECTORY ${LATEX_DIR}
-   DEPENDS CookBookTexFromRST
+   DEPENDS PETexFromRST
    COMMENT "Building RST documentation in pdf")

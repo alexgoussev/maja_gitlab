@@ -13,19 +13,19 @@ structure du document
 ---------------------
 
 Ce document s’articule autour de quatre grandes parties :
-– Présentation générale avec :
-– Ce même chapitre,
-– L’environnement de validation,
-– Les tests Unitaires :
-– Description des tests unitaires,
-– Les tests de validation algorithmique (Validation numérique) :
-– Description des tests,
-– Liste des tests,
-– Description détaillée des tests
-– Les essais de validation (Validation globale) :
-– Description de la phase d’Intégration et de Validation,
-– Liste des essais,
-– Description détaillée des essais
-– Annexes :
-– A : Matrice de couvertures des exigences,
-– B : La génération du plan d’essai
+
+- Présentation générale avec :
+- Ce même chapitre,
+- L’environnement de validation,
+- Les tests Unitaires :
+  * Description des tests unitaires,
+- Les tests de validation algorithmique (Validation numérique) :
+  * Description des tests,
+  * Liste des tests,
+  * Description détaillée des tests
+- Les essais de validation (Validation globale) :
+  * Description de la phase d’Intégration et de Validation,
+  * Liste des essais,
+  * Description détaillée des essais
+- Annexes
+
