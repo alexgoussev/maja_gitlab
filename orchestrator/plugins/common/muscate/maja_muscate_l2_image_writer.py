@@ -533,4 +533,3 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
             # *************************************************************************************************************
             # WARNING : For simplicity, the SOL and VIE images (and headers) are written by the L2HeaderFileWriter
             # *************************************************************************************************************
-

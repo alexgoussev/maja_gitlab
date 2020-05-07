@@ -168,4 +168,3 @@ class MajaMaskResampling(MajaModule):
 
 
         dict_of_output["L2CLDList"] = l2_cld_list
-

@@ -45,17 +45,6 @@ import orchestrator.common.conf.maja_xml_camera_user_config as camera_user_conf
 
 class PluginBase(object):
 
-    CLDCoreAlgorithmsMapBand = {CLOUD_MASK_ALL : 0,
-                                CLOUD_MASK_ALL_CLOUDS : 1,
-                                CLOUD_MASK_SHADOWS : 2,
-                                CLOUD_MASK_SHADVAR : 3,
-                                CLOUD_MASK_REFL : 4,
-                                CLOUD_MASK_REFL_VAR : 5,
-                                CLOUD_MASK_EXTENSION : 6,
-                                CLOUD_MASK_ALT : 7,
-                                CLOUD_MASK_CIRRUS : 8
-                                }
-
     def __init__(self):
         self.WebSiteURL = ""
         self.ReferenceDate = "20000101"
@@ -90,7 +79,16 @@ class PluginBase(object):
         self.L2PRODUCT_FILE_VERSION = "NOT INITIALIZED"
         self.L3PRODUCT_FILE_VERSION = "NOT INITIALIZED"
 
-
+        self.CLDCoreAlgorithmsMapBand = {}
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_ALL] = 0
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_ALL_CLOUDS] = 1
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_SHADOWS] = 2
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_SHADVAR] = 3
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_REFL] = 4
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_REFL_VAR] = 5
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_EXTENSION] = 6
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_ALT] = 7
+        self.CLDCoreAlgorithmsMapBand[CLOUD_MASK_CIRRUS] = 8
 
         # Schemas directories
         self.MAJA_INSTALL_SCHEMAS_DIR = ""
@@ -140,12 +138,9 @@ class PluginBase(object):
     def is_valid(self, plugin_name):
         return self.PluginName == plugin_name
 
-    @staticmethod
-    def get_cld_algoindex_from_bandname(band_name):
-        if band_name in PluginBase.CLDCoreAlgorithmsMapBand:
-            return PluginBase.CLDCoreAlgorithmsMapBand[band_name]
-        else:
-            raise MajaDataException("Internal error: the CLD band '" + band_name + "' is not defined!")
+    def get_cld_algoindex_from_bandname(self, band_name):
+        if band_name in self.CLDCoreAlgorithmsMapBand:
+            return self.CLDCoreAlgorithmsMapBand[band_name]
 
     def is_valid_with_satellite(self, p_sat):
         return p_sat in self.ListOfSatellites

@@ -155,31 +155,57 @@ class L2ImageWriterBase(object):
         self._aotnodatavalue = aotnodatavalue
 
     def set_quicklook_min_refl_redband(self, quicklookminreflredband):
-        self._quicklookminreflredband = quicklookminreflredband
+        if quicklookminreflredband[1] == '0':
+            self._quicklookminreflredband = quicklookminreflredband[0:1] + quicklookminreflredband[2:len(quicklookminreflredband)]
+        else:
+            self._quicklookminreflredband = quicklookminreflredband
 
     def set_quicklook_min_refl_greenband(self, quicklookminreflgreenband):
-        self._quicklookminreflgreenband = quicklookminreflgreenband
+        if quicklookminreflgreenband[1] == '0':
+            self._quicklookminreflgreenband = quicklookminreflgreenband[0:1] + quicklookminreflgreenband[2:len(quicklookminreflgreenband)]
+        else:
+            self._quicklookminreflgreenband = quicklookminreflgreenband
 
     def set_quicklook_min_refl_blueband(self, quicklookminreflblueband):
-        self._quicklookminreflblueband = quicklookminreflblueband
+        if quicklookminreflblueband[1] == '0':
+            self._quicklookminreflblueband = quicklookminreflblueband[0:1] + quicklookminreflblueband[2:len(quicklookminreflblueband)]
+        else:
+            self._quicklookminreflblueband = quicklookminreflblueband
 
     def set_quicklook_max_refl_redband(self, quicklookmaxreflredband):
+        if quicklookmaxreflredband[1] == '0':
+            quicklookmaxreflredband = quicklookmaxreflredband[0:1] + quicklookmaxreflredband[2:len(quicklookmaxreflredband)]
         self._quicklookmaxreflredband = quicklookmaxreflredband
 
     def set_quicklook_max_refl_greenband(self, quicklookmaxreflgreenband):
-        self._quicklookmaxreflgreenband = quicklookmaxreflgreenband
+        if quicklookmaxreflgreenband[1] == '0':
+            self._quicklookmaxreflgreenband = quicklookmaxreflgreenband[0:1] + quicklookmaxreflgreenband[2:len(quicklookmaxreflgreenband)]
+        else:
+            self._quicklookmaxreflgreenband = quicklookmaxreflgreenband
 
     def set_quicklook_max_refl_blueband(self, quicklookmaxreflblueband):
-        self._quicklookmaxreflblueband = quicklookmaxreflblueband
+        if quicklookmaxreflblueband[1] == '0':
+            self._quicklookmaxreflblueband = quicklookmaxreflblueband[0:1] + quicklookmaxreflblueband[2:len(quicklookmaxreflblueband)]
+        else:
+            self._quicklookmaxreflblueband = quicklookmaxreflblueband
 
     def set_quicklook_red_band_code(self, quicklookredbandcode):
-        self._quicklookredbandcode = quicklookredbandcode
+        if quicklookredbandcode[1] == '0':
+            self._quicklookredbandcode = quicklookredbandcode[0:1] + quicklookredbandcode[2:len(quicklookredbandcode)]
+        else:
+            self._quicklookredbandcode = quicklookredbandcode
 
     def set_quicklook_green_band_code(self, quicklookgreenbandcode):
-        self._quicklookgreenbandcode = quicklookgreenbandcode
+        if quicklookgreenbandcode[1] == '0':
+            self._quicklookgreenbandcode = quicklookgreenbandcode[0:1] + quicklookgreenbandcode[2:len(quicklookgreenbandcode)]
+        else:
+            self._quicklookgreenbandcode = quicklookgreenbandcode
 
     def set_quicklook_blue_band_code(self, quicklookbluebandcode):
-        self._quicklookbluebandcode = quicklookbluebandcode
+        if quicklookbluebandcode[1] == '0':
+            self._quicklookbluebandcode = quicklookbluebandcode[0:1] + quicklookbluebandcode[2:len(quicklookbluebandcode)]
+        else:
+            self._quicklookbluebandcode = quicklookbluebandcode
 
     def set_projection_ref(self, projectionref):
         self._projectionref = projectionref
@@ -430,7 +456,7 @@ class L2ImageWriterBase(object):
             otb_file_utils.otb_copy_image_to_file(
                 self._ndt,
                 p_L2PrivateImageFilenamesProvider.get_ndt_image_filename() +
-                file_utils.get_extended_filename_write_image_file_standard()+":uint16")
+                file_utils.get_extended_filename_write_image_file_standard())
 
             # START WRITING LTC Image file DATA
             # Create the image list
@@ -534,6 +560,9 @@ class L2ImageWriterBase(object):
                 inmin=[str(p_QuicklookMinReflRedBand), str(p_QuicklookMinReflGreenBand), str(p_QuicklookMinReflBlueBand)],
                 inmax=[str(p_QuicklookMaxReflRedBand), str(p_QuicklookMaxReflGreenBand), str(p_QuicklookMaxReflBlueBand)]
             )
+            if (os.path.exists(filename + '.aux.xml')):
+                LOGGER.debug("Removing " + filename + '.aux.xml file')
+                os.remove(filename + '.aux.xml')
 
     @staticmethod
     def write_quicklook_image(
@@ -602,4 +631,3 @@ class L2ImageWriterBase(object):
                                                                p_RealL2NoData,
                                                                dtm,
                                                                working_dir)
-
