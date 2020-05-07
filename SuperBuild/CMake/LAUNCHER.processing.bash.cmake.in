@@ -1,0 +1,24 @@
+############################################################################################################
+#                                                                                                          #
+#                                        __  __    __     ____   __                                        #
+#                                       (  \/  )  /__\   (_  _) /__\                                       #
+#                                        )    (  /(__)\ .-_)(  /(__)\                                      #
+#                                       (_/\/\_)(__)(__)\____)(__)(__)                                     #
+#                                                                                                          #
+#                                                                                                          #
+############################################################################################################
+# HISTORIQUE                                                                                               #
+#                                                                                                          #
+# VERSION : 3.1.0 : DM : LAIG-DM-MAJA-2526-CNES : 9 avril 2018 : Montée de version de d'OTB 6.0            #
+#                                                                                                          #
+# FIN-HISTORIQUE                                                                                           #
+#                                                                                                          #
+# $Id$                                                                                                     #
+#                                                                                                          #
+############################################################################################################
+
+#!/bin/sh
+MAJA_INSTALL_DIR=@SB_INSTALL_PREFIX@
+# MAJA_INSTALL_DIR is used by executable (to detects install directory, and find schemas, xml templates, ...)
+export MAJA_INSTALL_DIR
+@SB_INSTALL_PREFIX@/bin/@wrapper_script@ $@

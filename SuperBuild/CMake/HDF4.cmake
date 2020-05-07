@@ -1,0 +1,49 @@
+############################################################################################################
+#                                                                                                          #
+#                                        __  __    __     ____   __                                        #
+#                                       (  \/  )  /__\   (_  _) /__\                                       #
+#                                        )    (  /(__)\ .-_)(  /(__)\                                      #
+#                                       (_/\/\_)(__)(__)\____)(__)(__)                                     #
+#                                                                                                          #
+#                                                                                                          #
+############################################################################################################
+# HISTORIQUE                                                                                               #
+#                                                                                                          #
+# VERSION : 3.1.0 : DM : LAIG-DM-MAJA-2526-CNES : 9 avril 2018 : Montée de version de d'OTB 6.0            #
+#                                                                                                          #
+# FIN-HISTORIQUE                                                                                           #
+#                                                                                                          #
+# $Id$                                                                                                     #
+#                                                                                                          #
+############################################################################################################
+
+set(HDF4_URL "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.5/src/hdf-4.2.5.tar.gz")
+set(HDF4_URL_MD5 7241a34b722d29d8561da0947c06069f)
+set(HDF4_DEPENDS ZLIB JPEG)
+build_projects(HDF4_DEPENDS)
+set(HDF4_CONFIG_ARGS
+  ${SB_CONFIGURE_ARGS}
+  --enable-fortran=no
+  --enable-netcdf=no
+  )
+
+add_configure_option(HDF4 JPEG --with-jpeg)
+add_configure_option(HDF4 ZLIB --with-zlib)
+set(HDF4_CONFIGURE_COMMAND "${SB_ENV_CONFIGURE_CMD};EGREP=${EGREP_COMMAND};${CMAKE_BINARY_DIR}/HDF4/source/configure")
+ExternalProject_Add(HDF4
+  URL          "${HDF4_URL}"
+  URL_MD5      ${HDF4_URL_MD5}
+  PREFIX       HDF4
+  TMP_DIR      HDF4/tmp
+  STAMP_DIR    HDF4/stamp
+  SOURCE_DIR   HDF4/source
+  BINARY_DIR   HDF4/build
+  INSTALL_DIR  ${SB_INSTALL_PREFIX}
+  DOWNLOAD_DIR ${DOWNLOAD_DIR}
+  DEPENDS           ${HDF4_DEPENDS}
+  CONFIGURE_COMMAND ${HDF4_CONFIGURE_COMMAND} ${HDF4_CONFIG_ARGS}
+  LOG_DOWNLOAD      ${WRITE_LOG}
+  LOG_CONFIGURE     ${WRITE_LOG}
+  LOG_BUILD ${WRITE_LOG}
+  LOG_INSTALL ${WRITE_LOG}
+  )

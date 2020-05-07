@@ -1,0 +1,23 @@
+diff -burN OTB-6.0.1.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx OTB-6.0.1/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx
+--- OTB-6.0.1.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx	2017-12-12 15:02:41.000000000 +0100
++++ OTB-6.0.1/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx	2017-12-12 15:19:14.000000000 +0100
+@@ -22,7 +22,6 @@
+ #define otbStreamingResampleImageFilter_txx
+ 
+ #include "otbStreamingResampleImageFilter.h"
+-#include "itkProgressAccumulator.h"
+ #include "otbImage.h"
+ 
+ namespace otb
+@@ -49,11 +48,6 @@
+ StreamingResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType>
+ ::GenerateData()
+ {
+-  // Set up progress reporting
+-  typename itk::ProgressAccumulator::Pointer progress = itk::ProgressAccumulator::New();
+-  progress->SetMiniPipelineFilter(this);
+-  progress->RegisterInternalFilter(m_WarpFilter, 1.f);
+-
+   m_WarpFilter->GraftOutput(this->GetOutput());
+   m_WarpFilter->UpdateOutputData(m_WarpFilter->GetOutput());
+   this->GraftOutput(m_WarpFilter->GetOutput());

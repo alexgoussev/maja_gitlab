@@ -1,0 +1,16 @@
+diff -burN InsightToolkit-4.7.2.orig/CMakeLists.txt InsightToolkit-4.7.2/CMakeLists.txt
+--- InsightToolkit-4.12.0.orig/CMakeLists.txt	2015-05-01 00:43:19.000000000 +0200
++++ InsightToolkit-4.12.0/CMakeLists.txt	2017-12-13 15:07:28.000000000 +0100
+@@ -423,9 +423,9 @@
+  
+ #----------------------------------------------------------------------
+ # Provide an option for generating documentation.
+-add_subdirectory(Utilities/Doxygen)
++#add_subdirectory(Utilities/Doxygen)
+ 
+ # Create target to download data from the ITKData group. This must come after
+ # all tests have been added that reference the group, so we put it last.
+ include(${ITK_CMAKE_DIR}/ExternalData.cmake)
+-ExternalData_Add_Target(ITKData)
++#ExternalData_Add_Target(ITKData)
+

@@ -1,0 +1,45 @@
+#!/bin/sh
+############################################################################################################
+#                                                                                                          #
+#                                        __  __    __     ____   __                                        #
+#                                       (  \/  )  /__\   (_  _) /__\                                       #
+#                                        )    (  /(__)\ .-_)(  /(__)\                                      #
+#                                       (_/\/\_)(__)(__)\____)(__)(__)                                     #
+#                                                                                                          #
+#                                                                                                          #
+############################################################################################################
+#                                                                                                          #
+# Author: CS Systemes d'Information  (France)                                                              #
+#                                                                                                          #
+############################################################################################################
+# HISTORIQUE                                                                                               #
+#                                                                                                          #
+# VERSION : 3.1.0 : DM : LAIG-DM-MAJA-2526-CNES : 9 avril 2018 : Montée de version de d'OTB 6.0            #
+#                                                                                                          #
+# FIN-HISTORIQUE                                                                                           #
+#                                                                                                          #
+# $Id$                                                                                                     #
+#                                                                                                          #
+############################################################################################################
+
+unset OLD_LD_LIBRARY_PATH
+unset OLD_PYTHONPATH
+unset OLD_OTB_APPLICATION_PATH
+
+if [ ${LD_LIBRARY_PATH} ]; then OLD_LD_LIBRARY_PATH=:${LD_LIBRARY_PATH} ; fi
+if [ ${PYTHONPATH} ]; then OLD_PYTHONPATH=:${PYTHONPATH} ; fi
+if [ ${OTB_APPLICATION_PATH} ]; then OLD_OTB_APPLICATION_PATH=:${OTB_APPLICATION_PATH} ; fi
+
+export PATH=@MY_MAJA_PATH_DIRS@:$PATH
+
+export LC_NUMERIC=C
+export GDAL_DATA=@GDAL_DATA@
+export GEOTIFF_CSV=@GEOTIFF_CSV@
+export GDAL_DRIVER_PATH=disable
+export MAJA_INSTALL_DIR=@MY_MAJA_INSTALL_DIR@
+
+#Setter les variables d'environnement liées à MAJA-NG
+#-----------------------------------------------------
+export OTB_APPLICATION_PATH=@MY_MAJA_APP_DIR@:${MAJA_INSTALL_DIR}/lib/otb/applications${OLD_OTB_APPLICATION_PATH}
+export PYTHONPATH=@MY_MAJA_PYTHON_DIR@:${MAJA_INSTALL_DIR}/lib/otb/python${OLD_PYTHONPATH}
+export LD_LIBRARY_PATH=@MY_MAJA_LIB_DIR@${OLD_LD_LIBRARY_PATH}:${MAJA_INSTALL_DIR}/lib/python3.7/site-packages/numpy/.libs/
