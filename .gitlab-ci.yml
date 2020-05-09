@@ -1,3 +1,4 @@
+
 variables:
   BUILD_ENV_REGISTRY: $CI_REGISTRY/maja/maja-build-env
 
@@ -107,4 +108,3 @@ tv-centos7:
     when: on_failure
     paths:
       - logs/*.log
-
