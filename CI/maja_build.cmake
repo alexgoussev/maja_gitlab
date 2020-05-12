@@ -17,7 +17,7 @@ execute_process(COMMAND ${CTEST_GIT_COMMAND} log -1 --pretty=format:%h
                 WORKING_DIRECTORY ${MAJA_SOURCE_DIR}
                 OUTPUT_VARIABLE ci_short_sha)
 
-# Detect site ( xenial / rh6 / rh7 )
+# Detect site ( bionic / xenial / rh6 / rh7 )
 if(NOT DEFINED IMAGE_NAME)
   if(DEFINED ENV{IMAGE_NAME})
     set(IMAGE_NAME $ENV{IMAGE_NAME})

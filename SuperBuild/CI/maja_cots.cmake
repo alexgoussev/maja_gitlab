@@ -14,7 +14,7 @@ set ( PROJECT_SOURCE_DIR "${SUPERBUILD_SOURCE_DIR}" )
 set ( CTEST_SOURCE_DIRECTORY "${SUPERBUILD_SOURCE_DIR}" )
 set ( CTEST_BINARY_DIRECTORY "${CI_BASE_DIR}/build-cots" )
 
-# Detect site ( xenial / rh6 / rh7 )
+# Detect site ( bionic / xenial / rh6 / rh7 )
 if(NOT DEFINED IMAGE_NAME)
   if(DEFINED ENV{IMAGE_NAME})
     set(IMAGE_NAME $ENV{IMAGE_NAME})
