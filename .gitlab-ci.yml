@@ -25,13 +25,13 @@ prepare-centos7:
     - sed -i "s,^FROM maja-build-env,FROM $BUILD_ENV_REGISTRY/maja-env-centos:7," SuperBuild/CentOS_7/Dockerfile
   script:
      - echo $CI_COMMIT_SHA > sha1.txt
-    #- /kaniko/executor --cleanup
-    #                   --cache=true
-    #                   --cache-repo=$CI_REGISTRY_IMAGE/maja-cots-centos7-cache
-    #                   --verbosity warn
-    #                   --dockerfile $CI_PROJECT_DIR/SuperBuild/CentOS_7/Dockerfile
-    #                   --context $CI_PROJECT_DIR
-    #                   --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+     - /kaniko/executor --cleanup
+                        --cache=true
+                        --cache-repo=$CI_REGISTRY_IMAGE/maja-cots-centos7-cache
+                        --verbosity warn
+                        --dockerfile $CI_PROJECT_DIR/SuperBuild/CentOS_7/Dockerfile
+                        --context $CI_PROJECT_DIR
+                        --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
   only:
     changes:
       - SuperBuild/**/*
@@ -82,62 +82,27 @@ build-centos7:
     ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 8
   script:
     - echo $CI_COMMIT_SHA > sha1.txt
-    #- ctest -V -S CI/maja_build.cmake
-    #- ctest -VV -S CI/maja_pkg.cmake
-    #- time rclone copy s3_otb:maja-data/TVA data/TVA
-    #~ - time rclone copy s3_otb:maja-data/TU data/TU
-    #- cd build
-    #- ctest -V -N -R pyTv- > ../tv_content.txt
-    #- ctest -j 2 -R apTv
-    #- cd ..
-    #- ls -lh build/Testing/*-*/
-    # Filter tv_content.txt to be used in a different job
-    #- sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
-    #- sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
-    #- sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
-    #- sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
-    #- sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
-  artifacts:
-    expire_in: 5 days
-    paths:
-      - sha1.txt
-      #- tv_content.txt
-      #- build-pkg/*.run
-
-build-ubuntu18:
-  stage: build
-  image: $CI_REGISTRY_IMAGE/maja-cots-ubuntu18:$CI_COMMIT_REF_NAME
-  tags:
-    - docker
-  except:
-    - schedules
-    - web
-  variables:
-    OTB_MAX_RAM_HINT: 20000
-    ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 8
-  script:
-    - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
     - ctest -VV -S CI/maja_pkg.cmake
-    #- time rclone copy s3_otb:maja-data/TVA data/TVA
+    - time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
-    #- cd build
-    #- ctest -V -N -R pyTv- > ../tv_content.txt
-    #- ctest -j 4 -R apTv
-    #- cd ..
-    #- ls -lh build/Testing/*-*/
+    - cd build
+    - ctest -V -N -R pyTv- > ../tv_content.txt
+    - ctest -j 2 -R apTv
+    - cd ..
+    - ls -lh build/Testing/*-*/
     # Filter tv_content.txt to be used in a different job
-    #- sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
-    #- sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
-    #- sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
-    #- sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
-    #- sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
+    - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
+    - sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
   artifacts:
     expire_in: 5 days
     paths:
       - sha1.txt
-      #- tv_content.txt
-      #- build-pkg/*.run
+      - tv_content.txt
+      - build-pkg/*.run
 
 
 # ---------------------------- heavy pipeline ----------------------------------
