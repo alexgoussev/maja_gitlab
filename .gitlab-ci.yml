@@ -118,7 +118,7 @@ build-ubuntu18:
   script:
     - echo $CI_COMMIT_SHA > sha1.txt
     - ctest -V -S CI/maja_build.cmake
-    #- ctest -VV -S CI/maja_pkg.cmake
+    - ctest -VV -S CI/maja_pkg.cmake
     #- time rclone copy s3_otb:maja-data/TVA data/TVA
     #~ - time rclone copy s3_otb:maja-data/TU data/TU
     #- cd build
