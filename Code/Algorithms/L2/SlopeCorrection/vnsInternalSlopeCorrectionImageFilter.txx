@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -210,11 +226,11 @@ namespace vns
             // Previous declarations
             const unsigned int lNbOfBands = lL2SREPtr->GetNumberOfComponentsPerPixel();
             unsigned int i(0);
-            PixelType lNumerator;
-            PixelType lDenominator;
+            //PixelType lNumerator;
+            //PixelType lDenominator;
             PixelType lPixel;
-            lNumerator.SetSize(lNbOfBands);
-            lDenominator.SetSize(lNbOfBands);
+            //lNumerator.SetSize(lNbOfBands);
+            //lDenominator.SetSize(lNbOfBands);
             lPixel.SetSize(lNbOfBands);
 
             // Compute the ratio 1 / (cos(ThetaS) + cos(ThetaV)) for all the pixels
@@ -295,21 +311,14 @@ namespace vns
                         }
 
                         // Initialization
-                        lNumerator.Fill(0.0);
-                        lDenominator.Fill(1.0);
                         lPixel.Fill(0.);
-
                         const PixelType & lTdirPix = lTdirIt.Get();
                         const PixelType & lTdifPix = lTdifIt.Get();
-                        PixelType lTPix = lTdirPix;
-                        lTPix += lTdifPix;
-
                         const PixelType & lRhoEnvPix = lRhoEnvIt.Get();
 
                         // Band loop
                         for (i = 0; i < lNbOfBands; i++)
                         {
-
                             const double lRsurf = lRsurfPix[i];
                             if (lRsurf >= 0.)
                             {
@@ -324,23 +333,23 @@ namespace vns
 
                                 // BRDF modeling
                                 const double lFBRDF = (lIncidenceAngle + lExitenceAngle) * lInvCosThetaSCosThetaV[i];
-                                lNumerator[i] = lRsurf * lTPix[i] * lFBRDF;
+                                const double lTPix = lTdirPix[i]+ lTdifPix[i];
+                                const double lNumerator = lRsurf * lTPix * lFBRDF;
 
-                                lDenominator[i] = lTdirPix[i] * (lIncidenceAngleDivByCosThetaS) + lTdifPix[i] * lFVisibleSky
-                                        + lTPix[i] * lRhoEnvPix[i] * lFVisibleGround;
+                                const double lDenominator = lTdirPix[i] * (lIncidenceAngleDivByCosThetaS) + lTdifPix[i] * lFVisibleSky
+                                        + lTPix * lRhoEnvPix[i] * lFVisibleGround;
 
                                 // The case where lDenominator[i]==0 is not handled : according to CESBIO, can't happen -> save time processing
                                 // No: the case handle in the Slope TVA testing
                                 // Flat surface reflectance value
-                                if (vnsDifferentDoubleMacro(lDenominator[i],0.0) == true)
+                                if (vnsDifferentDoubleMacro(lDenominator,0.0) == true)
                                 {
-                                    lPixel[i] = lNumerator[i] / lDenominator[i];
+                                    lPixel[i] = lNumerator / lDenominator;
                                 }
                             }
                         }
                         // Set the flat reflectance value in the output image (FRE)
                         lL2FREIt.Set(lPixel);
-
                     }
                     else
                     {

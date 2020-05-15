@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                        o     o                                                                           #
@@ -46,38 +62,37 @@ add_test(NAME pyTu${PREFIX}_L1ImageFileReader
           )
 
 
-add_test(NAME pyTu${PREFIX}_L1ImageReader_L1TOA
+add_test(NAME pyTu${PREFIX}_L1ImageReader_L1TOACirrus
           COMMAND ${VNS_TEST_DRIVER}
          --compare-image ${EPSILON_4}
          ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/l1toa_0.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/l1toa_0.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L1TOACirrusImage.tif
          "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
          )
 
 
-add_test(NAME pyTu${PREFIX}_L1ImageReader_L1PIX
+
+add_test(NAME pyTu${PREFIX}_L1ImageReader_L2PIX
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/PIX_Masks_const_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/PIX_Masks_const_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2PIXImageList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
-
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2SAT
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/L2SATImageList_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2SATImageList_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2SATMaskList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
           )
-
 
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2TOA
           COMMAND ${VNS_TEST_DRIVER}
@@ -105,7 +120,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2EDG
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/IPEDGMaskL2_R1.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPEDGMaskL2_R1.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/L2EDGOutputList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
@@ -116,7 +131,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_TOASub
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/aot_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/aot_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPTOASubOutput.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
@@ -127,7 +142,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SATSub
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sat_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sat_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/IPSATSubOutput.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
@@ -138,7 +153,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_CLA
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/cla_constant_sub.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/cla_constant_sub.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/CLAImage.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
@@ -149,7 +164,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL1
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/sol1_concat.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/sol1_concat.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/SOL1Image.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh
@@ -160,7 +175,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_VIE
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
           ${MAJADATA_TU_L1_READER_LANDSAT8_BASELINE}/vie_concat.tif
-          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/vie_concat.tif
+          ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/ShadowVIEImage.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8/testing-compare-output-directory
           ${MAJA_BINARY_DIR}/bin/vnsDummyProgram.sh

@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -19,11 +34,6 @@ orchestrator.plugins.maja_sentinel2_l1_image_file_reader is a description
 It defines classes_and_methods
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 import os
 import math
@@ -33,7 +43,6 @@ from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
-from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.cots.otb.algorithms.otb_angle_list_to_image import angle_list_to_image
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.plugins.common.sentinel2_base.maja_sentinel2_l1_image_file_reader_base import \
@@ -56,8 +65,10 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         self._toa_pipeline = OtbPipelineManager()
         self._l2_dfp_pipeline = OtbPipelineManager()
         self._l2_sat_pipeline = OtbPipelineManager()
+        self._sub_sat_pipeline = OtbPipelineManager()
         self._l2_detf_pipeline = OtbPipelineManager()
         self._l2_zone_pipeline = OtbPipelineManager()
+        self._l2_edg_pipeline = OtbPipelineManager()
         self.m_headerHandler = None
         self._band_zone_map = {}
 
@@ -73,8 +84,6 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         """
         if len(reflectanceMultiplicationValues) != len(listOfTOAImageFileNames):
             raise MajaDataException("Not the same number of band images and coefficients")
-        # Init the projRef
-        l_ProjectionRef = ""
         # =======> GENERATE TOA CACHING
         l_ProjectionRef = self.generate_toa_caching(listOfTOAImageFileNames, reflectanceMultiplicationValues, working)
         LOGGER.debug("Caching TOA images done ...")
@@ -93,6 +102,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                              }
         concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
+        self._sub_sat_pipeline.free_otb_app()
 
     def generate_mask_rasters(
             self,
@@ -193,7 +203,8 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                           "out": dfp_mask + ":uint8",
                                           "nbcomp": nbL1Bands
                                           }
-                    dfp_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=True)
+                    dfp_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_dfp, write_output=False)
+                    self._l2_dfp_pipeline.add_otb_app(dfp_mask_app)
                     self._l2dfpimagelist[l_ListOfL2Resolution.index(curL1Res)] = dfp_mask_app.getoutput().get("out")
             else:
                 raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on PIX")
@@ -213,16 +224,18 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 # self._l2_sat_pipeline.add_otb_app(sat_mask_app)
                 if curL1Res in l_ListOfL2Resolution:
                     self._l2satmasklist[l_ListOfL2Resolution.index(curL1Res)] = sat_mask_app.getoutput().get("out")
+                tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(curL1Res))
+                sat_resamp_app = resample(sat_mask_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
+                                          OtbResampleType.LINEAR, write_output=False)
+                self._sub_sat_pipeline.add_otb_app(sat_resamp_app)
                 for l1band in listOfL1Bands:
                     l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l1band)
                     tmp_sat_roi = os.path.join(working, "tmp_extract_roi_sat_{}.tif".format(l1band))
-                    tmp_sat_roi_app = extract_roi(sat_mask_app.getoutput().get("out"),
+                    tmp_sat_roi_app = extract_roi(sat_resamp_app.getoutput().get("out"),
                                                   [self.m_headerHandler.get_l1_sat_image_index(l1BandIdx) - 1],
                                                   tmp_sat_roi, write_output=False)
-                    tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(l1band))
-                    resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample,
-                             OtbResampleType.LINEAR)
-                    self._satmasksublist[l1BandIdx] = tmp_sat_resample
+                    self._sub_sat_pipeline.add_otb_app(tmp_sat_roi_app)
+                    self._satmasksublist[l1BandIdx] = tmp_sat_roi_app.getoutput().get("out")
             else:
                 raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on SAT")
 
@@ -236,27 +249,32 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                       "out": ndt_mask + ":uint8",
                                       "nbcomp": nbL1Bands
                                       }
-                ndt_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_ndt, write_output=True)
+                ndt_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_ndt, write_output=False)
+                self._subedg_pipeline.add_otb_app(ndt_mask_app)
                 tmp_ndt_resample = os.path.join(working, "tmp_extract_roi_ndt_resample_{}.tif".format(curL1Res))
                 ndt_resamp_app = resample(
                     ndt_mask_app.getoutput().get("out"),
                     dtm_coarse,
                     tmp_ndt_resample,
                     OtbResampleType.LINEAR,
-                    write_output=True)
+                    write_output=False)
+                self._subedg_pipeline.add_otb_app(ndt_resamp_app)
                 for l1band in listOfL1Bands:
                     l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l1band)
                     tmp_ndt_roi = os.path.join(working, "tmp_extract_roi_ndt_{}.tif".format(l1band))
                     tmp_ndt_roi_app = extract_roi(ndt_resamp_app.getoutput().get("out"),
                                                   [self.m_headerHandler.get_l1_ndt_image_index(l1BandIdx) - 1],
-                                                  tmp_ndt_roi, write_output=True)
+                                                  tmp_ndt_roi, write_output=False)
+                    self._subedg_pipeline.add_otb_app(tmp_ndt_roi_app)
                     self._nodatamasksublist[l1BandIdx] = tmp_ndt_roi_app.getoutput().get("out")
             else:
                 raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on NoData")
 
             # Detectors FootPrint Masks Generation
+            # Get all the detectors files realted to this resolution
             # Test if they all refers to the same files
-            l_bin_to_vec_zone_map = {}
+            tmp_res_det_filenames = None
+            all_same_det_for_bands = True
             for l_BandIdxL1 in range(len(listOfL1Bands)):
                 # Get the L1 band index associated to the L2 band code
                 l_StrBandIdL1 = listOfL1Bands[l_BandIdxL1]
@@ -266,54 +284,84 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                              l1BandIdx)
                 # Detectors FootPrint Masks
                 l_bandDetFnames = zoneMaskFileNames[l1BandIdx]
-                l_ListOfZone = self.m_headerHandler.get_list_of_zones(listOfL1Bands[l_BandIdxL1])
-                bandmath_expr = "max(0 "
+                if tmp_res_det_filenames is not None:
+                    if len(tmp_res_det_filenames) != len(l_bandDetFnames):
+                        all_same_det_for_bands = False
+                        break
+                else:
+                    tmp_res_det_filenames = l_bandDetFnames
+            #Construct file and det number list
+            tmp_list_of_detf_filenames = []
+            tmp_list_of_detf_num = []
+            tmp_list_of_band_idx = []
+            if all_same_det_for_bands:
+                l_ListOfZone = self.m_headerHandler.get_list_of_zones(listOfL1Bands[0])
                 nbDetector = len(l_ListOfZone)
                 # For each detector of the current band
-                l_listOfZoneInput = []
                 for det in range(nbDetector):
-                    detFname = l_bandDetFnames[l_ListOfZone[det]]
-                    l_det_band_idx = self.m_headerHandler.get_l1_dtf_image_index(l1BandIdx, l_ListOfZone[det])[0]
-                    vec_zone_output = None
-                    if not os.path.basename(detFname) in list(l_bin_to_vec_zone_map.keys()):
-                        detf_mask = os.path.join(
-                            working, "L1_DETF_Masks_{}_{}.tif".format(
-                                l1BandIdx, l_ListOfZone[det]))
-                        param_bintovec_detf = {
-                            "im": detFname,
-                            "out": detf_mask,
-                            "nbcomp": self.m_headerHandler.get_l1_dtf_max_image_index(
-                                l_ListOfZone[det])}
-                        detf_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_detf, write_output=True)
-                        self._l2_detf_pipeline.add_otb_app(detf_mask_app)
-                        vec_zone_output = detf_mask_app.getoutput().get("out")
-                        l_bin_to_vec_zone_map[os.path.basename(detFname)] = vec_zone_output
-                    else:
-                        vec_zone_output = l_bin_to_vec_zone_map[os.path.basename(detFname)]
-                    l_listOfZoneInput.append(vec_zone_output)
-                    bandmath_expr = bandmath_expr + ", im" + \
-                        str(det + 1) + "b" + str(l_det_band_idx) + " * " + str(int(l_ListOfZone[det])) + " "
-                bandmath_expr = bandmath_expr + ")"
-                LOGGER.debug("expression: " + bandmath_expr)
-                LOGGER.debug(l1BandIdx)
-                tmp_zone = os.path.join(working, "tmp_zone_{}".format(l1BandIdx))
-                param_bandmath_zone = {"il": l_listOfZoneInput,
-                                       "exp": bandmath_expr,
-                                       "out": tmp_zone
-                                       }
-                zone_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone, write_output=True)
-                # self._l2_zone_pipeline.add_otb_app(zone_bandmath_app)
-
-                if curL1Res in l_ListOfL2Resolution:
-                    self._l2zonemasklist[l_ListOfL2Resolution.index(curL1Res)].append(
-                        zone_bandmath_app.getoutput().get("out"))
-                tmp_zone_band_math = os.path.join(working, "tmp_zone_band_math_{}".format(l1BandIdx))
+                    tmp_list_of_detf_filenames.append(tmp_res_det_filenames[l_ListOfZone[det]])
+                    tmp_list_of_detf_num.append(str(int(l_ListOfZone[det])))
+            else:
+                #some bands are not in all det rare case
+                tmp_det_info_map = {}
+                for l_BandIdxL1 in range(len(listOfL1Bands)):
+                    # Get the L1 band index associated to the L2 band code
+                    l_StrBandIdL1 = listOfL1Bands[l_BandIdxL1]
+                    l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l_StrBandIdL1)
+                    LOGGER.debug(
+                        "Sentinel2MuscateL1ImageFileReader::GenerateMaskRasters: CurrentResol = %s, reading the "
+                        "BandId L1 (associated) <%s> with index <%s>.", curL1Res, l_StrBandIdL1,
+                        l1BandIdx)
+                    # Detectors FootPrint Masks
+                    l_bandDetFnames = zoneMaskFileNames[l1BandIdx]
+                    l_ListOfZone = self.m_headerHandler.get_list_of_zones(l_StrBandIdL1)
+                    nbDetector = len(l_ListOfZone)
+                    # For each detector of the current band
+                    for det in range(nbDetector):
+                        det_num = l_ListOfZone[det]
+                        if det_num not in tmp_det_info_map.keys():
+                            tmp_det_info_map[det_num] = (zoneMaskFileNames[l1BandIdx][det_num], [0] * len(listOfL1Bands))
+                        tmp_det_info_map[det_num][1][l_BandIdxL1] = \
+                            self.m_headerHandler.get_l1_dtf_image_index(l1BandIdx, det_num)[0]
+                #once the info map is done
+                for det in tmp_det_info_map.keys():
+                    det_info = tmp_det_info_map[det]
+                    tmp_list_of_detf_filenames.append(det_info[0])
+                    tmp_list_of_detf_num.append(str(int(det)))
+                    for x in det_info[1]:
+                        tmp_list_of_band_idx.append(str(x))
+            #create params
+            detf_mask = os.path.join(
+                 working, "L1_DETF_Masks_{}.tif".format(curL1Res))
+            param_dispacth_zone = {
+                 "il": tmp_list_of_detf_filenames,
+                 "out": detf_mask+':uint8',
+                 "nbcomp": len(listOfL1Bands),
+                 "outvals": tmp_list_of_detf_num
+                }
+            #handle not all det/band case
+            if not all_same_det_for_bands:
+                param_dispacth_zone["outindexes"] = tmp_list_of_band_idx
+            #Call the app
+            dispatch_app = OtbAppHandler("DispatchZonesToVector",param_dispacth_zone,write_output=True)
+            #This is the L2 output
+            if curL1Res in l_ListOfL2Resolution:
+                self._l2zoneimagelist[l_ListOfL2Resolution.index(curL1Res)] = dispatch_app.getoutput().get("out")
+            #extract the coarse bands
+            for l1band in listOfL1Bands:
+                l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(l1band)
+                tmp_zone_roi = os.path.join(working, "tmp_extract_roi_ndt_{}.tif".format(l1band))
+                tmp_zone_roi_app = extract_roi(dispatch_app.getoutput().get("out"),
+                                              [self.m_headerHandler.get_l1_ndt_image_index(l1BandIdx) - 1],
+                                              tmp_zone_roi, write_output=False)
+                self._subedg_pipeline.add_otb_app(tmp_zone_roi_app)
+                tmp_zone_with_nodata = os.path.join(working, "tmp_zone_with_nodata_{}".format(curL1Res))
                 masterExpr = "( im1b1 > 0 ) ? im1b1 : -10000"
-                param_bandmath_zone = {"il": [zone_bandmath_app.getoutput().get("out")],
+                param_bandmath_zone = {"il": [tmp_zone_roi_app.getoutput().get("out")],
                                        "exp": masterExpr,
-                                       "out": tmp_zone_band_math
-                                       }
-                zone_thresh_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone, write_output=True)
+                                       "out": tmp_zone_with_nodata
+                                   }
+                zone_thresh_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone, write_output=False)
                 # LAIG-FA-MAC-1652-CNES : probleme reech detecteur en unsigned char : detecteur 1 devient 0.....
                 tmp_zone_resample = os.path.join(working, "tmp_extract_roi_zone_resample_{}.tif".format(l1BandIdx))
                 zone_resample_app = resample(
@@ -321,7 +369,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                     dtm_coarse,
                     tmp_zone_resample,
                     OtbResampleType.LINEAR,
-                    write_output=True)
+                    write_output=False)
                 # threshold everything negative to 0
                 Thresholdexpr = "im1b1 > 0 ? im1b1 : 0"
                 tmp_zone_threshold = os.path.join(working, "tmp_zone_threshold_{}".format(l1BandIdx))
@@ -336,23 +384,23 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 param_bandmath_zone_round = {"im": zone_bandmath_threshold_app.getoutput().get("out"),
                                              "out": tmp_zone_round
                                              }
-                zone_round_app = OtbAppHandler("RoundImage", param_bandmath_zone_round)
+                zone_round_app = OtbAppHandler("RoundImage", param_bandmath_zone_round,write_output=True)
                 # Add to the official output
                 self._zonemasksublist[l1BandIdx] = zone_round_app.getoutput().get("out")
                 # Log current loop
-                LOGGER.debug("band loop: " + str(l_BandIdxL1 + 1) + " / " + str(nbL1Bands) + " (" + curL1Res + ")")
+                LOGGER.debug("band loop: " + str(l1BandIdx + 1) + " / " + str(nbL1Bands) + " (" + curL1Res + ")")
             # band loop
             LOGGER.debug("band loop: END")
             self._l2_detf_pipeline.free_otb_app()
 
             # L2 Zone mask pipeline connection
-            if curL1Res in l_ListOfL2Resolution:
-                l2_zone_image = os.path.join(working, "l2_zone_mask_{}.tif".format(curL1Res))
-                param_l2zone_concatenate = {"il": self._l2zonemasklist[l_ListOfL2Resolution.index(curL1Res)],
-                                            "out": l2_zone_image
-                                            }
-                l2_zone_app = OtbAppHandler("ConcatenateImages", param_l2zone_concatenate)
-                self._l2zoneimagelist[l_ListOfL2Resolution.index(curL1Res)] = l2_zone_app.getoutput().get("out")
+            # if curL1Res in l_ListOfL2Resolution:
+            #     l2_zone_image = os.path.join(working, "l2_zone_mask_{}.tif".format(curL1Res))
+            #     param_l2zone_concatenate = {"il": self._l2zonemasklist[l_ListOfL2Resolution.index(curL1Res)],
+            #                                 "out": l2_zone_image
+            #                                 }
+            #     l2_zone_app = OtbAppHandler("ConcatenateImages", param_l2zone_concatenate,write_output=True)
+            #     self._l2zoneimagelist[l_ListOfL2Resolution.index(curL1Res)] = l2_zone_app.getoutput().get("out")
 
             # end res loop
 
@@ -375,106 +423,13 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         dtm_coarse = self._dem.ALC
         l_BandsDefinitions = self._plugin.BandsDefinitions
         l1BandIdx = l_BandsDefinitions.get_band_id_in_l1(band)
-        # Set a constant image if the gml masks are empty
-        tmp_constant_filename = os.path.join(working, "Masks_sat_const.tif")
-        constant_image(dtm_coarse, 0, tmp_constant_filename, write_output=True)
 
-        # Generate masks at L2 coarse resolution
-        # to generate the viewing grids
-
-        # Saturated pixel mask at L2 coarse
-        # The band has not been filled yet in GenerateMaskRaster
-        """sat_mask = os.path.join(working, "L2_SAT_VecMasks_{}.tif".format(band))
-        param_bintovec_sat = {"im": satFilename,
-                              "out": sat_mask + ":uint8",
-                              "nbcomp": nbL1Bands
-                              }
-        sat_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_sat,write_output=True)
-        tmp_sat_roi = os.path.join(working, "tmp_extract_roi_sat_{}.tif".format(band))
-        tmp_sat_roi_app = extract_roi(sat_mask_app.getoutput().get("out"), [self.m_headerHandler.get_L1_SAT_image_index(l1BandIdx) - 1],
-                                      tmp_sat_roi,write_output=False)
-        tmp_sat_resample = os.path.join(working, "tmp_extract_roi_sat_resample_{}.tif".format(band))
-        resample(tmp_sat_roi_app.getoutput().get("out"), dtm_coarse, tmp_sat_resample, OtbResampleType.LINEAR)
-        self._satmasksublist.append(tmp_sat_resample)
-
-        # No_data mask at L2 coarse
-        ndt_mask = os.path.join(working, "L2_NDT_VecMasks_{}.tif".format(band))
-        param_bintovec_ndt = {"im": nodataFilename,
-                              "out": ndt_mask + ":uint8",
-                              "nbcomp": nbL1Bands
-                              }
-        ndt_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_ndt,write_output=True)
-        tmp_ndt_roi = os.path.join(working, "tmp_extract_roi_ndt_{}.tif".format(band))
-        tmp_ndt_roi_app = extract_roi(ndt_mask_app.getoutput().get("out"), [self.m_headerHandler.get_l1_ndt_image_index(l1BandIdx) - 1],
-                                      tmp_ndt_roi,write_output=False)
-        tmp_ndt_resample = os.path.join(working, "tmp_extract_roi_ndt_resample_{}.tif".format(band))
-        resample(tmp_ndt_roi_app.getoutput().get("out"), dtm_coarse, tmp_ndt_resample, OtbResampleType.LINEAR)
-        self._nodatamasksublist.append(tmp_ndt_resample)
-
-        # Detectors FootPrint
-        # TODO: FLIP
-        bandDetFnames = zoneFilenames
-        bandmath_sstm =  "max(0 "
-        id = 0
-        # For each detector of the current band
-        zone_bandmath_app = None
-        if not l1BandIdx in self._band_zone_map:
-            l_listOfZoneInput = []
-            for detid, detFname in bandDetFnames.iteritems():
-                zone_mask = os.path.join(working, "L2_ZONE_VecMasks_{}.tif".format(band))
-                param_bintovec_zone = {"im": detFname,
-                                      "out": zone_mask + ":uint8",
-                                      "nbcomp": 16
-                                      }
-                zone_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_zone,write_output=True)
-                l_det_band_idx = self.m_headerHandler.get_l1_dtf_image_index(l1BandIdx, detid)[0]
-                LOGGER.debug("detFname: "+ detFname + " - detId: " + detid + " - bit_number: " + str(self.m_headerHandler.get_l1_dtf_image_index(l1BandIdx, detid)[0]))
-                l_listOfZoneInput.append(zone_mask_app.getoutput().get("out"))
-                bandmath_sstm = bandmath_sstm + ", im" + str(id + 1) + "b"+str(l_det_band_idx) + " * " + detid + " "
-                id = id + 1
-            bandmath_sstm = bandmath_sstm + ")"
-            masterExpr = "(" + bandmath_sstm + " > 0) ? " + bandmath_sstm + " : -10000"
-            tmp_zone = os.path.join(working, "tmp_zone_{}".format(band))
-            param_bandmath_zone = {"il": l_listOfZoneInput,
-                                   "exp": masterExpr,
-                                   "out": tmp_zone
-                                   }
-            zone_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone,write_output=True)
-        else:
-            tmp_zone = os.path.join(working, "tmp_zone_{}".format(band))
-            masterExpr = "( im1b1 > 0 ) ? im1b1 : -10000"
-            param_bandmath_zone = {"il": [self._band_zone_map[l1BandIdx]],
-                                   "exp": masterExpr,
-                                   "out": tmp_zone
-                                   }
-            zone_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone, write_output=True)
-
-        # LAIG-FA-MAC-1652-CNES : probleme reech detecteur en unsigned char : detecteur 1 devient 0.....
-        tmp_zone_resample = os.path.join(working, "tmp_extract_roi_zone_resample_{}.tif".format(band))
-        zone_resample_app = resample(zone_bandmath_app.getoutput().get("out"), dtm_coarse, tmp_zone_resample, OtbResampleType.LINEAR)
-
-        # threshold everything negative to 0
-        Thresholdexpr = "im1b1 > 0 ? im1b1 : 0"
-        tmp_zone_threshold = os.path.join(working, "tmp_zone_threshold_{}".format(band))
-        param_bandmath_zone_threshold = {"il": [zone_resample_app.getoutput().get("out")],
-                               "exp": Thresholdexpr,
-                               "out": tmp_zone_threshold
-                               }
-        zone_bandmath_threshold_app = OtbAppHandler("BandMath", param_bandmath_zone_threshold,write_output=True)
-        #Rounding
-        tmp_zone_round = os.path.join(working, "tmp_zone_round_{}".format(band))
-        param_bandmath_zone_round = {"im": zone_bandmath_threshold_app.getoutput().get("out"),
-                                     "out": tmp_zone_round
-                                     }
-        zone_round_app = OtbAppHandler("RoundImage", param_bandmath_zone_round)
-        # Add to the official output
-        self._zonemasksublist.append(zone_round_app.getoutput().get("out"))
-"""
         # ---- Viewing angle Grid --------------------------------------------------------------------
         l_VieAnglesGridList = []
         l_nbDetectors = len(viewing_angles_azimuth)
         # Detector loop
         LOGGER.debug("For each detectors (nb=%s) ...", l_nbDetectors)
+        view_resamp_pipeline = OtbPipelineManager()
         for detId in range(len(viewing_angles_azimuth)):
             # Generate an image with the list of viewing angle values set in the header file
             det = listOfZone[detId]
@@ -497,17 +452,17 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
 
             # angle_list_to_image()
             viewing_angle_app = angle_list_to_image(dtm_coarse, output_filename, viewing_grid_filename,
-                                                    extrapolation=True,
-                                                    write_output=True)
-
+                                                    extrapolation=False,
+                                                    write_output=False)
+            view_resamp_pipeline.add_otb_app(viewing_angle_app)
             # Expand at L2Coarse.
             viewing_grid_resamp_filename = os.path.join(working,
                                                         "viewing_grid_resamp_{}_{}.tif".format(detId, band))
-            resample(viewing_angle_app.getoutput().get("out"), dtm_coarse, viewing_grid_resamp_filename,
-                     OtbResampleType.LINEAR)
-
+            viewing_grid_resamp_app = resample(viewing_angle_app.getoutput().get("out"), dtm_coarse,
+                                               viewing_grid_resamp_filename,  OtbResampleType.LINEAR,write_output=False)
+            view_resamp_pipeline.add_otb_app(viewing_grid_resamp_app)
             # add images in a list
-            l_VieAnglesGridList.append(viewing_grid_resamp_filename)
+            l_VieAnglesGridList.append(viewing_grid_resamp_app.getoutput().get("out"))
             # end detector loop
 
         # Generate the angle images using the zone (detector) mask
@@ -520,7 +475,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                 "zonelist": listOfZone,
                                 "out": viewing_concat_filename
                                 }
-        concat_perzone_app = OtbAppHandler("ConcatenatePerZone", param_concat_perzone, write_output=True)
+        concat_perzone_app = OtbAppHandler("ConcatenatePerZone", param_concat_perzone, write_output=False)
         # Multiply by reference altitude
         viewing_grid_mult_filename = os.path.join(working, "viewing_grid_mult_{}.tif".format(band))
         param_scaled_solar = {"im": concat_perzone_app.getoutput().get("out"),
@@ -539,8 +494,8 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             # -----------------------------------------------------------------------------------
             # VAP Reader connection (from ATB)
             tmp_azi = os.path.join(working, "tmp_azi_{}_{}.tif".format(band, l_zone))
-            tmp_azi_image = extract_roi(l_VieAnglesGridList[d], [1], tmp_azi)
-            param_stats = {"im": tmp_azi,
+            tmp_azi_image = extract_roi(l_VieAnglesGridList[d], [1], tmp_azi,write_output=False)
+            param_stats = {"im": tmp_azi_image.getoutput().get("out"),
                            "exclude": 1,
                            "mask": self._zonemasksublist[l1BandIdx],
                            "maskforeground": int(l_zone)
@@ -549,7 +504,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
 
             azi_mean = l2_stat.getoutput().get("mean")
             tmp_zen = os.path.join(working, "tmp_zen_{}_{}.tif".format(band, l_zone))
-            tmp_zen_app = extract_roi(l_VieAnglesGridList[d], [0], tmp_zen)
+            tmp_zen_app = extract_roi(l_VieAnglesGridList[d], [0], tmp_zen,write_output=False)
             param_stats = {"im": tmp_zen_app.getoutput().get("out"),
                            "exclude": 1,
                            "mask": self._zonemasksublist[l1BandIdx],
@@ -583,6 +538,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                          str(l_ViewingAngleMeanDeg[1]) +
                          " deg.")
         LOGGER.debug("Start Loop for Zone done.")
+        view_resamp_pipeline.free_otb_app()
 
     # Can read method
 
@@ -626,10 +582,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         l_ZoneMaskFileNames = product_info.HeaderHandler.get_map_list_of_detector_footprint_image_filenames()
         l_NoDataMaskFileNames = product_info.HeaderHandler.get_list_of_l1_ndt_image_filenames()
         l_ListOfTOABandCode = product_info.HeaderHandler.get_list_of_band_code()  # ListOfStrings
-        l_ListOfL1Resolution = l_BandsDefinitions.ListOfL1Resolution  # ListOfStrings
-        l_ListOfL2Resolution = l_BandsDefinitions.ListOfL2Resolution  # ListOfStrings
         l_NbBand = len(l_ListOfTOAImageFileNames)  # int
-
         l_L1NoData = product_info. L1NoData
         l_ReflectanceQuantificationValue = product_info.ReflectanceQuantification
         l_RealL1NoData = l_L1NoData * l_ReflectanceQuantificationValue  # RealNoDataType
@@ -660,12 +613,6 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
 
         #                                     START READ L1 for ALGORITHMS
         if pReadL1Mode == ReadL1Mode.READ_L1_MODE_FOR_ALGORITHMS:
-            # --------------------------------------
-            # Get information of areas (footprint) of the product (Origin, Spacing and Size for L2 and L2Coarse resolution)
-            # --------------------------------------
-            l_L2Dems = dem.ALTList
-            l_CoarseDem = dem.ALC
-
             # =======> GENERATE TOA SUB IMAGES AT L2 COARSE RESOLUTION
             LOGGER.debug("Start SubSampling ...")
             self.generate_toa_sub_images(working_dir)
@@ -745,15 +692,6 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             # To check mean angle values
             # TODO
 
-            # L2DFP image pipeline connection
-            # for (unsigned int i = 0; i < l_NbL2Res; i++)
-            #    {
-            #        MaskListToVectorImageFilterPointer l_L2DFPMaskListToVectorImageFilter = MaskListToVectorImageFilterType::New();
-            #        l_L2DFPMaskListToVectorImageFilter->SetInput(this->m_L2DFPImageListVector.at(i));
-            #        m_L2DFPMaskListToVectorImageFilterList.push_back(l_L2DFPMaskListToVectorImageFilter);
-            #        this->m_L2DFPOutputList->PushBack(m_L2DFPMaskListToVectorImageFilterList.at(i)->GetOutput());
-            #    }
-
             # IPEDGSub and L2EDG pipeline connection
             # =======> GENERATE EDG IMAGES
             self.generate_edg_images(working_dir)
@@ -809,12 +747,6 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             self.dict_of_vals["L2SATImageList"] = self._l2satmasklist
             self.dict_of_vals["L2PIXImageList"] = self._l2piximagelist
             self.dict_of_vals["L2DFPImageList"] = self._l2dfpimagelist
-
-            # Cleanup pipelines
-            self._toa_pipeline.free_otb_app()
-            self._l2_dfp_pipeline.free_otb_app()
-            self._l2_sat_pipeline.free_otb_app()
-            self._l2_detf_pipeline.free_otb_app()
 
             # *************************************************************************************************************
             #                                     END READ L1 for ALGORITHMS

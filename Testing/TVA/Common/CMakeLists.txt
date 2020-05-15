@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                        o     o                                                                           #
@@ -122,7 +138,35 @@ maja_test_application(NAME apTvConcatenatePerZone
                      ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvConcatenatePerZone.tif
 
                     )
+                    
+maja_test_application(NAME apTvDispatchZonesToVectorNoWeight
+                     APP DispatchZonesToVector
+                     OPTIONS
+                     -il ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D06.tif ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D09.tif
+                     -outvals 6 9
+                     -nbcomp 3
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorNoWeight.tif
 
+                     VALID --compare-image 0.0
+                     ${MAJADATA_TVA_BASELINE}/apTvDispatchZonesToVectorNoWeight.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorNoWeight.tif
+
+                    )
+
+maja_test_application(NAME apTvDispatchZonesToVectorWeight
+                     APP DispatchZonesToVector
+                     OPTIONS
+                     -il ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D06.tif ${MAJADATA_TVA_INPUT}/Common/SENTINEL2B_20171008-105012-463_L2A_T31TCH_C_V1-0_DTF_R3-D09.tif
+                     -outvals 6 9
+                     -nbcomp 3
+                     -outindexes 1 2 3 0 1 2
+                     -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorWeight.tif
+
+                     VALID --compare-image 0.0
+                     ${MAJADATA_TVA_BASELINE}/apTvDispatchZonesToVectorWeight.tif
+                     ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDispatchZonesToVectorWeight.tif
+
+                    )
 
 maja_test_application(NAME apTvIncidenceAngle
                      APP IncidenceAngle
@@ -215,7 +259,7 @@ maja_test_application(NAME apTvRoundImage
 
 
 maja_test_application(NAME apTvRoundVectorImage
-                     APP RoundVectorImage
+                     APP RoundImage
                      OPTIONS
                      -im ${MAJADATA_TVA_INPUT}/Common/TOASubImage.tif?&bands=1,2
                      -out ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvRoundVectorImage.tif uint8

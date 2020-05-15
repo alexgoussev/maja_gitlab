@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -39,7 +55,7 @@
  ************************************************************************************************************/
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "otbMultiplyByScalarImageFilter.h"
+#include "vnsMultiplyByScalarVectorImageFilter.h"
 #include "vnsLoggers.h"
 #include <string>
 
@@ -51,7 +67,7 @@ namespace Wrapper
 
 using namespace otb::Wrapper;
 
-class MultiplyByScalar : public Application
+class MultiplyByScalar: public Application
 {
 public:
 	/** Standard class typedefs. */
@@ -67,7 +83,7 @@ public:
 
 	/** Some convenient typedefs. */
 	typedef DoubleVectorImageType ImageType;
-	typedef otb::MultiplyByScalarImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
+	typedef vns::MultiplyByScalarVectorImageFilter<ImageType, ImageType> RealToRealScalarVectorImageFilterType;
 
 
 private:
@@ -88,7 +104,6 @@ private:
 		AddParameter(ParameterType_Float, "coef","Coeff to multiply");
 		AddParameter(ParameterType_OutputImage, "out", "image");
 		SetParameterDescription("out","output image");
-
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram",2048);
 
@@ -109,9 +124,8 @@ private:
 		ImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
 		const double l_coeff = this->GetParameterFloat("coef");
 		m_filter->SetInput(l_im);
-		m_filter->SetCoef(l_coeff);
+		m_filter->SetCoeff(l_coeff);
 		SetParameterOutputImage<ImageType>("out",m_filter->GetOutput());
-
 	}
 
 

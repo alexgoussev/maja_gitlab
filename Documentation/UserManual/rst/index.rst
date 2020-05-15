@@ -14,7 +14,7 @@
 Software: **MAJA**
 **SETG-**\ **MU-**\ **MAJA-**\ **010-**\ **CS**                       
 Change                                          02 Date              29/11/2019
-Issue                                           01 Date              10/03/2020
+Issue                                           02 Date              05/05/2020
 Distribution Code                               E
 Ref. : CSSI/SPACE/PD&A/MAJA/MU 
 =============================================== == ================= ============
@@ -22,14 +22,14 @@ Ref. : CSSI/SPACE/PD&A/MAJA/MU
 **USER, INSTALLATION AND OPERATING MANUAL FOR MAJA CHAINS [MU]**
 
 =================================== =================
-Written by :                        Date : 10/03/2020 
+Written by :                        Date : 05/05/2020 
                                                     
 ESQUIS Benjamin CSSI/ESPACE/PDA/IP                   
 BRICIER Aurélien CSSI/ESPACE/PDA/IP                  
-Approved by :                       Date : 22/05/2018 
+Approved by :                       Date : 05/05/2020 
                                                      
 OLIVIE Francis CSSI/ESPACE/DSM                       
-For application :                   Date : 10/03/2020
+For application :                   Date : 05/05/2020
                                                      
 Esquis Benjamin CSSI/ESPACE/PDA/IP                   
 =================================== =================
@@ -61,7 +61,7 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | CONFIGURATION MANAGEMENT : NG                                                          | CM RESP. :                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CAUSE D'EVOLUTION : Update document for MAJA v4.1.0                                                                                                                                   |
+| CAUSE D'EVOLUTION : Update document for MAJA v4.2.0                                                                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | HOST SYSTEM : WordVersion                                                                                                                                                             |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
@@ -105,6 +105,11 @@ PUJOL Mathilde      DNO/DA/AQ
 		    
 ===== ==== ========== ===============================================================================================
 Issue Rev. Date       Reference, Author(s), Reasons for evolution
+02    02   05/05/2020  CSSI/SPACE/PD&A/MAJA/MU
+                     
+                      ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                     
+                      Update document for MAJA v4.2.0
 02    01   10/03/2020  CSSI/SPACE/PD&A/MAJA/MU
                      
                       ESQUIS Benjamin CSSI/ESPACE/PDA/IP

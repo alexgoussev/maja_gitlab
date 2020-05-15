@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 
@@ -18,10 +33,6 @@ orchestrator.tests.plugins.test_maja_sentinel2_l1_pimage_file_reader is a descri
 
 It defines classes_and_methods
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -34,6 +45,7 @@ import os
 from orchestrator.plugins.sentinel2.maja_sentinel2_l1_image_file_reader import Sentinel2L1ImageFileReader
 from orchestrator.plugins.sentinel2.maja_sentinel2_plugin import MajaSentinel2Plugin
 from orchestrator.common.dem.dem_base import DEMBase
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 import orchestrator.common.gipp_utils as gipp_utils
 
 
@@ -67,3 +79,6 @@ def test(argv):
 
     maja_object._dem = dem
     maja_object.generate_edg_images_from_toa(l_ListOfTOAImageFileNames, working_dir)
+    otb_copy_image_to_file(maja_object._l2edgmasklist[0], os.path.join(working_dir, "IPEDGMaskL2_R1.tif"))
+    otb_copy_image_to_file(maja_object._l2edgmasklist[1], os.path.join(working_dir, "IPEDGMaskL2_R2.tif"))
+    otb_copy_image_to_file(maja_object._edgsubmask, os.path.join(working_dir, "MaskOrMask12.tif"))

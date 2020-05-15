@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -87,15 +103,16 @@ public:
 	typedef ImageType::Pointer ImagePointer;
 	typedef ImageType::PixelType PixelType;
 
-	typedef UInt8ImageType MaskType;
+	typedef UInt8VectorImageType MaskType;
 	typedef MaskType::Pointer MaskPointer;
 	typedef MaskType::ConstPointer MaskConstPointer;
+
 
 	/** PadFilter used to manipulate real data */
 	typedef PadAndResampleImageFilter<VectorImageType, VectorImageType> PadAndResampleImageFilterType;
 	typedef PadAndResampleImageFilterType::Pointer PadAndResampleImageFilterPointerType;
 
-	typedef BinaryThresholdVectorImageFilter<VectorImageType, VectorImageType> BinaryThresholdVectorImageFilterType;
+	typedef BinaryThresholdVectorImageFilter<VectorImageType, MaskType> BinaryThresholdVectorImageFilterType;
 	typedef BinaryThresholdVectorImageFilterType::Pointer BinaryThresholdVectorImageFilterPointer;
 
 	/* VectorImage to image converter */
@@ -226,9 +243,23 @@ private:
 
 		if( isSamePhysical && HasValue("outareasize.x")==false && HasValue("outareasize.y")==false)
 		{
-		   vnsLogDebugMacro("No resampling needed")
-		   SetParameterOutputImagePixelType("out", ImagePixelType_double);
-		   SetParameterOutputImage<VectorImageType>("out", l_inPtr);
+		   vnsLogDebugMacro("No resampling needed");
+		   if(HasValue("threshold"))
+		   {
+			   m_Thresholder = BinaryThresholdVectorImageFilterType::New();
+			   m_Thresholder->SetInput(l_inPtr);
+			   m_Thresholder->ThresholdAbove(GetParameterFloat("threshold"));
+			   m_Thresholder->SetInsideValue(0);
+			   m_Thresholder->SetOutsideValue(1);
+			   SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
+			   SetParameterOutputImage<MaskType>("out",m_Thresholder->GetOutput());
+
+		   }
+		   else
+		   {
+			   SetParameterOutputImagePixelType("out", ImagePixelType_double);
+			   SetParameterOutputImage<VectorImageType>("out", l_inPtr);
+		   }
 		}
 		else
 		{
@@ -236,7 +267,8 @@ private:
             m_PadAndResampleFilter = PadAndResampleImageFilterType::New();
             m_PadAndResampleFilter->SetInput0(l_inPtr);
             m_PadAndResampleFilter->SetInterpolator(l_interpolator);
-
+            m_PadAndResampleFilter->SetReleaseDataFlag(true);
+            m_PadAndResampleFilter->SetReleaseDataBeforeUpdateFlag(true);
             if(HasValue("outareasize.x") && HasValue("outareasize.y") )
             {
               vns::AreaType::SizeType l_outputSize;
@@ -258,12 +290,14 @@ private:
             if(HasValue("threshold"))
 		    {
                 m_Thresholder = BinaryThresholdVectorImageFilterType::New();
+                m_Thresholder->SetReleaseDataBeforeUpdateFlag(true);
+                m_Thresholder->SetReleaseDataFlag(true);
                 m_Thresholder->SetInput(m_PadAndResampleFilter->GetOutput());
                 m_Thresholder->ThresholdAbove(GetParameterFloat("threshold"));
                 m_Thresholder->SetInsideValue(0);
                 m_Thresholder->SetOutsideValue(1);
                 SetParameterOutputImagePixelType("out", ImagePixelType_uint8);
-                SetParameterOutputImage<VectorImageType>("out",m_Thresholder->GetOutput());
+                SetParameterOutputImage<MaskType>("out",m_Thresholder->GetOutput());
 
 		    }
 		    else

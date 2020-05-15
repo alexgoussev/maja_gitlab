@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                        o     o                                                                           #
@@ -39,28 +55,28 @@ add_test(NAME pyTuL1ImageReaderLandsat8MuscatePlugin
          --compare-n-images 0.00001 8
          #IPEDGSubOutput
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_IPEDGSubOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/tmp_edg_sub_oneBandEqual.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/IPEDGSubOutput.tif
          #IPAOTSubOutput
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_IPAOTSubOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/aot_sub.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/IPTOASubOutput.tif
          # IPSATSubOutput
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_IPSATSubOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/SubSatVector.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/IPSATSubOutput.tif
          #CLAImage
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_CLAImage.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/cla_constant_sub.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/CLAImage.tif
          #L2TOAImageList
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_L2TOAImageOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/L2TOAImageListVector_R1.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/L2TOAImageList_R1.tif
          # L2EDGOutputList
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_L2EDGImageOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/IPEDGMaskL2_R1.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/L2EDGOutputList_R1.tif
          #SOL1Image
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_SOL1Image.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/sol1_concat.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/SOL1Image.tif
          #L2SAT
          ${MAJADATA_TU_L1_READER_LANDSAT8_MUSCATE_BASELINE}/apTuL1Reader_LANDSAT8_MUSCATE_L2SATMaskOutput.tif
-         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/tmp_sat_resample_0.tif
+         ${MAJA_TEST_OUTPUT_ROOT}/TU/LANDSAT8_MUSCATE/L2SATMaskList_R1.tif
          Execute
          ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/test_maja_l1_image_reader.py
          "-i" ${MAJADATA_TV_LANDSAT8_MUSCATE_INPUT}/L8-V-L2INIT-011-F-N-LANDSAT8_MUSCATE-GENERAL

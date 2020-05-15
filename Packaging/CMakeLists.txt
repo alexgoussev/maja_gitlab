@@ -1,4 +1,3 @@
-#TODO
 #
 # Copyright (C) 2005-2017 Centre National d'Etudes Spatiales (CNES)
 #
@@ -19,7 +18,7 @@
 # limitations under the License.
 #
 
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 project(MAJAPackaging)
 
@@ -54,6 +53,18 @@ if(NOT EXISTS "${MAJA_TEST_EXE_DIR}/maja")
   message(FATAL_ERROR "${MAJA_TEST_EXE_DIR}/maja not found")
 endif()
 
+
+# find startmaja in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/startmaja")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/startmaja")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/startmaja")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/maja not found")
+endif()
+
+
 if(PROJECT_NAME STREQUAL "MAJAPackaging")
   if(EXISTS "${SUPERBUILD_INSTALL_DIR}/maja/")
     file(GLOB maja_install_dirs "${SUPERBUILD_INSTALL_DIR}/maja/*.*")
@@ -85,6 +96,10 @@ include(${CMAKE_SOURCE_DIR}/../CMakeConfig/CommonCmakeOptions.cmake)
 
 if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/maja")
   message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/maja not found.")
+endif()
+
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/startmaja")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/startmaja not found.")
 endif()
 
 set(plugins_enabled)
@@ -135,6 +150,7 @@ include(update_make_symlinks_script)
 include(detect_using_file_command)
 include(cleanup_package)
 include(install_orchestrator)
+include(install_startmaja)
 include(install_python_bindings)
 include(install_share_dirs)
 include(installer_files)
@@ -172,6 +188,8 @@ endforeach()
 install_python_bindings()
 
 install_orchestrator()
+
+install_startmaja()
 
 install_share_dirs()
 

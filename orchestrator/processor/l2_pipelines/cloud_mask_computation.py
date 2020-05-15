@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -29,6 +40,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.maja_exceptions import *
 from orchestrator.modules.maja_module import MajaModule
@@ -307,6 +319,10 @@ class MajaCloudMaskComputation(MajaModule):
 
         # ---------------------------------------------------------------
         # ------------------- Cld shadow ------------------------
+        #caching of ShadowVIE that is know for causing troubles
+        shadowvie_filename = os.path.join(cloud_working, "shadow_vie.tif")
+        otb_copy_image_to_file(dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),shadowvie_filename)
+
         cloud_shadow_filename = os.path.join(cloud_working, "cloud_shadow.tif")
         cloud_cla_filename = os.path.join(cloud_working, "cloud_cla.tif")
         grid_ref_alt = dict_of_input.get("Plugin").ConfigUserCamera.get_Algorithms().get_GRID_Reference_Altitudes()
@@ -314,7 +330,7 @@ class MajaCloudMaskComputation(MajaModule):
                         "edg": dict_of_input.get("L1Reader").get_value("IPEDGSubOutput"),
                         "cldall": cloud_allnoext_image,
                         "cla": dict_of_output.get("CLA_Sub"),
-                        "vie": dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),
+                        "vie": shadowvie_filename,
                         "dtm": dict_of_input.get("DEM").ALC,
                         "sol1.in": dict_of_input.get("L1Reader").get_value("SOL1Image"),
                         "sol1.h": grid_ref_alt.get_SOLH1(),
@@ -584,10 +600,8 @@ class MajaCloudMaskComputation(MajaModule):
 
         dict_of_output[constants.CLOUD_MASK_ALL] = cloud_sum_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL])
-
         dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_all_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS])
-
         dict_of_output[constants.CLOUD_MASK_SHADOWS] = cloud_shadow_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_SHADOWS])
         if compute_shadvar:

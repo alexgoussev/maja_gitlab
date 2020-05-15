@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -39,10 +55,13 @@
  ************************************************************************************************************/
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "itkRoundImageFilter.h"
-#include "itkBinaryThresholdImageFilter.h"
-#include "vnsLoggers.h"
+#include "vnsRoundVectorImageFunctor.h"
+#include "vnsRoundImageFunctor.h"
+#include "otbUnaryFunctorVectorImageFilter.h"
+#include "itkUnaryFunctorImageFilter.h"
 #include <string>
+#include "vnsLoggers.h"
+#include "vnsMacro.h"
 
 namespace vns
 {
@@ -67,8 +86,13 @@ public:
 	itkTypeMacro(RoundImage, otb::Wrapper::Application);
 
 	/** Some convenient typedefs. */
-	typedef itk::RoundImageFilter<DoubleImageType, UInt16ImageType> RealToMaskRoundImageFilterType;
-	typedef typename RealToMaskRoundImageFilterType::Pointer RealToMaskRoundImageFilterPointer;
+	typedef DoubleVectorImageType InputImageType;
+
+	typedef vns::Functor::RoundVectorImage<InputImageType::PixelType, InputImageType::PixelType> RoundVectorImageFunctor;
+	typedef otb::UnaryFunctorVectorImageFilter<InputImageType, InputImageType, RoundVectorImageFunctor> RealToRealRoundVectorImageFilterType;
+
+	typedef vns::Functor::RoundImage<DoubleImageType::PixelType, DoubleImageType::PixelType> RoundImageFunctor;
+	typedef itk::UnaryFunctorImageFilter<DoubleImageType, DoubleImageType, RoundImageFunctor> RealToRealRoundImageFilterType;
 
 
 private:
@@ -87,38 +111,36 @@ private:
 
 		AddParameter(ParameterType_InputImage,  "im",   "image");
 		AddParameter(ParameterType_OutputImage, "out", "image");
+		SetParameterOutputImagePixelType("out", ImagePixelType_double);
 		SetParameterDescription("out","output image");
-
+		AddParameter(ParameterType_Float,"coef","multiplication coeff");
+		MandatoryOff("coef");
 		AddRAMParameter("ram");
-		SetDefaultParameterInt("ram",2048);
+		SetDefaultParameterInt("ram", 2048);
 
 	}
 
 	void DoUpdateParameters()
 	{
-
 	}
 
 
 	void DoExecute()
 	{
+		// Get input image pointers
 		// Init filters
-		m_round_filter = RealToMaskRoundImageFilterType::New();
-
-		//Get Image
-		DoubleImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
-		m_round_filter->SetInput(l_im);
-		SetParameterOutputImage<
-
-
-
-		>("out",m_round_filter->GetOutput());
-
+		DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
+		m_filter = RealToRealRoundVectorImageFilterType::New();
+		m_filter->SetInput(l_im);
+		if(HasValue("coef"))
+		{
+			m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
+		}
+		SetParameterOutputImage<InputImageType>("out", m_filter->GetOutput());
 	}
 
-
 	/** Filters declaration */
-	RealToMaskRoundImageFilterPointer m_round_filter;
+	 RealToRealRoundVectorImageFilterType::Pointer m_filter;
 };
 
 }

@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 
@@ -19,18 +34,13 @@ orchestrator.cots.otb.otb_cots is a description
 It defines classes_and_methods
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 
 from ..maja_cots import MajaCots
 from orchestrator.common.maja_exceptions import *
 from orchestrator.common.maja_utils import get_test_mode
 import otbApplication
-import copy
+import copy,gc
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -63,6 +73,8 @@ class MajaOtbCots(MajaCots):
             self.otb_app.Execute()
 
     def __del__(self):
+        if self.otb_app is not None:
+            self.otb_app.FreeRessources()
         del(self.otb_app)
         self.otb_app = None
 
@@ -91,7 +103,6 @@ class MajaOtbCots(MajaCots):
             self.otb_app.SetParameters(parameters_im)
             if not get_test_mode():
                 self.otb_app.UpdateParameters()
-
         # remove flag if set to false
         parameters_clean = {}
         for key, value in parameters.items():
@@ -99,7 +110,7 @@ class MajaOtbCots(MajaCots):
                 if self.otb_app.GetParameterType(key) == otbApplication.ParameterType_OutputImage \
                         and len(value.split(":")) > 1:
                     # split value into value and output type
-                    if value.split(":")[1] in  OTB_APP_PIXELS_TYPE.keys():
+                    if value.split(":")[1] in OTB_APP_PIXELS_TYPE.keys():
                         parameters_clean[key] = (value.split(":")[0])
                         self.otb_app.SetParameterOutputImagePixelType(key, OTB_APP_PIXELS_TYPE.get(value.split(":")[1]))
                     else:
@@ -116,7 +127,6 @@ class MajaOtbCots(MajaCots):
             self.otb_app.UpdateParameters()
 
     def post(self, write_output=True):
-
         LOGGER.debug("Write output %s", write_output)
         params_keys = self.otb_app.GetParametersKeys()
         for param in params_keys:
@@ -143,5 +153,7 @@ class MajaOtbCots(MajaCots):
                             if not self.otb_app.GetParameterType(param) == otbApplication.ParameterType_Group:
                                 self.outputs[param] = copy.deepcopy(self.otb_app.GetParameterValue(param))
         if write_output:
-            del(self.otb_app)
+            self.otb_app.FreeRessources()
+            del self.otb_app
             self.otb_app = None
+

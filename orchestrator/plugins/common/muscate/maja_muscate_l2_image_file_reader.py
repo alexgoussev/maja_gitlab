@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 
@@ -17,10 +32,6 @@ orchestrator.plugins.common.earth_explorer.maja_earth_explorer_l2_image_file_rea
 
 It defines classes_and_methods
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -30,6 +41,7 @@ from orchestrator.plugins.common.base.maja_l2_image_reader_base import L2ImageRe
 from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.plugins.common.base.maja_l2_private_image_filenames_provider import L2PrivateImageFilenamesProvider
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 import orchestrator.common.file_utils as file_utils
 from orchestrator.common.muscate.muscate_xml_file_handler import MuscateXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_band_math import *
@@ -379,21 +391,21 @@ class MuscateL2ImageFileReader(L2ImageReaderBase):
             LOGGER.debug("Start reading the CLD image")
             tmp_cld_vec = os.path.join(working_dir, "tmp_cld_vec_" + l_sres + ".tif")
             param_vec_cld = {"im": p_L2XMLHandler.get_l2_cld_filename(l_sres_mtd),
-                             "out": tmp_cld_vec,
+                             "out": tmp_cld_vec + ":double",
                              "nbcomp": len(p_PluginBase.CLDCoreAlgorithmsMapBand)}
             cld_vec_app = OtbAppHandler("BinaryToVector", param_vec_cld, write_output=False)
             # In this case some cld bits are not available in the data
             tmp_cld_zero = os.path.join(working_dir, "tmp_cld_zero_" + l_sres + ".tif")
             cld_const_zero_app = None
             if len(p_PluginBase.CLDCoreAlgorithmsMapBand) > len(p_PluginBase.CLDDataBandsSelected):
-                cld_const_zero_app = band_math([cld_vec_app.getoutput()["out"]], "0",
+                cld_const_zero_app = constant_image(cld_vec_app.getoutput()["out"], "0",
                                                os.path.join(working_dir, "tmp_zero_cld_" + l_sres + ".tif"))
             l_dict_of_cld = dict()
             for b in list(p_PluginBase.CLDCoreAlgorithmsMapBand.keys()):
                 if b in p_PluginBase.CLDDataBandsSelected:
                     tmp_cld_chan = os.path.join(working_dir, "tmp_" + b + "_" + l_sres + ".tif")
                     chan = p_PluginBase.CLDDataBandsSelected.index(b)
-                    l_dict_of_cld[b] = extract_roi(tmp_cld_vec, [chan], tmp_cld_chan, working_dir).getoutput()["out"]
+                    l_dict_of_cld[b] = extract_roi(tmp_cld_vec, [chan], tmp_cld_chan + ":uint8", working_dir).getoutput()["out"]
                 else:
                     l_dict_of_cld[b] = cld_const_zero_app.getoutput()["out"]
             # For GetVectorizedCLDImageList method

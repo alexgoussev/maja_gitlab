@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 """
 ###################################################################################################
 
@@ -19,16 +35,12 @@ orchestrator.common.directory_manager is a description
 It defines classes_and_methods
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.gipp_utils import uncompress_dbl_product
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
+from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_stats import stats
 from orchestrator.cots.gdal.gdal_dataset_info import GdalDatasetInfo
 from orchestrator.common.maja_exceptions import MajaDataException
@@ -82,7 +94,7 @@ class DEMBase(object):
         list_of_file = os.listdir(file_dbldir)
         nbresol = 0
         for f in list_of_file:
-            if "_ALT" in f:
+            if "_ALT" in f and "TIF" in os.path.splitext(f)[1]:
                 nbresol = nbresol + 1
         LOGGER.info("Nb resolution found " + str(nbresol))
         self.initialize_res_list(nbresol)
@@ -189,7 +201,8 @@ class DEMBase(object):
             else:
                 LOGGER.debug("Starting multiply " + self.__SLPListInternal[resol] + " * " + str(self._coeff))
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__SLPListInternal[resol]))
-                self._apps.add_otb_app(multiply_by_scalar(self.__SLPListInternal[resol], self._coeff, output_image=tmp))
+                slp_mul_app = multiply_by_scalar(self.__SLPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                self._apps.add_otb_app(slp_mul_app)
                 mtdat = GdalDatasetInfo(self.__SLPListInternal[resol])
                 l2area = Area()
                 l2area.size = mtdat.size
@@ -198,7 +211,7 @@ class DEMBase(object):
                 self.ProjRef = mtdat.dataset.GetProjectionRef()
                 self.L2Areas.append(l2area)
                 LOGGER.debug("Done")
-                self.SLPList.append(tmp)
+                self.SLPList.append(slp_mul_app.getoutput().get("out"))
             # --------------------------------------
             # Check existent of ALT filename
             if not os.path.exists(self.ALTList[resol]):
@@ -213,9 +226,10 @@ class DEMBase(object):
             else:
                 LOGGER.debug("Starting multiply " + self.__ASPListInternal[resol] + " * " + str(self._coeff))
                 tmp = os.path.join(working_dir, "Mul_" + os.path.basename(self.__ASPListInternal[resol]))
-                self._apps.add_otb_app(multiply_by_scalar(self.__ASPListInternal[resol], self._coeff, output_image=tmp))
+                asp_mul_app = multiply_by_scalar(self.__ASPListInternal[resol], self._coeff, output_image=tmp,write_output=False)
+                self._apps.add_otb_app(asp_mul_app)
                 LOGGER.debug("Done")
-                self.ASPList.append(tmp)
+                self.ASPList.append(asp_mul_app.getoutput().get("out"))
 
         # end loop resol
 

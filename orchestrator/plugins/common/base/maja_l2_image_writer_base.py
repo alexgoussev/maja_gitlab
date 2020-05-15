@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -19,19 +34,16 @@ orchestrator.plugins.maja_dataset is a description
 It defines classes_and_methods
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 from orchestrator.common.maja_exceptions import MajaNotYetImplemented
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
+from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
 from orchestrator.cots.otb.algorithms.otb_rescale import rescale_intensity
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 import orchestrator.common.file_utils as file_utils
+from orchestrator.plugins.common.base.maja_plugin_base import PluginBase
 import orchestrator.cots.otb.otb_file_utils as otb_file_utils
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 import os
@@ -317,36 +329,36 @@ class L2ImageWriterBase(object):
             file_utils.create_directory(os.path.dirname(l2privateimagefilenames.get_rta_image_filename()))
 
             # Copy all data from private directory
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rta_image_filename(),
                 l2privateimagefilenames.get_rta_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rtc_image_filename(),
                 l2privateimagefilenames.get_rtc_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_rcr_image_filename(),
                 l2privateimagefilenames.get_rcr_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_sto_image_filename(),
                 l2privateimagefilenames.get_sto_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_pxd_image_filename(),
                 l2privateimagefilenames.get_pxd_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_ndt_image_filename(),
                 l2privateimagefilenames.get_ndt_image_filename())
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_cld_image_filename(),
                 l2privateimagefilenames.get_cld_image_filename())
             #CLA can be optional
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_cla_image_filename(),
                 l2privateimagefilenames.get_cla_image_filename(),raise_exceptions=False)
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_wam_image_filename(),
                 l2privateimagefilenames.get_wam_image_filename())
             #LTC writing can be optional
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 l_l2privateimagefilenamesprovider.get_ltc_image_filename(),
                 l2privateimagefilenames.get_ltc_image_filename(), raise_exceptions=False)
 
@@ -359,23 +371,24 @@ class L2ImageWriterBase(object):
     def write_qlt_product(self, p_res, p_qlt_image_filename, working_dir):
         raise MajaNotYetImplemented("Could not instanciate base class")
 
-    def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename):
+    def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename, use_filenames=False):
         il = []
-        coeff = 1
-        idx = 1
-        exp = ""
         for c in p_clddatabandsselected:
             band = self._plugin.get_cld_algoindex_from_bandname(c)
             il.append(p_cldimages[band])
-            exp = exp + " im" + str(idx) + "b1 * " + str(coeff) + " + "
-            coeff = coeff * 2
-            idx = idx + 1
-        exp = exp + "0"
-        param_mask = {"il": il,
-                      "out": cld_image_filename + ":uint8"+  file_utils.get_extended_filename_write_image_file_standard(),
-                      "exp": exp
-                      }
-        cld_app = OtbAppHandler("BandMath", param_mask)
+
+        param_concat = {
+                        "il": il,
+                        "out": "tmp.tif:uint8"
+                        }
+        if not use_filenames:
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=False)
+        else:
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat, write_output=False)
+        param_bin_concat = {"im": concat_app.getoutput().get("out"),
+                            "out": cld_image_filename + ":uint8"+file_utils.get_extended_filename_write_image_file_standard()
+                            }
+        bin_concat_app = OtbAppHandler("BinaryConcatenate", param_bin_concat, write_output=True)
 
     def write_private_images(
             self,
@@ -397,7 +410,7 @@ class L2ImageWriterBase(object):
             # START WRITING PXD Image file DATA
             # Create the writer
             # Initialize the writer filter
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._pxd,
                 p_L2PrivateImageFilenamesProvider.get_pxd_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())
@@ -432,27 +445,15 @@ class L2ImageWriterBase(object):
 
             # START WRITING STO Image file DATA
             # Scalar filter
-
-            tmp_sto_bandmath = os.path.join(working_dir, "tmp_sto_bandmath.tif")
-            param_scaled_sto = {
-                "im": self._sto,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_sto_bandmath
-            }
-            OtbAppHandler("MultiplyByScalar", param_scaled_sto)
-
-            param_round_sto = {
-                "im": param_scaled_sto.get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_sto_image_filename() +
-                file_utils.get_extended_filename_write_image_file_standard()
-            }
-            OtbAppHandler("RoundVectorImage", param_round_sto)
+            multiply_by_scalar(self._sto,p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_sto_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard() + ":int16")
 
 
             # START WRITING NDT Image file DATA
             # Create the writer
             # Evol 4 - 1: NDT ecris sur 8 bits(et non 16  bits car seuilement un masque)
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._ndt,
                 p_L2PrivateImageFilenamesProvider.get_ndt_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())
@@ -460,68 +461,30 @@ class L2ImageWriterBase(object):
             # START WRITING LTC Image file DATA
             # Create the image list
             if p_WriteLTC:
-                otb_file_utils.otb_copy_file(self._ltc_image,
+                otb_file_utils.otb_copy_image_to_file(self._ltc_image,
                                              p_L2PrivateImageFilenamesProvider.get_ltc_image_filename())
 
             # START WRITING RTA Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rta = os.path.join(working_dir, "tmp_bandmath_rta.tif")
-            param_scaled_rta = {
-                "im": self._rta,
-                "coef": p_ReflectanceQuantificationValue,
-                "out":  tmp_bandmath_rta}
-            rta_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rta)
-
-            param_round_rta = {
-                "im": rta_scal_app.getoutput().get("out"),
-                "out":  p_L2PrivateImageFilenamesProvider.get_rta_image_filename()+
-                file_utils.get_extended_filename_write_image_file_standard()}
-            OtbAppHandler("RoundVectorImage", param_round_rta)
-
+            multiply_by_scalar(self._rta, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rta_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
             # START WRITING RTC Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rtc = os.path.join(working_dir, "tmp_bandmath_rtc.tif")
-            param_scaled_rtc = {
-                "im": self._rtc,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_bandmath_rtc
-            }
-
-            rtc_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rtc)
-
-            param_round_rtc = {
-                "im": rtc_scal_app.getoutput().get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_rtc_image_filename() +
-            file_utils.get_extended_filename_write_image_file_standard()
-            }
-
-            OtbAppHandler("RoundVectorImage", param_round_rtc)
-
+            multiply_by_scalar(self._rtc, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rtc_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
             # START WRITING RCR Image file DATA
-            # Initialize the Scalar filter
-            tmp_bandmath_rcr = os.path.join(working_dir, "tmp_bandmath_rcr.tif")
-            param_scaled_rcr = {
-                "im": self._rcr,
-                "coef": p_ReflectanceQuantificationValue,
-                "out": tmp_bandmath_rcr
-            }
-            rcr_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rcr)
-
-            param_round_rcr = {
-                "im": rcr_scal_app.getoutput().get("out"),
-                "out": p_L2PrivateImageFilenamesProvider.get_rcr_image_filename()+
-                file_utils.get_extended_filename_write_image_file_standard()
-            }
-            OtbAppHandler("RoundVectorImage", param_round_rcr)
+            multiply_by_scalar(self._rcr, p_ReflectanceQuantificationValue,
+                               p_L2PrivateImageFilenamesProvider.get_rcr_image_filename() +
+                               file_utils.get_extended_filename_write_image_file_standard()+":int16")
 
 
         # End od condition
         self.write_cld_image(
             self._cld,
             p_CLDDataBandsSelected,
-            p_L2PrivateImageFilenamesProvider.get_cld_image_filename())
+            p_L2PrivateImageFilenamesProvider.get_cld_image_filename(), use_filenames=True)
 
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
         # START WRITING CLA Sub Image file DATA
@@ -529,13 +492,78 @@ class L2ImageWriterBase(object):
         # LAIG - DM - MAC - 1691 - CNES: Write CLA only is available(only for VENUS - stereo)
         if self._cld_l2cla is not None:
 
-            otb_file_utils.otb_copy_file(
+            otb_file_utils.otb_copy_image_to_file(
                 self._cld_l2cla,
                 p_L2PrivateImageFilenamesProvider.get_cla_image_filename() +
                 file_utils.get_extended_filename_write_image_file_standard())
 
+    @staticmethod
+    def write_quicklook_image_from_files(
+            filename,
+            p_WritePublicProduct,
+            p_QuicklookRedBandImage,
+            p_QuicklookGreenBandImage,
+            p_QuicklookBlueBandImage,
+            p_QuicklookMinReflRedBand,
+            p_QuicklookMaxReflRedBand,
+            p_QuicklookMinReflGreenBand,
+            p_QuicklookMaxReflGreenBand,
+            p_QuicklookMinReflBlueBand,
+            p_QuicklookMaxReflBlueBand,
+            p_RealL2NoData,
+            dtm,
+            working_dir):
 
-    # TODO
+        # ====================================================================
+        # IF PUBLIC PART OF L2 PRODUCT IS WRITTEN
+        # ====================================================================
+        if p_WritePublicProduct:
+            LOGGER.debug("Start QLK wiring...")
+
+            # Replace NoData value by min
+            # TODO
+            # Generate he quicklook
+            tmp_qlk_red_sub = os.path.join(working_dir, "tmp_qck_red_sub.tif")
+            tmp_qlk_green_sub = os.path.join(working_dir, "tmp_qck_green_sub.tif")
+            tmp_qlk_blue_sub = os.path.join(working_dir, "tmp_qck_blue_sub.tif")
+
+            # Call the resampling app
+            resampling_app_red = resample(p_QuicklookRedBandImage, dtm, tmp_qlk_red_sub,
+                                          OtbResampleType.LINEAR_WITH_RADIUS,
+                                          padradius=4, outarea=[1000,1000], write_output=False)
+            resampling_app_green = resample(p_QuicklookGreenBandImage, dtm, tmp_qlk_green_sub,
+                                            OtbResampleType.LINEAR_WITH_RADIUS,
+                                            padradius=4, outarea=[1000,1000], write_output=False)
+            resampling_app_blue = resample(p_QuicklookBlueBandImage, dtm, tmp_qlk_blue_sub,
+                                           OtbResampleType.LINEAR_WITH_RADIUS,
+                                           padradius=4, outarea=[1000,1000], write_output=False)
+
+            # Concatenate images
+            tmp_qlk = os.path.join(working_dir, "tmp_qck_sub.tif")
+            param_concat = {
+                "il": [
+                    resampling_app_red.getoutput().get("out"),
+                    resampling_app_blue.getoutput().get("out"),
+                    resampling_app_green.getoutput().get("out")],
+                "out": tmp_qlk,
+                "ram": str(OtbAppHandler.ram_to_use / 3)
+                }
+            concat_app = OtbAppHandler("ConcatenateImages", param_concat,write_output=True)
+
+            # Rescale between 0 and 255
+            rescale_intensity(
+                concat_app.getoutput().get("out"),
+                0,
+                255,
+                filename +
+                file_utils.get_extended_filename_write_image_file_standard()+":uint8",
+                inmin=[str(p_QuicklookMinReflRedBand), str(p_QuicklookMinReflGreenBand), str(p_QuicklookMinReflBlueBand)],
+                inmax=[str(p_QuicklookMaxReflRedBand), str(p_QuicklookMaxReflGreenBand), str(p_QuicklookMaxReflBlueBand)]
+            )
+            if (os.path.exists(filename + '.aux.xml')):
+                LOGGER.debug("Removing " + filename + '.aux.xml file')
+                os.remove(filename + '.aux.xml')
+
     @staticmethod
     def write_quicklook_image(
             filename,
@@ -585,52 +613,21 @@ class L2ImageWriterBase(object):
             tmp_qlk_red = os.path.join(working_dir, "tmp_qck_red.tif")
             tmp_qlk_green = os.path.join(working_dir, "tmp_qck_green.tif")
             tmp_qlk_blue = os.path.join(working_dir, "tmp_qck_blue.tif")
-            extract_roi(pInputImage, [p_QuicklookRedBandId], tmp_qlk_red)
-            extract_roi(pInputImage, [p_QuicklookGreenBandId], tmp_qlk_green)
-            extract_roi(pInputImage, [p_QuicklookBlueBandId], tmp_qlk_blue)
+            tmp_qlk_red_app = extract_roi(pInputImage, [p_QuicklookRedBandId], tmp_qlk_red,write_output=False)
+            tmp_qlk_green_app = extract_roi(pInputImage, [p_QuicklookGreenBandId], tmp_qlk_green,write_output=False)
+            tmp_qlk_blue_app = extract_roi(pInputImage, [p_QuicklookBlueBandId], tmp_qlk_blue,write_output=False)
 
-            # Replace NoData value by min
-            # TODO
-            # Generate he quicklook
-            tmp_qlk_red_sub = os.path.join(working_dir, "tmp_qck_red_sub.tif")
-            tmp_qlk_green_sub = os.path.join(working_dir, "tmp_qck_green_sub.tif")
-            tmp_qlk_blue_sub = os.path.join(working_dir, "tmp_qck_blue_sub.tif")
-
-            # Call the resampling app
-            resampling_app_red = resample(tmp_qlk_red, dtm, tmp_qlk_red_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
-            resampling_app_green = resample(tmp_qlk_green, dtm, tmp_qlk_green_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
-            resampling_app_blue = resample(tmp_qlk_blue, dtm, tmp_qlk_blue_sub, OtbResampleType.LINEAR_WITH_RADIUS, padradius=4, outarea=[1000,1000], write_output=True)
-
-            # Concatenate images
-            tmp_qlk = os.path.join(working_dir, "tmp_qck_sub.tif")
-            param_concat = {
-                "il": [
-                    resampling_app_red.getoutput().get("out"),
-                    resampling_app_blue.getoutput().get("out"),
-                    resampling_app_green.getoutput().get("out")],
-                "out": tmp_qlk}
-            concat_app = OtbAppHandler("ConcatenateImages", param_concat)
-
-            # Rescale between 0 and 255
-            rescale_intensity(
-                tmp_qlk,
-                0,
-                255,
-                filename +
-                file_utils.get_extended_filename_write_image_file_standard()+":uint8",
-                inmin=[str(p_QuicklookMinReflRedBand), str(p_QuicklookMinReflGreenBand), str(p_QuicklookMinReflBlueBand)],
-                inmax=[str(p_QuicklookMaxReflRedBand), str(p_QuicklookMaxReflGreenBand), str(p_QuicklookMaxReflBlueBand)]
-            )
-
-            if (os.path.exists(filename + '.aux.xml')):
-                LOGGER.debug("Removing " + filename + '.aux.xml file')
-                os.remove(filename + '.aux.xml')
-
-
-
-
-
-
-
-
-
+            L2ImageWriterBase.write_quicklook_image_from_files(filename,
+                                                               p_WritePublicProduct,
+                                                               tmp_qlk_red_app.getoutput().get("out"),
+                                                               tmp_qlk_green_app.getoutput().get("out"),
+                                                               tmp_qlk_blue_app.getoutput().get("out"),
+                                                               p_QuicklookMinReflRedBand,
+                                                               p_QuicklookMaxReflRedBand,
+                                                               p_QuicklookMinReflGreenBand,
+                                                               p_QuicklookMaxReflGreenBand,
+                                                               p_QuicklookMinReflBlueBand,
+                                                               p_QuicklookMaxReflBlueBand,
+                                                               p_RealL2NoData,
+                                                               dtm,
+                                                               working_dir)
