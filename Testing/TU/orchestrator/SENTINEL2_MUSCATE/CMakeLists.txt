@@ -168,6 +168,6 @@ add_test(NAME pyTu${PREFIX}_Sentinel2_L2HeaderWriter_cross
           COMMAND ${TEST_DRIVER}
           Execute ${PYTHON_EXECUTABLE}
           ${TEST_ORCHESTRATOR}/test_maja_l2_cross_writer.py
-          ${MAJADATA_TU_SENTINEL2_INPUT}/L1Reader/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL
+          ${MAJADATA_TU_SENTINEL2_INPUT}/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL
           "${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2_MUSCATE/cross"
           )

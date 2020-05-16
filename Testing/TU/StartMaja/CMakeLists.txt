@@ -62,7 +62,7 @@ add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_AuxFile
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_GippFile
 	COMMAND ${TEST_DRIVER}
 	Execute
-	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_GippFile.py -v
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_GippFile.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
