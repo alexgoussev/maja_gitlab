@@ -44,6 +44,8 @@ if(ENABLE_TU)
     file(MAKE_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja)
 endif()
 
+set(TEST_DRIVER ${CMAKE_INSTALL_PREFIX}/bin/otbTestDriver.sh)
+
 SET(PREFIX "StartMaja")
 SET(FOLDER_CHAIN "Chain")
 SET(FOLDER_COMMON "Common")
@@ -51,82 +53,112 @@ SET(FOLDER_PREPARE_MNT "prepare_mnt")
 
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_AuxFile
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_AuxFile.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_AuxFile.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_GippFile
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_GippFile.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_GippFile.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 set_tests_properties(pyTu${PREFIX}_${FOLDER_CHAIN}_GippFile PROPERTIES TIMEOUT 300000)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_L8Product
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_L8Product.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_L8Product.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_Product
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_Product.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_Product.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_S2Product
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_S2Product.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_S2Product.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_VSProduct
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_VSProduct.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_VSProduct.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_Workplan
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_Workplan.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_Workplan.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_DateConverter
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DateConverter.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DateConverter.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_DummyFiles
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DummyFiles.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DummyFiles.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_FileSystem
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_FileSystem.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_FileSystem.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_ImageIO
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_ImageIO.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_ImageIO.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_XMLTools
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_XMLTools.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_XMLTools.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_PREPARE_MNT}_MNTBase
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/prepare_mnt/mnt/test_MNTBase.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/prepare_mnt/mnt/test_MNTBase.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_PREPARE_MNT}_SRTM
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/prepare_mnt/mnt/test_SRTM.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/prepare_mnt/mnt/test_SRTM.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
 
 add_test(NAME pyTu${PREFIX}_Start_maja
-	COMMAND ${PYTHON_EXECUTABLE} ${START_MAJA}/test/test_Start_maja.py -v
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/test_Start_maja.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 

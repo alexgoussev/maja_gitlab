@@ -42,105 +42,104 @@
 
 
 set(TEST_DRIVER ${CMAKE_INSTALL_PREFIX}/bin/otbTestDriver.sh)
+SET(PREFIX "Sentinel2")
 
-
-add_test(NAME pyTuGenerateEDGImagefromTOAImages
+add_test(NAME pyTu${PREFIX}_GenerateEDGImagefromTOAImages
           COMMAND ${TEST_DRIVER}
           --compare-n-images ${EPSILON_4} 3
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestGenerateEDGImageFromTOAImages/Baseline/apTuIPEDGSubMask0.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/TestGenerateEDGImageFromTOAImages/MaskOrMask12.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/MaskOrMask12.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestGenerateEDGImageFromTOAImages/Baseline/apTuIPEDGMaskL2_R0.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/TestGenerateEDGImageFromTOAImages/IPEDGMaskL2_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/IPEDGMaskL2_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestGenerateEDGImageFromTOAImages/Baseline/apTuIPEDGMaskL2_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/TestGenerateEDGImageFromTOAImages/IPEDGMaskL2_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/IPEDGMaskL2_R2.tif
           Execute
           ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/PythonTestDriver.py test_maja_sentinel2_generate_edg_images_from_toa
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestGenerateEDGImageFromTOAImages/Input/
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestGenerateEDGImageFromTOAImages/Input/S2__TEST_AUX_REFDE2_36JTT____5001.HDR
+          ${MAJADATA_TU_SENTINEL2_INPUT}/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL/S2A_MSIL1C_20160914T074612_N0204_R135_T36JTT_20160914T081456.SAFE/GRANULE/L1C_T36JTT_A006424_20160914T081456/IMG_DATA/
+          ${MAJADATA_TU_SENTINEL2_INPUT}/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL/S2__TEST_AUX_REFDE2_36JTT____5001.HDR
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/
           )
 
-add_test(NAME pyTuL1ImageInfoReaderSentinel2Plugin
+add_test(NAME pyTu${PREFIX}_L1ImageInfo
          COMMAND ${TEST_DRIVER}
          Execute
          ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/test_maja_l1_image_info.py
-         "-i" ${MAJADATA_TV_SENTINEL2_INPUT}/S2-V-L2NOMINAL-001-F-N-SENTINEL2-ALGO/
+         "-i" ${MAJADATA_TU_SENTINEL2_INPUT}/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL/
          "-t" "36JTT"
 
           )
           
- add_test(NAME pyTuL1ImageReaderSentinel2Plugin
+add_test(NAME pyTu${PREFIX}_L1ImageFileReader
           COMMAND ${TEST_DRIVER}
           --compare-n-images ${EPSILON_4} 18
 
           #IPEDGSubOutput
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_IPEDGSubOutput.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader/IPEDGSubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/IPEDGSubOutput.tif
 
           #L1TOACirrus
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L1TOACirrus.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader/L1TOACirrusImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L1TOACirrusImage.tif
 
           #IPAOTSubOutput
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_IPAOTSubOutput.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader/IPTOASubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/IPTOASubOutput.tif
 
           # IPSATSubOutput
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_IPSATSubOutput.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//IPSATSubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/IPSATSubOutput.tif
 
           #CLAImage
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_CLAImage.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//CLAImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/CLAImage.tif
 
           # L2EDGOutputList
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2EDGOutput_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2EDGOutputList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2EDGOutputList_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2EDGOutput_R2.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2EDGOutputList_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2EDGOutputList_R2.tif
 
           #SOL1Image
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_SOL1Image.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//SOL1Image.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/SOL1Image.tif
 
           #L2SATMaskList
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2SATMaskOutput_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2SATMaskList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2SATMaskList_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2SATMaskOutput_R2.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2SATMaskList_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2SATMaskList_R2.tif
-          
+
           #L2TOAImageList
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2TOAImageOutput_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2TOAImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2TOAImageList_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2TOAImageOutput_R2.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2TOAImageList_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2TOAImageList_R2.tif
 
           #DTMVieImage
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_DTMVIEImage.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//DTMVieImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/DTMVieImage.tif
 
           #ShadowVIEImage
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_ShadowVIEImage.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//ShadowVIEImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/ShadowVIEImage.tif
 
           #L2PIX
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2PIXImageOutput_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2PIXImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2PIXImageList_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_L2PIXImageOutput_R2.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//L2PIXImageList_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/L2PIXImageList_R2.tif
 
           # AngleZoneMaskList
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_AngleZoneMaskList_R1.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//AngleZoneMaskList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/AngleZoneMaskList_R1.tif
-          ${MAJADATA_TU_L1_READER_SENTINEL2_DIR}/TestL1ImageReader/Baseline//apTuL1Reader_SENTINEL2_AngleZoneMaskList_R2.tif
+          ${MAJADATA_TU_SENTINEL2_BASELINE}/L1Reader//AngleZoneMaskList_R2.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2/AngleZoneMaskList_R2.tif
-
 
           Execute
           ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/test_maja_l1_image_reader.py
-          "-i" ${MAJADATA_TV_SENTINEL2_INPUT}/S2-V-L2NOMINAL-001-F-N-SENTINEL2-ALGO/
+          "-i" ${MAJADATA_TU_SENTINEL2_INPUT}/S2-V-L2INIT-001-F-N-SENTINEL2-GENERAL
           "-o" ${MAJA_TEST_OUTPUT_ROOT}/TU/SENTINEL2
           "-t" "36JTT"
           )
-  set_tests_properties(pyTuL1ImageReaderSentinel2Plugin PROPERTIES TIMEOUT 300000)
+set_tests_properties(pyTu${PREFIX}_L1ImageFileReader PROPERTIES TIMEOUT 300000)
      

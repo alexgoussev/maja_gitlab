@@ -69,116 +69,117 @@ def set_input_l2_writer(input_dir, dict_img):
         else:
             dict_img["ltc"] = None
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuCLAImage.tif')):
-        dict_img["cla"] = os.path.join(input_dir + 'apTuCLAImage.tif')
+
+    if os.path.isfile(os.path.join(input_dir, 'cloud_cla.tif')):
+        dict_img["cla"] = os.path.join(input_dir + 'cloud_cla.tif')
     else:
         dict_img["cla"] = None
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuSNWImage.tif')):
-        dict_img["snow"] = os.path.join(input_dir + 'apTuSNWImage.tif')
+    if os.path.isfile(os.path.join(input_dir, 'cloud_snow_mask.tif')):
+        dict_img["snow"] = os.path.join(input_dir + 'cloud_snow_mask.tif')
     else:
         dict_img["snow"] = None
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuSHDImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'dtm_shd.tif')):
         try:
-            dict_img["dtm_shd"] = os.path.join(input_dir + 'apTuSHDImage.tif')
+            dict_img["dtm_shd"] = os.path.join(input_dir + 'dtm_shd.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuSHDImageList.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'dtm_shd.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuHIDImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'dtm_hid.tif')):
         try:
-            dict_img["dtm_hid"] = os.path.join(input_dir + 'apTuHIDImage.tif')
+            dict_img["dtm_hid"] = os.path.join(input_dir + 'dtm_hid.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuHIDImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'dtm_hid.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuWASImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'water_sub.tif')):
         try:
-            dict_img["was"] = os.path.join(input_dir + 'apTuWASImage.tif')
+            dict_img["was"] = os.path.join(input_dir + 'water_sub.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuWASImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'water_sub.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuPWAImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'possible_water_sub.tif')):
         try:
-            dict_img["pwa"] = os.path.join(input_dir + 'apTuPWAImage.tif')
+            dict_img["pwa"] = os.path.join(input_dir + 'possible_water_sub.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuPWAImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'possible_water_sub.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuTWAImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'tested_water_sub.tif')):
         try:
-            dict_img["twa"] = os.path.join(input_dir + 'apTuTWAImage.tif')
+            dict_img["twa"] = os.path.join(input_dir + 'tested_water_sub.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuTWAImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'tested_water_sub.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuRTAImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_rta.tif')):
         try:
-            dict_img["rta_composite"] = os.path.join(input_dir + 'apTuRTAImage.tif')
+            dict_img["rta_composite"] = os.path.join(input_dir + 'composite_rta.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuRTAImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_rta.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuRTCImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_rtc.tif')):
         try:
-            dict_img["rtc_composite"] = os.path.join(input_dir + 'apTuRTCImage.tif')
+            dict_img["rtc_composite"] = os.path.join(input_dir + 'composite_rtc.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuRTCImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_rtc.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuRCRImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_rcr.tif')):
         try:
-            dict_img["rcr_composite"] = os.path.join(input_dir + 'apTuRCRImage.tif')
+            dict_img["rcr_composite"] = os.path.join(input_dir + 'composite_rcr.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuRCRImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_rcr.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuSTOImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_sto.tif')):
         try:
-            dict_img["sto_composite"] = os.path.join(input_dir + 'apTuSTOImage.tif')
+            dict_img["sto_composite"] = os.path.join(input_dir + 'composite_sto.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuSTOImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_sto.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuPXDImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_pxd.tif')):
         try:
-            dict_img["pxd_composite"] = os.path.join(input_dir + 'apTuPXDImage.tif')
+            dict_img["pxd_composite"] = os.path.join(input_dir + 'composite_pxd.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuPXDImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_pxd.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuNDTImage.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'composite_ndt.tif')):
         try:
-            dict_img["ndt_composite"] = os.path.join(input_dir + 'apTuNDTImage.tif')
+            dict_img["ndt_composite"] = os.path.join(input_dir + 'composite_ndt.tif')
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuNDTImage.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'composite_ndt.tif')) + "doesn't exist ! ")
 
-    l2cld_img_R1 = [os.path.join(input_dir, 'apTuL2CLDImage_R1_1.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_2.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_3.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_4.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_5.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_6.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_7.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_8.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R1_9.tif')]
+    l2cld_img_R1 = [os.path.join(input_dir, 'cloud_all_R1.tif'),
+                    os.path.join(input_dir, 'cloud_allclouds_R1.tif'),
+                    os.path.join(input_dir, 'cloud_shadows_R1.tif'),
+                    os.path.join(input_dir, 'cloud_shadvar_R1.tif'),
+                    os.path.join(input_dir, 'cloud_refl_R1.tif'),
+                    os.path.join(input_dir, 'cloud_reflvar_R1.tif'),
+                    os.path.join(input_dir, 'cloud_ext_R1.tif'),
+                    os.path.join(input_dir, 'cloud_alt_R1.tif'),
+                    os.path.join(input_dir, 'cloud_cirrus_R1.tif')]
 
-    l2cld_img_R2 = [os.path.join(input_dir, 'apTuL2CLDImage_R2_1.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_2.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_3.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_4.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_5.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_6.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_7.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_8.tif'),
-                    os.path.join(input_dir, 'apTuL2CLDImage_R2_9.tif')]
+    l2cld_img_R2 = [os.path.join(input_dir, 'cloud_all_R2.tif'),
+                    os.path.join(input_dir, 'cloud_allclouds_R2.tif'),
+                    os.path.join(input_dir, 'cloud_shadows_R2.tif'),
+                    os.path.join(input_dir, 'cloud_shadvar_R2.tif'),
+                    os.path.join(input_dir, 'cloud_refl_R2.tif'),
+                    os.path.join(input_dir, 'cloud_reflvar_R2.tif'),
+                    os.path.join(input_dir, 'cloud_ext_R2.tif'),
+                    os.path.join(input_dir, 'cloud_alt_R2.tif'),
+                    os.path.join(input_dir, 'cloud_cirrus_R2.tif')]
 
     if all(os.path.isfile(l2cld_img_R1[i]) for i in range(0, len(l2cld_img_R1) - 1)):
         try:
@@ -190,15 +191,16 @@ def set_input_l2_writer(input_dir, dict_img):
             LOGGER.debug("Missing one image of L2 CLD image list ! ")
 
 
-    tmp_cld = [os.path.join(input_dir, 'apTuCLDImage_1.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_2.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_3.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_4.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_5.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_6.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_7.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_8.tif'),
-                   os.path.join(input_dir, 'apTuCLDImage_9.tif')]
+    tmp_cld = [os.path.join(input_dir, 'cloud_sum_dilated_masked.tif'),
+                   os.path.join(input_dir, 'cloud_all_dilated_masked.tif'),
+                   os.path.join(input_dir, 'cloud_shadow_dilated_masked.tif'),
+                   os.path.join(input_dir, 'cloud_constzero.tif'),
+                   os.path.join(input_dir, 'cloud_refl_dilated_masked.tif'),
+                   os.path.join(input_dir, 'cloud_constzero.tif'),
+                   os.path.join(input_dir, 'cloud_constzero.tif'),
+                   os.path.join(input_dir, 'cloud_alt_dilated_masked.tif'),
+                   os.path.join(input_dir, 'cloud_cirrus_dilated_masked.tif')]
+
     if all(os.path.isfile(tmp_cld[i]) for i in range(0, len(tmp_cld) - 1)):
         try:
             dict_img["CLD_List"] = tmp_cld
@@ -207,138 +209,141 @@ def set_input_l2_writer(input_dir, dict_img):
 
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuSREImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'sre_R1.tif')):
         try:
             sre_list.append(os.path.join(
-                input_dir, 'apTuSREImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuSREImageList_R2.tif')):
+                input_dir, 'sre_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'sre_R2.tif')):
                 sre_list.append(os.path.join(
-                    input_dir, 'apTuSREImageList_R2.tif'))
+                    input_dir, 'sre_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuSREImageList.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'sre_list.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuFREImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'fre_R1.tif')):
         try:
             fre_list.append(os.path.join(
-                input_dir, 'apTuFREImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuFREImageList_R2.tif')):
+                input_dir, 'fre_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'fre_R2.tif')):
                 fre_list.append(os.path.join(
-                    input_dir, 'apTuFREImageList_R2.tif'))
+                    input_dir, 'fre_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuFREImageList.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'fre.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2SATImageList_R1.tif')):
-        try:
-            l2sat_list.append(os.path.join(
-                input_dir, 'apTuL2SATImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2SATImageList_R2.tif')):
-                l2sat_list.append(os.path.join(
-                    input_dir, 'apTuL2SATImageList_R2.tif'))
-        except FileNotFoundError:
-            LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuSATImageList.tif')) + "doesn't exist ! ")
+    if os.path.isfile(os.path.join(input_dir, 'L1_SAT_Masks_R1.tif')):
+        l2sat_list.append(os.path.join(input_dir, 'L1_SAT_Masks_R1.tif'))
+        if os.path.isfile(os.path.join(input_dir, 'L1_SAT_Masks_R2.tif')):
+            l2sat_list.append(os.path.join(input_dir, 'L1_SAT_Masks_R2.tif'))
+    elif os.path.isfile(os.path.join(input_dir, 'tmp_sat_resample_0.tif')):
+        l2sat_list.append(os.path.join(input_dir, 'tmp_sat_resample_0.tif'))
+    else:
+        raise OSError("Cannot find l2sat file")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2STLImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'stl_R1.tif')):
         try:
             l2stl_list.append(os.path.join(
-                input_dir, 'apTuL2STLImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2STLImageList_R2.tif')):
+                input_dir, 'stl_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'stl_R2.tif')):
                 l2stl_list.append(os.path.join(
-                    input_dir, 'apTuL2STLImageList_R2.tif'))
+                    input_dir, 'stl_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuSTLImageList.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'stl_R1.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2TGSImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'tgs_R1.tif')):
         try:
             l2tgs_list.append(os.path.join(
-                input_dir, 'apTuL2TGSImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2TGSImageList_R2.tif')):
+                input_dir, 'tgs_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'tgs_R2.tif')):
                 l2tgs_list.append(os.path.join(
-                    input_dir, 'apTuL2TGSImageList_R2.tif'))
+                    input_dir, 'tgs_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuTGSImageList.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'tgs_R1.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2AOTImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'aot_R1.tif')):
         try:
             l2aot_list.append(os.path.join(
-                input_dir, 'apTuL2AOTImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2AOTImageList_R2.tif')):
+                input_dir, 'aot_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'aot_R2.tif')):
                 l2aot_list.append(os.path.join(
-                    input_dir, 'apTuL2AOTImageList_R2.tif'))
+                    input_dir, 'aot_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2AOTImageList_R1.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'aot_R1.tif')) + "doesn't exist ! ")
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2TAOImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'aotmask_R1.tif')):
         try:
             l2tao_list.append(os.path.join(
-                input_dir, 'apTuL2TAOImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2TAOImageList_R2.tif')):
+                input_dir, 'aotmask_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'aotmask_R2.tif')):
                 l2tao_list.append(os.path.join(
-                    input_dir, 'apTuL2TAOImageList_R2.tif'))
+                    input_dir, 'aotmask_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2TAOImageList_R1.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'aotmask_R1.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2VAPImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'vap_R1.tif')):
         try:
             l2vap_list.append(os.path.join(
-                input_dir, 'apTuL2VAPImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2VAPImageList_R2.tif')):
+                input_dir, 'vap_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'vap_R2.tif')):
                 l2vap_list.append(os.path.join(
-                    input_dir, 'apTuL2VAPImageList_R2.tif'))
+                    input_dir, 'vap_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2VAPImageList_R1.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'vap_R1.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2IWCImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'vapmask_R1.tif')):
         try:
             l2iwc_list.append(os.path.join(
-                input_dir, 'apTuL2IWCImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2IWCImageList_R2.tif')):
+                input_dir, 'vapmask_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'vapmask_R2.tif')):
                 l2iwc_list.append(os.path.join(
-                    input_dir, 'apTuL2IWCImageList_R2.tif'))
+                    input_dir, 'vapmask_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2IWCImageList_R1.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'vapmask_R1.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2PIXImageList_R1.tif')):
-        try:
-            l2pix_list.append(os.path.join(
-                input_dir, 'apTuL2PIXImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2PIXImageList_R2.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'Masks_const_.tif')):
+        l2pix_list.append(os.path.join(
+            input_dir, "Masks_const_.tif"))
+    elif os.path.isfile(os.path.join(input_dir, 'tmp_dfp_resample_0.tif')):
+        l2pix_list.append(os.path.join(
+            input_dir, 'tmp_dfp_resample_0.tif'))
+    else:
+        for file in os.listdir(input_dir):
+            if "_DFP_R1" in file:
                 l2pix_list.append(os.path.join(
-                    input_dir, 'apTuL2PIXImageList_R2.tif'))
-        except FileNotFoundError:
-            LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2PIXImageList_R1.tif')) + "doesn't exist ! ")
+                    input_dir, file))
+        for file in os.listdir(input_dir):
+            if "_DFP_R2" in file:
+                l2pix_list.append(os.path.join(
+                    input_dir, file))
 
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2EDGImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'IPEDGRealL2_R1.tif')):
         try:
             l2edg_list.append(os.path.join(
-                input_dir, 'apTuL2EDGImageList_R1.tif'))
-            if os.path.isfile(os.path.join(input_dir, 'apTuL2EDGImageList_R2.tif')):
+                input_dir, 'IPEDGRealL2_R1.tif'))
+            if os.path.isfile(os.path.join(input_dir, 'IPEDGRealL2_R2.tif')):
                 l2edg_list.append(os.path.join(
-                    input_dir, 'apTuL2EDGImageList_R2.tif'))
+                    input_dir, 'IPEDGRealL2_R2.tif'))
         except FileNotFoundError:
             LOGGER.debug("The file " + os.path.basename(
-                os.path.join(input_dir, 'apTuL2EDGImageList_R1.tif')) + "doesn't exist ! ")
+                os.path.join(input_dir, 'IPEDGRealL2_R1.tif')) + "doesn't exist ! ")
 
-    if os.path.isfile(os.path.join(input_dir, 'apTuL2DFPImageList_R1.tif')):
+    if os.path.isfile(os.path.join(input_dir, 'L1_DFP_Masks_R1.tif')):
         dfp_list.append(os.path.join(
-            input_dir, 'apTuL2DFPImageList_R1.tif'))
-        if os.path.isfile(os.path.join(input_dir, 'apTuL2DFPImageList_R2.tif')):
+            input_dir, 'L1_DFP_Masks_R1.tif'))
+        if os.path.isfile(os.path.join(input_dir, 'L1_DFP_Masks_R2.tif')):
             dfp_list.append(os.path.join(
-                    input_dir, 'apTuL2DFPImageList_R2.tif'))
+                    input_dir, 'L1_DFP_Masks_R2.tif'))
 
     dict_img["SRE_List"] = sre_list
     dict_img["FRE_List"] = fre_list
@@ -353,6 +358,7 @@ def set_input_l2_writer(input_dir, dict_img):
     dict_img["L2EDG_List"] = l2edg_list
     dict_img["L2CLD_List"] = l2cld_list
     dict_img["L2DFP_List"] = dfp_list
+
 
     LOGGER.debug(dict_img["SRE_List"] )
     LOGGER.debug(dict_img["FRE_List"])

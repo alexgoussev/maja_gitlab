@@ -54,19 +54,19 @@ def test(argv):
     dem_filename = argv[2]
     working_dir = argv[3]
 
-    l_ListOfTOAImageFileNames = [os.path.join(in_dir, 'TOAReader_0.tif'),
-                                 os.path.join(in_dir, 'TOAReader_1.tif'),
-                                 os.path.join(in_dir, 'TOAReader_2.tif'),
-                                 os.path.join(in_dir, 'TOAReader_3.tif'),
-                                 os.path.join(in_dir, 'TOAReader_4.tif'),
-                                 os.path.join(in_dir, 'TOAReader_5.tif'),
-                                 os.path.join(in_dir, 'TOAReader_6.tif'),
-                                 os.path.join(in_dir, 'TOAReader_7.tif'),
-                                 os.path.join(in_dir, 'TOAReader_8.tif'),
-                                 os.path.join(in_dir, 'TOAReader_9.tif'),
-                                 os.path.join(in_dir, 'TOAReader_10.tif'),
-                                 os.path.join(in_dir, 'TOAReader_11.tif'),
-                                 os.path.join(in_dir, 'TOAReader_12.tif')
+    l_ListOfTOAImageFileNames = [os.path.join(in_dir, 'T36JTT_20160914T074612_B01.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B02.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B03.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B04.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B05.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B06.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B07.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B08.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B8A.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B09.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B10.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B11.jp2'),
+                                 os.path.join(in_dir, 'T36JTT_20160914T074612_B12.jp2')
                                  ]
 
     maja_object = Sentinel2L1ImageFileReader()

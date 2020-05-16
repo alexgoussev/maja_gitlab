@@ -49,7 +49,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageInfo
          COMMAND ${TEST_DRIVER}
          Execute
          ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/test_maja_l1_image_info.py
-         "-i" ${MAJADATA_TV_VENUS_INPUT}/VE-V-L2INIT-002-F-N-VENUS-IFPDS
+         "-i" ${MAJADATA_TU_VENUS_INPUT}/VE-V-L2INIT-001-F-N-VENUS-CHILE/
          )
 
 
@@ -57,7 +57,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageFileReader
           COMMAND ${TEST_DRIVER}
           Execute
           ${PYTHON_EXECUTABLE} ${TEST_ORCHESTRATOR}/test_maja_l1_image_reader.py
-          "-i" ${MAJADATA_TV_VENUS_INPUT}/VE-V-L2INIT-002-F-N-VENUS-IFPDS
+          "-i" ${MAJADATA_TU_VENUS_INPUT}/VE-V-L2INIT-001-F-N-VENUS-CHILE
           "-o" ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS
           )
 
@@ -65,7 +65,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageFileReader
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L1PIX
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/l1pix.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/L1PIXImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/L1PIXImageList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -76,7 +76,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L1PIX
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2PIX
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/l2pix.tif
+          ${MAJADATA_TU_VENUS_BASELINE}//L2PIXImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/L2PIXImageList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -87,7 +87,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2PIX
 add_test(NAME pyTu${PREFIX}_L1ImageReader_EDGSub
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/edgsub.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/IPEDGSubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/IPEDGSubOutput.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -97,7 +97,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_EDGSub
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2TOA
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/l2toa.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/L2TOAImageList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/L2TOAImageList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -107,7 +107,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2TOA
 add_test(NAME pyTu${PREFIX}_L1ImageReader_TOASub
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/toasub.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/IPTOASubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/IPTOASubOutput.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -118,7 +118,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_TOASub
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2EDG
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/l2edg.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/L2EDGOutputList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/L2EDGOutputList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -129,7 +129,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2EDG
 add_test(NAME pyTu${PREFIX}_L1ImageReader_L2SAT
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/l2sat.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/L2SATMaskList_R1.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/L2SATMaskList_R1.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -139,7 +139,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_L2SAT
 add_test(NAME pyTu${PREFIX}_L1ImageReader_SATSub
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/satsub.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/IPSATSubOutput.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/IPSATSubOutput.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -150,7 +150,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SATSub
 add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL1
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/sol1.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/SOL1Image.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/SOL1Image.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -160,7 +160,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL1
 add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL2
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/sol2.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/SOL2Image.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/SOL2Image.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -171,7 +171,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_SOL2
 add_test(NAME pyTu${PREFIX}_L1ImageReader_DTMVIE
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/dtmvie.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/DTMVieImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/DTMVieImage.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
@@ -181,7 +181,7 @@ add_test(NAME pyTu${PREFIX}_L1ImageReader_DTMVIE
 add_test(NAME pyTu${PREFIX}_L1ImageReader_ShadowVIE
           COMMAND ${VNS_TEST_DRIVER}
           --compare-image ${EPSILON_4}
-          ${MAJADATA_TU_L1_READER_VENUS_BASELINE}/shadowvie.tif
+          ${MAJADATA_TU_VENUS_BASELINE}/ShadowVIEImage.tif
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/ShadowVIEImage.tif
           "--output-directory"
           ${MAJA_TEST_OUTPUT_ROOT}/TU/VENUS/testing-compare-output-directory
