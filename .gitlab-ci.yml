@@ -86,10 +86,10 @@ build-centos7:
     - ctest -VV -S CI/maja_pkg.cmake
     - time rclone copy s3_otb:maja-data/TVA data/TVA
     - time rclone copy s3_otb:maja-data/cropped_context/TV/SENTINEL2_MUSCATE data/TV/SENTINEL2_MUSCATE
-    #~ - time rclone copy s3_otb:maja-data/TU data/TU
+    - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    - ctest -j 2 -R apTv
+    - ctest -j 2 -E pyTv
     - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
     - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
     - cd ..
