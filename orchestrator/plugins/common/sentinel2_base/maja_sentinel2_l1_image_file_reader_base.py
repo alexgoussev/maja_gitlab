@@ -512,7 +512,13 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                     projectionRef,
                     l_image_raster_filename,
                     sqlRequest)
-                self._zonemasksublist.append(l_image_raster_filename)
+
+                submask_resamp_filename = os.path.join(working,
+                                                       "SubZoneMask_resampled_band_id_{}.tif".format(band))
+                resample(l_image_raster_filename, dtm_coarse,
+                         submask_resamp_filename, OtbResampleType.LINEAR)
+
+                self._zonemasksublist.append(submask_resamp_filename)
             else:
                 LOGGER.debug("Bad Order DETFOO detected")
                 l_image_raster_filename = os.path.join(working,
@@ -542,10 +548,20 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                                        "outvals": [str(a) for a in l_fid_dets.values()]
                                        }
                 change_values_app = OtbAppHandler("ChangeValues", change_values_param)
-                self._zonemasksublist.append(change_values_app.getoutput().get("out"))
+
+                submask_resamp_filename = os.path.join(working,
+                                                       "SubZoneMask_resampled_band_id_{}.tif".format(band))
+                resample(change_values_app.getoutput().get("out"), dtm_coarse,
+                         submask_resamp_filename, OtbResampleType.LINEAR)
+
+                self._zonemasksublist.append(submask_resamp_filename)
 
         else:
-            self._zonemasksublist.append(tmp_constant_filename)
+            submask_resamp_filename = os.path.join(working,
+                                                   "SubZoneMask_resampled_band_id_{}.tif".format(band))
+            resample(tmp_constant_filename, dtm_coarse,
+                     submask_resamp_filename, OtbResampleType.LINEAR)
+            self._zonemasksublist.append(submask_resamp_filename)
 
         # -----------------------------------------------------------------------------------
         # Saturated pixel mask at L2 coarse
