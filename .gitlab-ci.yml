@@ -112,7 +112,7 @@ build-centos7:
       - build-pkg/*.run
     when: on_failure
     paths:
-      - logs/*.log
+      - err_logs/*.log
     
 
 # ---------------------------- heavy pipeline ----------------------------------
