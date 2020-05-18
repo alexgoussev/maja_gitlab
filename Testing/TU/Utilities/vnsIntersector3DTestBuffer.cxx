@@ -58,6 +58,7 @@
 #include "vnsUtilities.h"
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <cstring>
 #include <cstdlib>
 
@@ -793,7 +794,7 @@ int vnsIntersector3DTestBuffer( int argc, char * argv[] )
 
 	if ( bValid )
 	{
-	    flux << std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
+	    flux << std::fixed <<std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
 		if ( PointR[2] > Point[2] )
 		{
 		    flux << "Le point fourni en entree est cache !!!" << std::endl;
