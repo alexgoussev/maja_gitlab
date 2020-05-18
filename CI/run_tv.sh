@@ -18,9 +18,10 @@ for cmd in $(cat $1 | grep 'Test command'); do
   TEST_ID=$(echo "$cmd" | cut -d ':' -f 1)
   TEST_NAME=$(grep "Test #$TEST_ID:" $1 | cut -d ':' -f 2)
   echo "Run #$TEST_ID $TEST_NAME"
-  bash -c "$(echo $cmd | cut -d ' ' -f 4-)" > logs/$TEST_ID.log 2>&1
+  echo $cmd | cut -d ' ' -f 4- > logs/${TEST_ID}_${TEST_NAME}.log
+  bash -c "$(echo $cmd | cut -d ' ' -f 4-)" >> logs/${TEST_ID}_${TEST_NAME}.log 2>&1
   RET_CODE=$?
-  if [ $RET_CODE -ne 0 ]; then cp logs/$TEST_ID.log err_logs ; fi
+  if [ $RET_CODE -ne 0 ]; then cp logs/${TEST_ID}_${TEST_NAME}.log err_logs ; fi
 done
 IFS=$OLDIFS
 

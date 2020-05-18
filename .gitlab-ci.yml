@@ -92,7 +92,7 @@ build-centos7:
     - ctest -V -N -R pyTv- > ../tv_content.txt
     - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
     - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
-    - ctest -V -N -E pyTv- > ../tu_content.txt
+    - ctest -V -N -E pyTv > ../tu_content.txt
     - cd ../
     - CI/run_tv.sh tu_content.txt
     #- ctest -E pyTv
