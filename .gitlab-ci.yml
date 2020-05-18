@@ -90,12 +90,10 @@ build-centos7:
     - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    #- ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
-    #- ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
-    - ctest -V -N -E pyTv > ../tu_content.txt
-    - cd ../
-    - CI/run_tv.sh tu_content.txt
-    #- ctest -E pyTv
+    - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
+    - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
+    - ctest -E pyTv 
+    - cd ..
     - ls -lh build/Testing/*-*/
     # Filter tv_content.txt to be used in a different job
     - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
@@ -110,9 +108,6 @@ build-centos7:
       - sha1.txt
       - tv_content.txt
       - build-pkg/*.run
-    when: on_failure
-    paths:
-      - err_logs/*.log
     
 
 # ---------------------------- heavy pipeline ----------------------------------
