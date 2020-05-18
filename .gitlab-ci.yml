@@ -72,6 +72,7 @@ prepare-ubuntu18:
 build-centos7:
   stage: build
   image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+  timeout: 1h 15m
   tags:
     - docker
   except:
@@ -89,7 +90,7 @@ build-centos7:
     - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    - ctest -j 2 -E pyTv
+    - ctest -E pyTv
     - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
     - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
     - cd ..
