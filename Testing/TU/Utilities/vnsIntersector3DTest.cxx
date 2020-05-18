@@ -102,7 +102,7 @@ int vnsIntersector3DTest( int argc, char * argv[] )
 
 	if ( bValid )
 	{
-        f << std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
+        f << std::fixed << std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
         std::cout << std::setprecision(3) << "Resultat : " << PointR[0] << ", " << PointR[1] << ", " << PointR[2] << std::endl;
 		if ( PointR[2] > Point[2] )
 		{
