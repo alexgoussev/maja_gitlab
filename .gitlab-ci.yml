@@ -92,7 +92,10 @@ build-centos7:
     - ctest -V -N -R pyTv- > ../tv_content.txt
     - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
     - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
-    - ctest -E pyTv
+    - ctest -V -N -E pyTv- > ../tu_content.txt
+    - cd ../
+    - CI/run_tv.sh tu_content.txt
+    #- ctest -E pyTv
     - cd ..
     - ls -lh build/Testing/*-*/
     # Filter tv_content.txt to be used in a different job
@@ -103,11 +106,15 @@ build-centos7:
     - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
   artifacts:
     expire_in: 5 days
+    when: on_success
     paths:
       - sha1.txt
       - tv_content.txt
       - build-pkg/*.run
-
+    when: on_failure
+    paths:
+      - logs/*.log
+    
 
 # ---------------------------- heavy pipeline ----------------------------------
 tv-centos7:
