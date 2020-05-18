@@ -405,19 +405,6 @@ ADD_TEST(${PREFIX}ThresholdVectorImageFunctorTest2 ${TESTS2}
     0
     )
 
-# -------    vnsBinaryThresholdVectorImageFunctorTest.cxx
-ADD_TEST(${PREFIX}ThresholdVectorImageFunctorBIGTest ${TESTS2}
-    --compare-n-images ${NOTOL} 1
-        ${BASELINEDATATU_IMAGES}/${PREFIX}BinaryThresholdVectorImageFunctorBIGTest.tif
-        ${TEMP}/${PREFIX}BinaryThresholdVectorImageFunctorBIGTest.tif
-    vnsThresholdVectorImageFunctorTest
-    ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.tif
-    ${TEMP}/${PREFIX}BinaryThresholdVectorImageFunctorBIGTest.tif
-    100
-    1
-    0
-    )
-
 # -------    vnsValueCountImageFilterNew.cxx
 ADD_TEST(${PREFIX}ValueCountImageFilterNew ${TESTS2}
     vnsValueCountImageFilterNew

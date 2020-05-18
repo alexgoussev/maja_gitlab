@@ -90,9 +90,9 @@ build-centos7:
     - time rclone copy s3_otb:maja-data/TU data/TU
     - cd build
     - ctest -V -N -R pyTv- > ../tv_content.txt
-    - ctest -E pyTv
     - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
     - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
+    - ctest -E pyTv
     - cd ..
     - ls -lh build/Testing/*-*/
     # Filter tv_content.txt to be used in a different job
