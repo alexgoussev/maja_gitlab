@@ -96,7 +96,6 @@ build-centos7:
     - cd ../
     - CI/run_tv.sh tu_content.txt
     #- ctest -E pyTv
-    - cd ..
     - ls -lh build/Testing/*-*/
     # Filter tv_content.txt to be used in a different job
     - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
