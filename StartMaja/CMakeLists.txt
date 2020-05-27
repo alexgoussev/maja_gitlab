@@ -65,5 +65,17 @@ CONFIGURE_FILE(${MAJA_SOURCE_DIR}/Code/Core/script.sh.in
 INSTALL(PROGRAMS ${MAJA_BINARY_DIR}/bin/startmaja DESTINATION ${MAJA_INSTALL_BIN_DIR})
 
 
+SET(processing "python3.7 $MAJA_INSTALL_DIR/lib/python/StartMaja/prepare_mnt/DTMCreation.py")
+CONFIGURE_FILE(${MAJA_SOURCE_DIR}/Code/Core/script.sh.in
+  ${MAJA_BINARY_DIR}/bin/dtmcreation @ONLY)
+INSTALL(PROGRAMS ${MAJA_BINARY_DIR}/bin/dtmcreation DESTINATION ${MAJA_INSTALL_BIN_DIR})
+
+
+SET(processing "python3.7 $MAJA_INSTALL_DIR/lib/python/StartMaja/cams_download/download_CAMS_daily.py")
+CONFIGURE_FILE(${MAJA_SOURCE_DIR}/Code/Core/script.sh.in
+  ${MAJA_BINARY_DIR}/bin/camsdownload @ONLY)
+INSTALL(PROGRAMS ${MAJA_BINARY_DIR}/bin/camsdownload DESTINATION ${MAJA_INSTALL_BIN_DIR})
+
+
 
 
