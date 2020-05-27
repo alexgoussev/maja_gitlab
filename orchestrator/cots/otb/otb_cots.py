@@ -86,7 +86,7 @@ class MajaOtbCots(MajaCots):
         :return:
         """
         # The following line creates an instance of the BandMath application
-        self.otb_app = otbApplication.Registry.CreateApplication(otb_app)
+        self.otb_app = otbApplication.Registry_CreateApplicationWithoutLogger(otb_app)
 
         if self.otb_app is None:
             raise MajaDriverException("No app " + otb_app + " found")
