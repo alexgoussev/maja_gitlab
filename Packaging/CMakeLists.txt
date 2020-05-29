@@ -61,7 +61,27 @@ elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/startmaja")
   set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
 endif()
 if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/startmaja")
-  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/maja not found")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/startmaja not found")
+endif()
+
+# find dtmcreation in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/dtmcreation")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/dtmcreation")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/dtmcreation")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/dtmcreation not found")
+endif()
+
+# find camsdownload in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/camsdownload")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/camsdownload")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/camsdownload")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/camsdownload not found")
 endif()
 
 
@@ -101,6 +121,13 @@ endif()
 if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/startmaja")
   message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/startmaja not found.")
 endif()
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/dtmcreation")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/dtmcreation not found.")
+endif()
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/camsdownload")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/camsdownload not found.")
+endif()
+
 
 set(plugins_enabled)
 FOREACH(plugin_name  ${MAJA_LIST_OF_SPECTRAL_CAMERA_AVAILABLE})
