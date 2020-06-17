@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import os
+import re
 from datetime import datetime, timedelta
 from StartMaja.Chain.Product import MajaProduct
+from StartMaja.Common import FileSystem, XMLTools
+from StartMaja.Common.FileSystem import symlink
+from StartMaja.prepare_mnt.mnt.SiteInfo import Site
 
 
 class VenusNatif(MajaProduct):
@@ -32,10 +32,15 @@ class VenusNatif(MajaProduct):
     """
 
     base_resolution = (5, -5)
+    coarse_resolution = (100, -100)
 
     @property
     def platform(self):
         return "venus"
+
+    @property
+    def short_name(self):
+        return "vns"
 
     @property
     def type(self):
@@ -50,8 +55,11 @@ class VenusNatif(MajaProduct):
         raise ValueError("Unknown product level for %s" % self.base)
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
-        import re
         site_basic = self.base.split("_")[4]
         # Try this more refined method.
         # Helps to detect sites like "SUDOUE_5" which are split by another "_"
@@ -68,7 +76,7 @@ class VenusNatif(MajaProduct):
     @property
     def metadata_file(self):
         metadata_filename = self.base.split(".")[0] + ".HDR"
-        return self.get_file(folders="../", filename=metadata_filename)
+        return self.find_file(path=os.path.abspath(os.path.join(self.fpath, "..")), pattern=metadata_filename)[0]
 
     @property
     def date(self):
@@ -82,16 +90,14 @@ class VenusNatif(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
         mtd_file = self.metadata_file
         symlink(mtd_file, os.path.join(link_dir, os.path.basename(mtd_file)))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*IMG*DBL.TIF")
+            band_bx = self.find_file(pattern=r"*IMG*DBL.TIF")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx, shape_index_y=1, shape_index_x=2)
@@ -100,8 +106,14 @@ class VenusNatif(MajaProduct):
     def mnt_resolutions_dict(self):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=15)
 
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError
 
 
@@ -111,10 +123,15 @@ class VenusMuscate(MajaProduct):
     """
 
     base_resolution = (5, -5)
+    coarse_resolution = (100, -100)
 
     @property
     def platform(self):
         return "venus"
+
+    @property
+    def short_name(self):
+        return "vns"
 
     @property
     def type(self):
@@ -131,8 +148,11 @@ class VenusMuscate(MajaProduct):
         raise ValueError("Unknown product level for %s" % self.base)
 
     @property
+    def nodata(self):
+        return -10000
+
+    @property
     def tile(self):
-        import re
         if len(self.base.split("_")) == 7:
             site = "_".join(self.base.split("_")[3:5])
         else:
@@ -144,7 +164,7 @@ class VenusMuscate(MajaProduct):
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="*MTD_ALL.xml")
+        return self.find_file(pattern="*MTD_ALL.xml")[0]
 
     @property
     def date(self):
@@ -155,7 +175,6 @@ class VenusMuscate(MajaProduct):
 
     @property
     def validity(self):
-        from StartMaja.Common import FileSystem, XMLTools
         if self.level == "l1c" and os.path.exists(self.metadata_file):
             return True
         if self.level == "l2a":
@@ -171,14 +190,12 @@ class VenusMuscate(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*_B0?1*.tif")
+            band_bx = self.find_file(pattern=r"*_B0?1*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx)
@@ -188,5 +205,12 @@ class VenusMuscate(MajaProduct):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
 
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=15)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError

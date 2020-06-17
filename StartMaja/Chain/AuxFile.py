@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import os
@@ -54,7 +50,7 @@ class EarthExplorer(object):
         self.dbl = dbl
         self.base = os.path.basename(dbl).split(".")[0]
         # Find associated HDR
-        self.hdr = FileSystem.get_file(root=os.path.join(dbl, "../"), filename=self.base + ".HDR")
+        self.hdr = FileSystem.find_single(path=os.path.join(dbl, "../"), pattern=self.base + ".HDR")
         assert os.path.isfile(self.hdr)
 
     def __str__(self):
@@ -67,8 +63,8 @@ class EarthExplorer(object):
     @classmethod
     def get_specifiable_regex(cls):
         """
-        Return regex without '\w+' at the end in order to make it costumizable.
-        :return: The class regex without \w+
+        Return regex without r"\\w+" at the end in order to make it costumizable.
+        :return: The class regex without \\w+
         """
         return cls.regex[:-3]
 
@@ -89,7 +85,7 @@ class CAMSFile(EarthExplorer):
     """
     Stores a single CAMS file
     """
-    regex = r"(VE|S2_|L8)_(TEST|PROD)_EXO_CAMS_\d{8}T\d{6}_\d{8}T\d{6}.DBL(.DIR)?"
+    regex = r"(VE|S2_|L8)_(TEST|PROD|OPER)_EXO_CAMS_\d{8}T\d{6}_\d{8}T\d{6}.DBL(.DIR)?"
 
     @classmethod
     def check_regex(cls, dbl):
@@ -111,3 +107,6 @@ class DTMFile(EarthExplorer):
     Stores a single DTM
     """
     regex = r"\w*_(TEST|PROD)_AUX_REFDE2_\w+"
+
+    mnt_version = {"srtm": ["1001", "0001"], "merit": ["2001"], "eudem": ["3001"],
+                   "any": [r"\d001"]}

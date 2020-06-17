@@ -1,24 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import unittest
@@ -237,8 +233,7 @@ class TestGippFile(unittest.TestCase):
         self.assertFalse(g.check_completeness())
         g.download()
         self.assertTrue(g.check_completeness())
-        models_expected = ["continen"]
-        self.assertEqual(g.get_models(), models_expected)
+        self.assertTrue(g.get_models() in g.expected_models)
         FileSystem.remove_file(os.path.join(self.root, "wget-log"))
         if not os.getcwd() == g.out_path:
             FileSystem.remove_directory(g.out_path)
@@ -252,8 +247,7 @@ class TestGippFile(unittest.TestCase):
         self.assertFalse(g.check_completeness())
         g.download()
         self.assertTrue(g.check_completeness())
-        models_expected = sorted(["continen", "dust", "blackcar", "sulphate", "seasalt", "organicm"])
-        self.assertEqual(g.get_models(), models_expected)
+        self.assertTrue(g.get_models() in g.expected_models)
         FileSystem.remove_file(os.path.join(self.root, "wget-log"))
         if not os.getcwd() == g.out_path:
             FileSystem.remove_directory(g.out_path)

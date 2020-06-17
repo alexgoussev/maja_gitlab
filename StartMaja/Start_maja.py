@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 """
+Copyright (C) CNES, CS-SI, CESBIO - All Rights Reserved
+This file is subject to the terms and conditions defined in
+file 'LICENSE.md', which is part of this source code package.
+
 Author:         Peter KETTIG <peter.kettig@cnes.fr>,
                 Olivier HAGOLLE (CESBIO)
 Project:        Start-MAJA, CNES
@@ -26,32 +15,35 @@ import sys
 import re
 import logging
 from os import path as p
-from datetime import timedelta
-
-from StartMaja.Chain import Product
+from datetime import timedelta, datetime
 from StartMaja.Common import FileSystem
-from StartMaja.Chain import AuxFile, GippFile
+from StartMaja.Chain import AuxFile, GippFile, Product
+from StartMaja.Chain.Workplan import Workplan, Nominal, Backward, Init
 
 
 class StartMaja(object):
     """
     Run the MAJA processor
     """
-    version = "4.0.1rc1"
-    date_regex = r"\d{4}-\d{2}-\d{2}"  # YYYY-MM-DD
+    version = "4.2.0"
     current_dir = p.dirname(p.realpath(__file__))
     max_product_difference = timedelta(hours=6)
-    max_l2_diff = timedelta(days=14)
 
-    def __init__(self, folder, tile, site, start, end, verbose=False, **kwargs):
+    def __init__(self, folder, tile, site, start, end, **kwargs):
         """
         Init the instance using the old start_maja parameters
-        Optional params: nbackward, overwrite, verbose, cams, skip_confirm, fixed_platform
+
+        :keyword nbackward: Number of products used to run in backward mode. Default is 8.
+        :keyword logger: Global ``logging.logger`` instance
+        :keyword overwrite: Overwrite existing L2 products. Default is false.
+        :keyword cams: Use CAMS during processing. The CAMS files have to be available in the repCAMS dir.
+        :keyword skip_confirm: Skip workplan confirmation. Default is False.
+        :keyword platform: Manually override which platform to use.
+                           By default this is deducted by the available input product(s)
+        :keyword type_dem: DEM type. If none is given, any will be used
         """
-        from StartMaja.Common import DateConverter
-        self.verbose = verbose
-        logging_level = logging.DEBUG if self.verbose else logging.INFO
-        self.logger = self.__init_loggers(msg_level=logging_level)
+
+        self.logger = kwargs.get("logger", logging.getLogger("root"))
         self.logger.info("=============This is Start_Maja v%s==============" % self.version)
         self.userconf = p.realpath(p.join(self.current_dir, "userconf"))
         if not p.isdir(self.userconf):
@@ -60,8 +52,8 @@ class StartMaja(object):
         self.logger.debug("Checking config file: %s" % folder)
         if not p.isfile(self.folder):
             raise OSError("Cannot find folder definition file: %s" % self.folder)
-        self.rep_work, self.gipp_root, self.rep_l1, self.rep_l2,\
-            self.rep_mnt, self.maja, self.rep_cams = self.parse_config(self.folder)
+        self.rep_work, self.gipp_root, self.rep_l1, self.rep_l2, self.maja, self.rep_cams, \
+            self.rep_mnt, self.rep_raw, self.rep_gsw = self.parse_config(self.folder)
         self.logger.debug("Config file parsed without errors.")
 
         self.logger.debug("Setting site and tile")
@@ -73,87 +65,81 @@ class StartMaja(object):
         self.site = site
         self.path_input_l1, self.path_input_l2, self.__site_info = self.__set_input_paths()
         self.logger.debug("Found %s" % self.__site_info)
-
-        self.avail_input_l1, self.avail_input_l2 = self.__get_all_availables_products()
+        self.logger.info("Detecting input products...")
+        self.avail_input_l1, self.avail_input_l2 = self.get_all_available_products()
 
         if not kwargs.get("platform"):
             platform = list(set([prod.platform for prod in self.avail_input_l1 + self.avail_input_l2]))
             if len(platform) != 1:
-                raise IOError("Cannot mix multiple platforms: %s" % platform)
+                raise IOError("Cannot mix multiple platforms: %s."
+                              "Please set parameter --platform to specify." % platform)
             self.platform = platform[0]
         else:
             self.platform = kwargs.get("platform")
-        assert self.platform in ["sentinel2", "landsat8", "venus"]
 
         ptype = list(set([prod.type for prod in self.avail_input_l1 + self.avail_input_l2]))
         if len(ptype) != 1:
             if sorted(ptype) == ["muscate", "natif"]:
-                # This is allowed.
+                # This is allowed. Maja4 doesn't need this, it is kept only for Maja3.
+                self.ptype = "tm"
                 pass
             else:
                 raise IOError("Cannot mix multiple plugin types: %s" % ptype)
-        if ptype[0] == "natif" and self.platform == "sentinel2":
-            self.ptype = "tm"
         else:
             self.ptype = ptype[0]
 
         # Parse product dates
         if start:
-            if re.search(self.date_regex, start):
-                self.start = DateConverter.stringToDatetime(start.replace("-", ""))
-            else:
-                raise ValueError("Unknown date encountered: %s" % start)
+            self.start = datetime.strptime(start, "%Y-%m-%d")
         else:
             dates = sorted([prod.date for prod in self.avail_input_l1])
             self.start = dates[0]
 
         if end:
-            if re.search(self.date_regex, end):
-                self.end = DateConverter.stringToDatetime(end.replace("-", ""))
-            else:
-                raise ValueError("Unknown date encountered: %s" % end)
+            self.end = datetime.strptime(end, "%Y-%m-%d")
         else:
             dates = sorted([prod.date for prod in self.avail_input_l1])
             self.end = dates[-1]
 
         if self.start > self.end:
-            raise ValueError("Start date has to be before the end date!")
+            raise ValueError("Start date has to be before the end date: %s -> %s" % (self.start, self.end))
 
         self.nbackward = kwargs.get("nbackward", int(8))
-
-        self.logger.debug("Checking GIPP files")
         self.use_cams = kwargs.get("cams", False)
-        if not p.isdir(self.gipp_root):
-            raise OSError("Cannot find GIPP folder: %s" % self.gipp_root)
-        self.logger.debug("Found GIPP folder: %s" % self.gipp_root)
-
-        self.gipp = GippFile.GippSet(self.gipp_root, self.platform, self.ptype, cams=self.use_cams)
-        self.logger.debug("Prepared GIPP for %s %s" % (self.platform, self.ptype))
-
-        # Other parameters:
-
-        self.overwrite = kwargs.get("overwrite", False)
-        self.maja_log_level = "PROGRESS" if not self.verbose else "DEBUG"
-        self.skip_confirm = kwargs.get("skip_confirm", False)
-
-        self.logger.debug("Searching for DTM")
-        try:
-            self.dtm = self.get_dtm()
-        except OSError:
-            self.dtm = None
-            self.logger.debug("Cannot find DTM. Will attempt to download it...")
-        else:
-            self.logger.debug("Found DTM: %s" % self.dtm.hdr)
 
         self.cams_files = []
-        if self.rep_cams:
-            self.logger.debug("Searching for CAMS")
+        if self.rep_cams and self.use_cams:
+            self.logger.info("Searching for CAMS")
             self.cams_files = self.get_cams_files()
-            self.logger.debug("...found %s CAMS files" % len(self.cams_files))
+            self.logger.info("...found %s CAMS files" % len(self.cams_files))
+        else:
+            self.logger.info("Skipping CAMS file detection.")
+        self.logger.info("Checking GIPP files")
+        if not p.isdir(self.gipp_root):
+            raise OSError("Cannot find GIPP folder: %s" % self.gipp_root)
+        self.logger.info("Setting up GIPP folder: %s" % self.gipp_root)
+        self.gipp = GippFile.GippSet(self.gipp_root, self.platform, self.ptype, cams=self.use_cams)
+        if not self.gipp.check_completeness():
+            self.logger.info("Cannot find GIPP for %s. Will attempt to download it." % self.gipp.gipp_folder_name)
+
+        # Other parameters:
+        self.overwrite = kwargs.get("overwrite", False)
+        self.skip_error = kwargs.get("skip_errors", False)
+        self.maja_log_level = "DEBUG" if self.logger.level == logging.DEBUG else "PROGRESS"
+        self.skip_confirm = kwargs.get("skip_confirm", False)
+
+        self.logger.info("Searching for DTM")
+        self.type_dem = kwargs.get("type_dem", "any")
+        self.dtm = self.get_dtm(type_dem=self.type_dem)
+        if not self.dtm:
+            self.logger.info("Cannot find DTM. Will attempt to download it for type '%s'" % self.type_dem)
+        else:
+            self.logger.info("Found DTM: %s" % self.dtm.hdr)
+
         return
 
     @staticmethod
-    def __init_loggers(msg_level=logging.DEBUG):
+    def init_loggers(msg_level=logging.DEBUG):
         """
         Init a stdout logger
         :param msg_level: Standard msgLevel for both loggers. Default is DEBUG
@@ -161,16 +147,16 @@ class StartMaja(object):
 
         logging.getLogger().addHandler(logging.NullHandler())
         # Create default path or get the pathname without the extension, if there is one
-        logger = logging.getLogger("root")
-        logger.handlers = []  # Remove the standard handler again - Bug in logging module
+        startmaja_logger = logging.getLogger("root")
+        startmaja_logger.handlers = []  # Remove the standard handler again - Bug in logging module
 
-        logger.setLevel(msg_level)
+        startmaja_logger.setLevel(msg_level)
         formatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s] %(message)s")
 
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
-        return logger
+        startmaja_logger.addHandler(console_handler)
+        return startmaja_logger
 
     @staticmethod
     def __read_config_param(config, section, option):
@@ -197,36 +183,41 @@ class StartMaja(object):
         :param cfg_file: The path to the file
         :return: The parsed paths for each of the directories. None for the optional ones if not given.
         """
-        from StartMaja.Common.FileSystem import create_directory
         import configparser as cfg
         # Parsing configuration file
         config = cfg.ConfigParser()
         config.read(cfg_file)
     
-        # get cfg parameters
-        rep_work = os.path.realpath(os.path.expanduser(config.get("PATH", "repWork")))
+        # Maja_Inputs
+        rep_work = os.path.realpath(os.path.expanduser(config.get("Maja_Inputs", "repWork")))
         if not p.isdir(rep_work):
-            create_directory(rep_work)
-        rep_gipp = os.path.realpath(os.path.expanduser(config.get("PATH", "repGipp")))
+            FileSystem.create_directory(rep_work)
+        rep_gipp = os.path.realpath(os.path.expanduser(config.get("Maja_Inputs", "repGipp")))
         if not p.isdir(rep_gipp):
-            create_directory(rep_gipp)
-        rep_l1 = self.__read_config_param(config, "PATH", "repL1")
-        rep_l2 = os.path.realpath(os.path.expanduser(config.get("PATH", "repL2")))
+            FileSystem.create_directory(rep_gipp)
+        rep_l1 = StartMaja.__read_config_param(config, "Maja_Inputs", "repL1")
+        rep_l2 = os.path.realpath(os.path.expanduser(config.get("Maja_Inputs", "repL2")))
         if not p.isdir(rep_l2):
-            create_directory(rep_l2)
-        rep_mnt = os.path.realpath(os.path.expanduser(config.get("PATH", "repMNT")))
+            FileSystem.create_directory(rep_l2)
+        exe_maja = StartMaja.__read_config_param(config, "Maja_Inputs", "exeMaja")
+        rep_mnt = os.path.realpath(os.path.expanduser(config.get("Maja_Inputs", "repMNT")))
         if not p.isdir(rep_mnt):
-            create_directory(rep_mnt)
-        exe_maja = self.__read_config_param(config, "PATH", "exeMaja")
-
+            FileSystem.create_directory(rep_mnt)
         # CAMS is optional:
         try:
-            rep_cams = os.path.realpath(os.path.expanduser(config.get("PATH", "repCAMS")))
+            rep_cams = os.path.realpath(os.path.expanduser(config.get("Maja_Inputs", "repCAMS")))
         except cfg.NoOptionError:
             self.logger.warning("repCAMS is missing. Processing without CAMS")
             rep_cams = None
-        
-        return rep_work, rep_gipp, rep_l1, rep_l2, rep_mnt, exe_maja, rep_cams
+
+        # DTM_Creation
+        rep_raw = os.path.realpath(os.path.expanduser(config.get("DTM_Creation", "repRAW")))
+        if not p.isdir(rep_raw):
+            FileSystem.create_directory(rep_raw)
+        rep_gsw = os.path.realpath(os.path.expanduser(config.get("DTM_Creation", "repGSW")))
+        if not p.isdir(rep_gsw):
+            FileSystem.create_directory(rep_gsw)
+        return rep_work, rep_gipp, rep_l1, rep_l2, exe_maja, rep_cams, rep_mnt, rep_raw, rep_gsw
 
     def __set_input_paths(self):
         """
@@ -261,7 +252,7 @@ class StartMaja(object):
 
         return path_input_l1, path_input_l2, site_info
 
-    def __get_all_availables_products(self):
+    def get_all_available_products(self):
         """
         Set the input folders for L1- and L2- products
         :return: The available L1 and L2 products in the given folders.
@@ -271,9 +262,9 @@ class StartMaja(object):
             raise OSError("L1 folder for %s not existing: %s" % (self.__site_info, self.path_input_l1))
 
         if not p.isdir(self.path_input_l2):
-            self.logger.warning("L2 folder for %s not existing: %s" % (self.__site_info, self.path_input_l1))
+            self.logger.warning("L2 folder for %s not existing: %s" % (self.__site_info, self.path_input_l2))
 
-        avail_input_l1 = sorted(self.get_available_products(self.path_input_l1, level="L1C", tile=self.tile))
+        avail_input_l1 = sorted(Workplan.get_available_products(self.path_input_l1, level="L1C", tile=self.tile))
 
         if not avail_input_l1:
             raise IOError("No L1C products detected for %s in %s" % (self.__site_info, self.path_input_l1))
@@ -281,7 +272,7 @@ class StartMaja(object):
             self.logger.info("%s L1C product(s) detected for %s in %s" % (len(avail_input_l1),
                                                                           self.__site_info,
                                                                           self.path_input_l1))
-        avail_input_l2 = sorted(self.get_available_products(self.path_input_l2, level="L2A", tile=self.tile))
+        avail_input_l2 = sorted(Workplan.get_available_products(self.path_input_l2, level="L2A", tile=self.tile))
         if not avail_input_l2:
             self.logger.warning("No L2A products detected for %s in %s" % (self.__site_info, self.path_input_l2))
         else:
@@ -290,36 +281,27 @@ class StartMaja(object):
                                                                           self.path_input_l2))
         return avail_input_l1, avail_input_l2
 
-    @staticmethod
-    def get_available_products(root, level, tile):
-        """
-        Parse the products from the constructed L1- or L2- directories
-        :param root: The root folder to be searched from
-        :param level: The product level to be search for
-        :param tile: The tileID
-        :return: A list of MajaProducts available in the given directory
-        """
-        avail_folders = [p.join(root, f) for f in os.listdir(root)]
-        avail_products = [Product.MajaProduct(f).factory() for f in avail_folders if p.isdir(f)]
-        # Remove the ones that didn't work:
-        avail_products = [prod for prod in avail_products if prod is not None]
-        return [prod for prod in avail_products if prod.level == level.lower() and prod.tile == tile]
-
-    def get_dtm(self):
+    def get_dtm(self, type_dem):
         """
         Find DTM folder for tile and search for associated HDR and DBL files
         A DTM folder has the following naming structure:
             *_AUX_REFDE2_TILEID_*DBL.DIR with TILEID e.g. T31TCH, KHUMBU ...
         A single .HDR file and an associated .DBL.DIR file
         has to be found. OSError is thrown otherwise.
-        :return: The full path to the hdr and dbl.dir. Throws OSError if they're not found.
+        :param type_dem: The DEM-type as str, e.g. 'srtm'
+        :return: The full path to the hdr and dbl.dir. None if they're not found.
         """
-        from StartMaja.Common import FileSystem
-        regex = AuxFile.DTMFile.get_specifiable_regex() + r"T?" + self.tile + r"\w+.DBL.DIR"
-        try:
-            mnt_folders = FileSystem.find(regex, self.rep_mnt)
-        except ValueError:
-            raise OSError("Cannot find DTM.")
+
+        regexes = ["%s%s_%s.DBL(.DIR)?$" % (AuxFile.DTMFile.get_specifiable_regex(), self.tile, nbr)
+                   for nbr in AuxFile.DTMFile.mnt_version[type_dem]]
+        mnt_folders = []
+        for regex in regexes:
+            try:
+                mnt_folders += FileSystem.find(regex, self.rep_mnt)
+            except ValueError:
+                pass
+        if not mnt_folders:
+            return None
         mnts = [AuxFile.DTMFile(mnt) for mnt in mnt_folders]
         mnts = [mnt for mnt in mnts if mnt is not None]
         return mnts[0]
@@ -333,30 +315,15 @@ class StartMaja(object):
         For each CAMS a single .HDR file and an associated .DBL.DIR/.DBL file
         has to be found. Otherwise it gets discarded
         """
-        from StartMaja.Common import FileSystem
-        cams_folders = FileSystem.find(AuxFile.CAMSFile.regex, self.rep_cams)
+        try:
+            cams_folders = FileSystem.find(AuxFile.CAMSFile.regex, self.rep_cams)
+        except ValueError:
+            return []
         cams = [AuxFile.CAMSFile(c) for c in cams_folders]
         cams = [c for c in cams if c is not None]
         return cams
 
-    @staticmethod
-    def filter_cams_by_product(cams_files, prod_date, delta_t=timedelta(hours=12)):
-        """
-        Filter out all CAMS files if they are between the given start_date and end_date
-        :param cams_files: The list of cams objects
-        :param prod_date: The product date
-        :param delta_t: The maximum time difference a CAMS file can be apart from the product date.
-        :return: The cams files available in the given time interval
-        """
-        cams_filtered = []
-        t_min, t_max = prod_date - delta_t, prod_date + delta_t
-        for cams in cams_files:
-            date = cams.get_date()
-            if t_min <= date <= t_max:
-                cams_filtered.append(cams)
-        return cams_filtered
-
-    def create_workplans(self, max_product_difference=timedelta(hours=6), max_l2_diff=timedelta(days=14)):
+    def create_workplans(self, max_product_difference):
         """
         Create a workplan for each Level-1 product found between the given date period
         For the first product available, check on top if an L2 product from the date
@@ -367,15 +334,11 @@ class StartMaja(object):
         in NOMINAL
         :param max_product_difference: Maximum time difference that the same L1 and L2 products date can be apart.
         This is necessary due to the fact that the acquisition date can vary in between platforms.
-        :param max_l2_diff: Maximum time difference a separate L2 product can be apart from an L1 following it.
         :return: List of workplans to be executed
         """
-        from StartMaja.Chain import Workplan
-
         # Get actually usable L1 products:
         used_prod_l1 = [prod for prod in self.avail_input_l1
                         if self.start <= prod.date <= self.end]
-
         if not used_prod_l1:
             raise ValueError("No products available for the given start and end dates: %s -> %s"
                              % (self.start, self.end))
@@ -391,99 +354,110 @@ class StartMaja(object):
         # Process the first product separately:
         if used_prod_l1[0] not in has_l2 or self.overwrite:
             # Check if there is a recent L2 available for a nominal workplan
-            min_time = used_prod_l1[0].date - max_l2_diff
+            min_time = used_prod_l1[0].date - used_prod_l1[0].max_l2_diff
             max_time = used_prod_l1[0].date
-            has_closest_l2_prod = [prod for prod in self.avail_input_l2 if min_time <= prod.date <= max_time]
+            # Filter closest l2 prod so the product itself is not included (in case of overwriting):
+            if self.overwrite:
+                has_closest_l2_prod = [prod for prod in self.avail_input_l2 if min_time <= prod.date <= max_time
+                                       and prod.date.strftime("%Y%m%d") != used_prod_l1[0].date.strftime("%Y%m%d")]
+            else:
+                has_closest_l2_prod = [prod for prod in self.avail_input_l2 if min_time <= prod.date <= max_time]
             if has_closest_l2_prod:
                 # Proceed with NOMINAL
-                workplans.append(Workplan.Nominal(wdir=self.rep_work,
-                                                  outdir=self.path_input_l2,
-                                                  l1=used_prod_l1[0],
-                                                  l2_date=used_prod_l1[0].date,
-                                                  log_level=self.maja_log_level,
-                                                  cams=self.filter_cams_by_product(self.cams_files,
-                                                                                   used_prod_l1[0].date)
-                                                  ))
+                workplans.append(Nominal(wdir=self.rep_work,
+                                         outdir=self.path_input_l2,
+                                         l1=used_prod_l1[0],
+                                         l2_date=used_prod_l1[0].date,
+                                         log_level=self.maja_log_level,
+                                         skip_errors=self.skip_error,
+                                         cams=Workplan.filter_cams_by_products(self.cams_files,
+                                                                               [used_prod_l1[0].date])
+                                         ))
                 pass
             else:
                 if len(self.avail_input_l1) >= self.nbackward:
                     # Proceed with BACKWARD
                     index_current_prod = self.avail_input_l1.index(used_prod_l1[0])
-                    workplans.append(Workplan.Backward(wdir=self.rep_work,
-                                                       outdir=self.path_input_l2,
-                                                       l1=used_prod_l1[0],
-                                                       l1_list=self.avail_input_l1[index_current_prod:
-                                                                                   index_current_prod + 1 +
-                                                                                   self.nbackward],
-                                                       log_level=self.maja_log_level,
-                                                       cams=self.filter_cams_by_product(self.cams_files,
-                                                                                        used_prod_l1[0].date)
-                                                       ))
+                    l1_list = self.avail_input_l1[index_current_prod:index_current_prod + self.nbackward]
+                    l1 = used_prod_l1[0]
+                    workplans.append(Backward(wdir=self.rep_work,
+                                              outdir=self.path_input_l2,
+                                              l1=l1,
+                                              l1_list=l1_list,
+                                              log_level=self.maja_log_level,
+                                              skip_errors=self.skip_error,
+                                              cams=Workplan.filter_cams_by_products(self.cams_files,
+                                                                                    [prod.date for prod in
+                                                                                     [l1] + l1_list])
+                                              ))
                     pass
                 else:
                     # Proceed with INIT
-                    self.logger.info("Not enough L1 products available for a BACKWARD mode. Beginning with INIT...")
-                    workplans.append(Workplan.Init(wdir=self.rep_work,
-                                                   outdir=self.path_input_l2,
-                                                   l1=used_prod_l1[0],
-                                                   log_level=self.maja_log_level,
-                                                   cams=self.filter_cams_by_product(self.cams_files,
-                                                                                    used_prod_l1[0].date)
-                                                   ))
+                    logger.info("Not enough L1 products available for a BACKWARD mode. Beginning with INIT...")
+                    workplans.append(Init(wdir=self.rep_work,
+                                          outdir=self.path_input_l2,
+                                          l1=used_prod_l1[0],
+                                          log_level=self.maja_log_level,
+                                          skip_errors=self.skip_error,
+                                          cams=Workplan.filter_cams_by_products(self.cams_files,
+                                                                                [used_prod_l1[0].date])
+                                          ))
                     pass
                 pass
         else:
-            self.logger.info("Skipping L1 product %s because it was already processed!" % used_prod_l1[0].base)
+            logger.debug("Skipping L1 product %s because it was already processed!" % used_prod_l1[0].base)
 
         # For the rest: Setup NOMINAL.
         # Except: The time series is 'stopped' - The gap between two products is too large.
         # In this case, proceed with a re-init.
         for i, prod in enumerate(used_prod_l1[1:]):
-            if prod in has_l2 or self.overwrite:
-                self.logger.info("Skipping L1 product %s because it was already processed!" % prod.base)
+            if prod in has_l2 and not self.overwrite:
+                logger.debug("Skipping L1 product %s because it was already processed!" % prod.base)
                 continue
             # Note: i, in this case is the previous product -> Not the current one, which is i+1
             date_gap = prod.date - used_prod_l1[i].date
-            if date_gap >= max_l2_diff:
-                self.logger.info("Will not continue time-series. Date gap too large between products %s vs. %s" %
-                                 (prod.date, used_prod_l1[i].date))
+            if date_gap >= prod.max_l2_diff:
                 index_current_prod = self.avail_input_l1.index(prod)
                 if len(self.avail_input_l1[index_current_prod:]) >= self.nbackward:
                     # Proceed with BACKWARD
-                    workplans.append(Workplan.Backward(wdir=self.rep_work,
-                                                       outdir=self.path_input_l2,
-                                                       l1=prod,
-                                                       l1_list=self.avail_input_l1[index_current_prod:
-                                                                                   index_current_prod + 1 +
-                                                                                   self.nbackward],
-                                                       log_level=self.maja_log_level,
-                                                       cams=self.filter_cams_by_product(self.cams_files,
-                                                                                        prod.date)
-                                                       ))
+                    l1_list = self.avail_input_l1[index_current_prod:index_current_prod + self.nbackward]
+                    workplans.append(Backward(wdir=self.rep_work,
+                                              outdir=self.path_input_l2,
+                                              l1=prod,
+                                              l1_list=l1_list,
+                                              log_level=self.maja_log_level,
+                                              skip_errors=self.skip_error,
+                                              cams=Workplan.filter_cams_by_products(self.cams_files,
+                                                                                    [prod.date for prod in
+                                                                                     [prod] + l1_list])
+                                              ))
                     pass
                 else:
                     # Proceed with INIT
-                    self.logger.info("Not enough L1 products available for a BACKWARD mode. Continuing with INIT...")
-                    workplans.append(Workplan.Init(wdir=self.rep_work,
-                                                   outdir=self.path_input_l2,
-                                                   l1=prod,
-                                                   log_level=self.maja_log_level,
-                                                   cams=self.filter_cams_by_product(self.cams_files,
-                                                                                    prod.date)
-                                                   ))
+                    logger.info("Not enough L1 products available for a BACKWARD mode. Continuing with INIT...")
+                    workplans.append(Init(wdir=self.rep_work,
+                                          outdir=self.path_input_l2,
+                                          l1=prod,
+                                          log_level=self.maja_log_level,
+                                          skip_errors=self.skip_error,
+                                          cams=Workplan.filter_cams_by_products(self.cams_files,
+                                                                                [prod.date])
+                                          ))
                     pass
                 pass
             else:
-                workplans.append(Workplan.Nominal(wdir=self.rep_work,
-                                                  outdir=self.path_input_l2,
-                                                  l1=prod,
-                                                  l2_date=prod.date,
-                                                  log_level=self.maja_log_level,
-                                                  cams=self.filter_cams_by_product(self.cams_files, prod.date),
-                                                  # Fallback parameters:
-                                                  remaining_l1=used_prod_l1[(i+1):],
-                                                  nbackward=self.nbackward
-                                                  ))
+                workplans.append(Nominal(wdir=self.rep_work,
+                                         outdir=self.path_input_l2,
+                                         l1=prod,
+                                         l2_date=prod.date,
+                                         log_level=self.maja_log_level,
+                                         skip_errors=self.skip_error,
+                                         cams=Workplan.filter_cams_by_products(self.cams_files, [prod.date]),
+                                         # Fallback parameters:
+                                         remaining_l1=used_prod_l1[(i + 1):],
+                                         nbackward=self.nbackward,
+                                         remaining_cams=self.cams_files
+                                         ))
 
         # This should never happen:
         if not workplans:
@@ -499,43 +473,39 @@ class StartMaja(object):
             - Filter both by start and end dates, if there are
             - Determine the Workplans and a mode for each (INIT, BACKWARD, NOMINAL)
             - For each workplan:
-            -   Create the input directory and link all the needed inputs
+            -   Create the input directory and link/copy all the needed inputs
             -   Create the output directory
             -   Run MAJA
         """
         if not self.dtm:
-            self.logger.info("Attempting to download DTM...")
-            self.avail_input_l1[0].get_mnt(dem_dir=self.rep_mnt)
-            self.dtm = self.get_dtm()
-            self.logger.info("DTM Creation succeeded.")
+            logger.info("Attempting to download DTM...")
+            self.avail_input_l1[0].get_mnt(dem_dir=self.rep_mnt, type_dem=self.type_dem,
+                                           raw_dem=self.rep_raw, raw_gsw=self.rep_gsw)
+            self.dtm = self.get_dtm(type_dem=self.type_dem)
+            logger.info("DTM Creation succeeded.")
         if not self.gipp.check_completeness():
-            self.logger.debug("Downloading Gipp for %s %s" % (self.platform, self.ptype))
+            logger.info("Attempting to download Gipp for %s" % self.gipp.gipp_folder_name)
             self.gipp.download()
-        workplans = self.create_workplans(self.max_product_difference, self.max_l2_diff)
-        self.logger.info("%s workplan(s) successfully created:" % len(workplans))
+        logger.info("GIPP Creation succeeded for %s" % self.gipp.gipp_folder_name)
+
+        workplans = self.create_workplans(self.max_product_difference)
+        logger.info("%s workplan(s) successfully created:" % len(workplans))
         # Print without the logging-formatting:
-        print(str("%19s | %5s | %8s | %70s | %15s" % ("DATE", "TILE", "MODE", "L1-PRODUCT", "ADDITIONAL INFO")))
+        print(str("%19s | %10s | %8s | %70s | %15s" % ("DATE", "TILE", "MODE", "L1-PRODUCT", "ADDITIONAL INFO")))
         for wp in workplans:
             print(wp)
         if not self.skip_confirm:
-            try:
-                if sys.version >= (3, 0):
-                    input("Press Enter to continue...\n")
-            except TypeError:
-                input("Press Enter to continue...\n")
-        self.logger.info("Beginning workplan execution.")
+            input("Press Enter to continue...\n")
+        logger.info("Beginning workplan execution.")
         for i, wp in enumerate(workplans):
-            self.logger.info("Executing workplan #%s/%s" % (i+1, len(workplans)))
+            logger.info("Executing workplan #%s/%s" % (i+1, len(workplans)))
             wp.execute(self.maja, self.dtm, self.gipp, self.userconf)
-        self.logger.info("=============Start_Maja v%s finished=============" % self.version)
+        logger.info("=============Start_Maja v%s finished=============" % self.version)
         pass
 
 
 if __name__ == "__main__":
-    if not sys.version_info >= (3, 5):
-        raise AssertionError("Start_maja needs python >= 3.5.\n"
-                             "Run 'python --version' for more info.")
-
+    assert sys.version_info >= (3, 5), "Start_maja needs python >= 3.5.\n Run 'python --version' for more info."
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--tile", help="Tile number",
@@ -543,7 +513,7 @@ if __name__ == "__main__":
     parser.add_argument("-s", "--site", help="Site name. If not specified,"
                                              "the tile number is used directly for finding the L1/L2 product directory",
                         type=str, required=False)
-    parser.add_argument("-f", "--folder", help="Config/Folder-definition file used for all permanent settings.",
+    parser.add_argument("-f", "--folder", help="Config/Folder-definition file used for all permanent paths.",
                         type=str, required=True)
     parser.add_argument("-d", "--start", help="Start date for processing in format YYYY-MM-DD. If none is provided,"
                                               "all products until the end date will be processed",
@@ -560,19 +530,26 @@ if __name__ == "__main__":
     parser.add_argument("--cams", help="Use CAMS during processing."
                                        "The CAMS files have to be available in the repCAMS dir. Default is False.",
                         action="store_true", required=False, default=False)
+    parser.add_argument("--type_dem",
+                        help="DEM type. If none is given, any will be used", required=False, type=str, default="any",
+                        choices=["srtm", "eudem", "any"])
     parser.add_argument("-y", help="Skip workplan confirmation. Default is False",
                         action="store_true", required=False, default=False)
+    parser.add_argument("--skip_errors", help="Skip erroneous products without stopping.",
+                        action="store_true", required=False, default=False)
     parser.add_argument("--version", action='version', version='%(prog)s ' + str(StartMaja.version))
-    parser.add_argument("-p", "--platform", help="Manually override which platform to use. By default this is deducted"
-                                                 "by the available input product(s). Options are 'sentinel2',"
-                                                 "'landsat8' and 'venus'.",
-                        type=str, required=False, default=None)
-    # TODO Add output plugin override, gipp re-download
-    # TODO Add "copy" parameter that copies files instead of symlink'n them.
+    parser.add_argument("--platform", help="Manually override which platform to use."
+                                           "By default this is deducted by the available input product(s)",
+                        choices=["sentinel2", "landsat8", "venus"], type=str, required=False, default=None)
     args = parser.parse_args()
-    
+
+    # TODO Add error skipping
+    logging_level = logging.DEBUG if args.verbose else logging.INFO
+    logger = StartMaja.init_loggers(msg_level=logging_level)
+
     s = StartMaja(args.folder, args.tile, args.site,
-                  args.start, args.end, nbackward=args.nbackward, verbose=args.verbose,
+                  args.start, args.end, nbackward=args.nbackward, logger=logger,
                   overwrite=args.overwrite, cams=args.cams,
-                  skip_confirm=args.y, platform=args.platform)
+                  skip_confirm=args.y, platform=args.platform,
+                  type_dem=args.type_dem, skip_errors=args.skip_errors)
     s.run()
