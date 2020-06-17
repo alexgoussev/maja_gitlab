@@ -1,28 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import os
 import logging
+from datetime import datetime
 from StartMaja.Chain.AuxFile import EarthExplorer
 
 
@@ -46,8 +43,8 @@ class GIPPFile(EarthExplorer):
         :param hdr: The full path to the HDR file
         :return:
         """
-        from StartMaja.Common import FileSystem
-        return FileSystem.get_single_xpath(hdr, "./Fixed_Header/Mission")
+        from StartMaja.Common import XMLTools
+        return XMLTools.get_single_xpath(hdr, "./Fixed_Header/Mission")
 
 
 class GippALBD(EarthExplorer):
@@ -94,7 +91,7 @@ class GippSet(object):
     """
     Stores a set of Gipp Files
     """
-    url = "http://tully.ups-tlse.fr/olivier/gipp_maja/repository/archive.zip?ref=master"
+    url = "http://osr-cesbio.ups-tlse.fr/gitlab_cesbio/kettigp/maja-gipp/-/archive/master/maja-gipp-master.zip"
     zenodo_reg = r"https?:\/\/zenodo.org\/record\/\d+\/files\/\w+.zip\?download=1"
 
     platforms = ["sentinel2", "landsat8", "venus"]
@@ -102,7 +99,12 @@ class GippSet(object):
                "landsat8": ["natif", "muscate", "tm"],
                "venus": ["natif", "muscate", "tm"]}
 
-    def __init__(self, root, platform, gtype, cams=False, log_level=logging.INFO):
+    models_const = ['CONTINEN']
+    models_cams_old = ['BLACKCAR', 'CONTINEN', 'DUST', 'ORGANICM', 'SEASALT', 'SULPHATE']
+    models_cams_46r1 = ['AMMONIUM', 'BLACKCAR', 'CONTINEN', 'DUST', 'NITRATE', 'ORGANICM', 'SEASALT', 'SULPHATE']
+    expected_models = [models_const, models_cams_old, models_cams_46r1]
+
+    def __init__(self, root, platform, gtype, cams=False, **kwargs):
         """
         Set the path to the root gipp folder
         :param root: The full path to the root gipp folder
@@ -123,7 +125,9 @@ class GippSet(object):
             self.gtype = gtype
         self.platform = platform
         self.cams_suffix = "_CAMS" if cams else ""
-        self.log_level = log_level
+        self.log_level = kwargs.get("log_level", logging.INFO)
+        self.lut_date = kwargs.get("date", datetime.now())
+        self.cams_46r1 = datetime(2019, 7, 10)
         self.n_sat = 2 if platform == "sentinel2" else 1
         # Create root if not existing:
         FileSystem.create_directory(self.fpath)
@@ -157,12 +161,13 @@ class GippSet(object):
         self.out_path = os.path.join(self.fpath, self.gipp_folder_name)
         FileSystem.download_file(self.url, self.gipp_archive, self.log_level)
         FileSystem.unzip(self.gipp_archive, self.temp_folder)
-        gipp_maja_git = os.path.join(self.temp_folder, "gipp_maja.git")
-        platform_folder = FileSystem.get_file(root=gipp_maja_git, filename= "^" + self.gipp_folder_name + "$")
+        gipp_maja_git = os.path.join(self.temp_folder, "maja-gipp-master")
+        # TODO Remove second WATV for Venus-Natif
+        platform_folder = FileSystem.find_single(path=gipp_maja_git, pattern="^" + self.gipp_folder_name + "$")
         if not platform_folder:
             self.__clean_up()
             raise OSError("Cannot find any gipp folder for platform %s" % self.gipp_folder_name)
-        readme = FileSystem.get_file(filename="readme*", root=platform_folder)
+        readme = FileSystem.find_single(path=platform_folder, pattern="readme*")
         if not readme:
             self.__clean_up()
             raise OSError("Cannot find download-file for LUT-Download in %s" % platform_folder)
@@ -172,17 +177,21 @@ class GippSet(object):
             raise OSError("Cannot find url to download LUTs")
         FileSystem.download_file(lut_url, self.lut_archive, self.log_level)
         FileSystem.unzip(self.lut_archive, platform_folder)
-        lut_folder = FileSystem.get_file(root=platform_folder, filename="LUTs")
+        lut_folder = FileSystem.find_single(path=platform_folder, pattern="LUTs")
         if not lut_folder:
             self.__clean_up()
             raise OSError("Cannot find 'LUTs' folder in %s" % self.temp_folder)
         for f in os.listdir(lut_folder):
             shutil.move(os.path.join(lut_folder, f), platform_folder)
+
         if os.path.isdir(self.out_path):
             FileSystem.remove_directory(self.out_path)
         shutil.move(platform_folder, self.out_path)
-        FileSystem.remove_directory(lut_folder)
         self.__clean_up()
+        FileSystem.remove_directory(lut_folder)
+        # Sanity check:
+        if not self.check_completeness():
+            raise ValueError("GIPP download failed. Please delete gipp/ folder and try again.")
 
     def link(self, dest):
         """
@@ -205,8 +214,8 @@ class GippSet(object):
         from StartMaja.Common import FileSystem
         import re
         hdr_reg = os.path.splitext(GIPPFile.regex)[0] + ".HDR"
-        hdrs = FileSystem.find(hdr_reg, self.out_path)
-        raw_models = [re.search(hdr_reg, h).group(3).replace("_", "").lower() for h in hdrs]
+        hdrs = FileSystem.find(hdr_reg, self.out_path, depth=1)
+        raw_models = [re.search(hdr_reg, h).group(3).replace("_", "").upper() for h in hdrs]
         models = list(set(raw_models))
         return sorted(models)
 
@@ -216,15 +225,15 @@ class GippSet(object):
         :return: True if existing. False if not.
         """
         from StartMaja.Common import FileSystem
-        n_files_per_model = 5
-        expected_n_models = [6, 8] if self.cams_suffix else [1]
+        n_files_per_lut = 4
         try:
-            found_n_models = len(self.get_models())
+            found_models = sorted(self.get_models())
+            n_models = len(found_models)
         except ValueError:
             return False
         if not os.path.isdir(self.out_path):
             return False
-        if found_n_models not in expected_n_models:
+        if found_models not in self.expected_models:
             return False
         try:
             hdrs = FileSystem.find("*.HDR", self.out_path)
@@ -234,8 +243,8 @@ class GippSet(object):
             return False
         if len(eefs) < 4:
             return False
-        # Models = 4 (TOCR, DIRT, DIFT, ALBD) + 1 constant for WATV per satellite
-        if len(hdrs) != len(dbls) != n_files_per_model * self.n_sat * (found_n_models - 1) + 1 * self.n_sat:
+        # LUTs = 4 (TOCR, DIRT, DIFT, ALBD) + 1 constant for WATV per satellite
+        if len(hdrs) != len(dbls) != n_files_per_lut * self.n_sat * n_models + 1 * self.n_sat:
             return False
 
         return True

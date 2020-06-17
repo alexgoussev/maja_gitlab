@@ -1,26 +1,35 @@
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
-#
-#Licensed under the Apache License, Version 2.0 (the "License");
-#you may not use this file except in compliance with the License.
-#You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-#Unless required by applicable law or agreed to in writing, software
-#distributed under the License is distributed on an "AS IS" BASIS,
-#WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#See the License for the specific language governing permissions and
-#limitations under the License.
-#
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>, Pierre LASSALLE <pierre.lassalle@cnes.fr>
-Project:        StartMaja, CNES
-Created on:     Tue Sep 11 15:31:00 2018
-"""
+import os
+import tempfile
+from osgeo import gdal
+import logging
+from datetime import datetime
+from xml.etree import ElementTree
+import numpy as np
+from scipy import ndimage
+from scipy.ndimage import zoom
+import math
+from collections import namedtuple
+from StartMaja.Common import FileSystem, ImageTools, ImageIO, XMLTools
+from StartMaja.prepare_mnt.mnt.DEMInfo import DEMInfo
 
 # GlobalSurfaceWater (GSW) base url for direct-download of the files:
 surface_water_url = "https://storage.googleapis.com/global-surface-water/downloads2/occurrence/occurrence_%s_v1_1.tif"
@@ -33,10 +42,6 @@ class MNT(object):
     MNT := Modèle numérique de terrain; french for DEM
     """
     def __init__(self, site, **kwargs):
-        import os
-        import tempfile
-        from osgeo import gdal
-        from StartMaja.Common import FileSystem
         if not int(gdal.VersionInfo()) >= 2000000:
             raise ImportError("MNT creation needs Gdal >2.0!")
         self.site = site
@@ -45,21 +50,22 @@ class MNT(object):
             FileSystem.create_directory(self.dem_dir)
         self.wdir = kwargs.get("wdir", None)
         if not self.wdir:
-            self.wdir = self.dem_dir
-        if not os.path.isdir(self.wdir):
+            self.wdir = tempfile.mkdtemp(prefix="raw_dem_")
+        else:
             FileSystem.create_directory(self.wdir)
+        # This needs to be provided for EuDEM:
         self.raw_dem = kwargs.get("raw_dem", None)
         if not self.raw_dem:
             self.raw_dem = tempfile.mkdtemp(prefix="raw_dem_")
-        if not os.path.exists(self.raw_dem):
+        else:
             FileSystem.create_directory(self.raw_dem)
         self.raw_gsw = kwargs.get("raw_gsw", None)
         if not self.raw_gsw:
             self.raw_gsw = tempfile.mkdtemp(prefix="raw_gsw_")
-        if not os.path.exists(self.raw_gsw):
+        else:
             FileSystem.create_directory(self.raw_gsw)
         self.gsw_codes = self.get_gsw_codes(self.site)
-        self.dem_version = kwargs.get("dem_version", 1)
+        self.dem_version = kwargs.get("dem_version", None)
         self.gsw_threshold = kwargs.get("gsw_threshold", 30.)
         self.gsw_dst = kwargs.get("gsw_dst", os.path.join(self.wdir, "surface_water_mask.tif"))
         self.quiet = not kwargs.get("verbose", False)
@@ -68,17 +74,26 @@ class MNT(object):
         """
         Get the DEM raw-data from a given directory. If not existing, an attempt will be made to download
         it automatically.
-        :return:
+        :return: Write a single raster containing the water-data
         """
         raise NotImplementedError
 
     def prepare_mnt(self):
+        """
+        Prepare the ALT file from a given MNT-type (e.g. SRTM).
+        :return: Write a single raster containing the altitude-data
+        """
         raise NotImplementedError
 
     @staticmethod
     def calc_gradient(mnt_arr, res_x, res_y):
-        import numpy as np
-        from scipy import ndimage
+        """
+        Calculate the gradient in x and y direction.
+        :param mnt_arr: The ALT numpy array
+        :param res_x: The resolution in x-direction. *Both positive and negative will work.*
+        :param res_y: The resolution in y-direction. *Both positive and negative will work.*
+        :return: The gradient/derivative in x- and y-direction.
+        """
         # TODO Find a pure numpy 2D convolution.
         kernel_horizontal = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
         kernel_vertical = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
@@ -88,7 +103,12 @@ class MNT(object):
 
     @staticmethod
     def calc_slope_aspect(dz_dc, dz_dl):
-        import numpy as np
+        """
+        Calculate the slope and aspect.
+        :param dz_dc: The derivative in x-direction
+        :param dz_dl: The derivative in y-direction
+        :return: The slope and aspect as numpy arrays.
+        """
         norme = np.sqrt(dz_dc * dz_dc + dz_dl * dz_dl)
         slope = np.arctan(norme)
         aspect = np.where(dz_dc > 0, np.arccos(dz_dl / norme), 2 * np.pi - np.arccos(dz_dl / norme))
@@ -108,9 +128,6 @@ class MNT(object):
         :param order: The spline interpolation order. Default is 3.
         :return:
         """
-        from scipy.ndimage import zoom
-        import numpy as np
-
         zoom_factor = (np.abs(mnt_resolution[0] / full_resolution[0]),
                        np.abs(mnt_resolution[1] / full_resolution[1]))
 
@@ -125,26 +142,24 @@ class MNT(object):
         :param grid_step: The step size of the grid
         :return: The list of filenames of format 'XX(E/W)_YY(N/S)' needed in order to cover to whole site.
         """
-        import math
-        from collections import namedtuple
-        if site.ul_latlon[1] > 170 and site.lr_latlon[1] < 160:
+        if site.ul_lonlat[0] > 170 and site.lr_lonlat[0] < 160:
             raise ValueError("Cannot wrap around longitude change")
 
-        point = namedtuple("point", ("y", "x"))
+        point = namedtuple("point", ("x", "y"))
         pts = []
-        for pt in [site.ul_latlon, site.lr_latlon]:
-            lat_dec = (math.fabs(pt[0]) / grid_step)
-            lon_dec = (math.fabs(pt[1]) / grid_step)
-            if pt[0] > 0:
+        for pt in [site.ul_lonlat, site.lr_lonlat]:
+            lat_dec = (math.fabs(pt[1]) / grid_step)
+            lon_dec = (math.fabs(pt[0]) / grid_step)
+            if pt[1] > 0:
                 lat_id = int(math.ceil(lat_dec) * grid_step)
             else:
                 lat_id = -1 * int(math.floor(lat_dec) * grid_step)
 
-            if pt[1] < 0:
+            if pt[0] < 0:
                 lon_id = int(math.ceil(lon_dec) * grid_step)
             else:
                 lon_id = -1 * int(math.floor(lon_dec) * grid_step)
-            pts.append(point(lat_id, lon_id))
+            pts.append(point(lon_id, lat_id))
         gsw_granules = []
         for x in range(pts[1].x, pts[0].x + grid_step, grid_step):
             for y in range(pts[1].y, pts[0].y + grid_step, grid_step):
@@ -156,11 +171,9 @@ class MNT(object):
     def get_raw_water_data(self):
         """
         Find the given gsw files or download them if not existing.
+
         :return: The list of filenames downloaded.
         """
-        import os
-        from StartMaja.Common import FileSystem
-        import logging
         filenames = []
         for code in self.gsw_codes:
             current_url = surface_water_url % code
@@ -175,42 +188,53 @@ class MNT(object):
     def prepare_water_data(self):
         """
         Prepare the water mask constituing of a set of gsw files.
+
         :return: Writes the tiles water_mask to the self.gsw_dst path.
         """
-        import os
-        from StartMaja.Common import ImageIO
         occ_files = self.get_raw_water_data()
-        # Fusion of all gsw files:
-        fusion_path = os.path.join(self.wdir, "occurrence.tif")
-        water_mask = os.path.join(self.wdir, "water_mask_comb.tif")
-        ImageIO.gdal_merge(fusion_path, *occ_files)
+        vrt_path = os.path.join(self.wdir, "vrt_%s.vrt" % self.site.nom)
+        ImageTools.gdal_buildvrt(*occ_files, dst=vrt_path)
         # Overlay occurrence image with same extent as the given site.
         # Should the occurrence files not be complete, this sets all areas not covered by the occurrence to 0.
-        ImageIO.gdal_warp(water_mask, fusion_path,
-                          r="near",
-                          te=self.site.te_str,
-                          t_srs=self.site.epsg_str,
-                          tr=self.site.tr_str,
-                          dstnodata="0")
+        ds_warped = ImageTools.gdal_warp(vrt_path,
+                                         r="near",
+                                         te=self.site.te_str,
+                                         t_srs=self.site.epsg_str,
+                                         tr=self.site.tr_str,
+                                         dstnodata=0,
+                                         multi=True)
         # Threshold the final image and write to destination:
-        image, drv = ImageIO.tiff_to_array(water_mask, array_only=False)
-        image_bin = image > self.gsw_threshold
-        ImageIO.write_geotiff_existing(image_bin, self.gsw_dst, drv)
+        image_bin = ds_warped.array > self.gsw_threshold
+        FileSystem.remove_file(vrt_path)
+        ImageIO.write_geotiff_existing(image_bin, self.gsw_dst, ds_warped.get_ds())
 
-    def to_maja_format(self, platform_id, mission_field, mnt_resolutions, coarse_res):
-        import os
-        import tempfile
-        from datetime import datetime
-        from StartMaja.Common import ImageIO, XMLTools, FileSystem
-        from StartMaja.prepare_mnt.mnt.DEMInfo import DEMInfo
-
+    def to_maja_format(self, platform_id, mission_field, mnt_resolutions, coarse_res, full_res_only=False):
+        """
+        Writes an MNT in Maja (=EarthExplorer) format: A folder .DBL.DIR containing the rasters and an
+        accompanying .HDR xml-file.
+        The two files follow the maja syntax::
+            *AUX_REFDE2*.(HDR|DBL.DIR)
+        :param platform_id: The platform ID of two digits (e.g. S2_ for Sentinel2A/B; VS for Venus)
+        :param mission_field: Similar to the platform ID, this is used in the <Mission>-field for the HDR file.
+                              e.g. SENTINEL-2 for S2
+        :param mnt_resolutions: A dict containing the resolutions for the given sensor. E.g.::
+            {"XS": (10, -10)}
+        :param coarse_res: A tuple of int describing the coarse resolution. E.g.::
+            (240, -240).
+        :param full_res_only:  If True, no coarse_res rasters will be created.
+        :return: Writes the .DBL.DIR and .HDR into the specified self.dem_dir
+        """
         assert len(mnt_resolutions) >= 1
         basename = str("%s_TEST_AUX_REFDE2_%s_%s" % (platform_id, self.site.nom, str(self.dem_version).zfill(4)))
-        # Get water data
-        self.prepare_water_data()
+
         # Get mnt data
         mnt_max_res = self.prepare_mnt()
-        mnt_res = (self.site.res_y, self.site.res_x)
+
+        # Water mask not needed with optional coarse_res writing:
+        if coarse_res and not full_res_only:
+            # Get water data
+            self.prepare_water_data()
+        mnt_res = (self.site.res_x, self.site.res_y)
         dbl_base = basename + ".DBL.DIR"
         dbl_dir = os.path.join(self.dem_dir, dbl_base)
         FileSystem.create_directory(dbl_dir)
@@ -220,8 +244,8 @@ class MNT(object):
         mnt_in, drv = ImageIO.tiff_to_array(mnt_max_res, array_only=False)
         grad_y_mnt, grad_x_mnt = self.calc_gradient(mnt_in, self.site.res_x, self.site.res_y)
 
-        full_res = (int(mnt_resolutions[0]["val"].split(" ")[1]),
-                    int(mnt_resolutions[0]["val"].split(" ")[0]))
+        full_res = (int(mnt_resolutions[0]["val"].split(" ")[0]),
+                    int(mnt_resolutions[0]["val"].split(" ")[1]))
 
         grad_x = self.resample_to_full_resolution(grad_x_mnt, mnt_resolution=mnt_res, full_resolution=full_res, order=3)
         grad_y = self.resample_to_full_resolution(grad_y_mnt, mnt_resolution=mnt_res, full_resolution=full_res, order=3)
@@ -230,8 +254,8 @@ class MNT(object):
 
         # Write full res slope and aspect
         geotransform = list(drv.GetGeoTransform())
-        geotransform[1] = float(full_res[1])
-        geotransform[-1] = float(full_res[0])
+        geotransform[1] = float(full_res[0])
+        geotransform[-1] = float(full_res[1])
         projection = drv.GetProjection()
         tmp_asp = tempfile.mktemp(dir=self.wdir, suffix="_asp.tif")
         ImageIO.write_geotiff(aspect, tmp_asp, projection, tuple(geotransform))
@@ -252,7 +276,7 @@ class MNT(object):
             rel_alt = os.path.join(dbl_base, bname_alt)
             path_alt = os.path.join(self.dem_dir, rel_alt)
             all_paths_alt.append(path_alt)
-            ImageIO.gdal_warp(path_alt, mnt_max_res, tr=res["val"], r="cubic")
+            ImageTools.gdal_warp(mnt_max_res, dst=path_alt, tr=res["val"], r="cubic", multi=True)
             rasters_written.append(rel_alt)
             # ASP:
             bname_asp = basename + "_ASP"
@@ -260,7 +284,7 @@ class MNT(object):
             bname_asp += ".TIF"
             rel_asp = os.path.join(dbl_base, bname_asp)
             path_asp = os.path.join(self.dem_dir, rel_asp)
-            ImageIO.gdal_warp(path_asp, tmp_asp, tr=res["val"], r="cubic")
+            ImageTools.gdal_warp(tmp_asp, dst=path_asp, tr=res["val"], r="cubic", multi=True)
             rasters_written.append(rel_asp)
             # SLP:
             bname_slp = basename + "_SLP"
@@ -268,35 +292,37 @@ class MNT(object):
             bname_slp += ".TIF"
             rel_slp = os.path.join(dbl_base, bname_slp)
             path_slp = os.path.join(self.dem_dir, rel_slp)
-            ImageIO.gdal_warp(path_slp, tmp_slp, tr=res["val"], r="cubic")
+            ImageTools.gdal_warp(tmp_slp, dst=path_slp, tr=res["val"], r="cubic", multi=True)
             rasters_written.append(rel_slp)
 
-        # Resize all rasters for coarse res.
-        coarse_res_str = str(coarse_res[0]) + " " + str(coarse_res[1])
-        # ALC:
-        bname_alc = basename + "_ALC.TIF"
-        rel_alc = os.path.join(dbl_base, bname_alc)
-        path_alc = os.path.join(self.dem_dir, rel_alc)
-        ImageIO.gdal_warp(path_alc, path_alt, tr=coarse_res_str)
-        rasters_written.append(rel_alc)
-        # ALC:
-        bname_asc = basename + "_ASC.TIF"
-        rel_asc = os.path.join(dbl_base, bname_asc)
-        path_asc = os.path.join(self.dem_dir, rel_asc)
-        ImageIO.gdal_warp(path_asc, path_asp, tr=coarse_res_str)
-        rasters_written.append(rel_asc)
-        # ALC:
-        bname_slc = basename + "_SLC.TIF"
-        rel_slc = os.path.join(dbl_base, bname_slc)
-        path_slc = os.path.join(self.dem_dir, rel_slc)
-        ImageIO.gdal_warp(path_slc, path_slp, tr=coarse_res_str)
-        rasters_written.append(rel_slc)
-        # Water mask:
-        bname_msk = basename + "_MSK.TIF"
-        rel_msk = os.path.join(dbl_base, bname_msk)
-        path_msk = os.path.join(self.dem_dir, rel_msk)
-        ImageIO.gdal_warp(path_msk, self.gsw_dst, tr=coarse_res_str)
-        rasters_written.append(rel_msk)
+        # Optional coarse_res writing:
+        if coarse_res and not full_res_only:
+            # Resize all rasters for coarse res.
+            coarse_res_str = str(coarse_res[0]) + " " + str(coarse_res[1])
+            # ALC:
+            bname_alc = basename + "_ALC.TIF"
+            rel_alc = os.path.join(dbl_base, bname_alc)
+            path_alc = os.path.join(self.dem_dir, rel_alc)
+            ImageTools.gdal_warp(path_alt, dst=path_alc, tr=coarse_res_str, multi=True)
+            rasters_written.append(rel_alc)
+            # ALC:
+            bname_asc = basename + "_ASC.TIF"
+            rel_asc = os.path.join(dbl_base, bname_asc)
+            path_asc = os.path.join(self.dem_dir, rel_asc)
+            ImageTools.gdal_warp(path_asp, dst=path_asc, tr=coarse_res_str, multi=True)
+            rasters_written.append(rel_asc)
+            # ALC:
+            bname_slc = basename + "_SLC.TIF"
+            rel_slc = os.path.join(dbl_base, bname_slc)
+            path_slc = os.path.join(self.dem_dir, rel_slc)
+            ImageTools.gdal_warp(path_slp, dst=path_slc, tr=coarse_res_str, multi=True)
+            rasters_written.append(rel_slc)
+            # Water mask:
+            bname_msk = basename + "_MSK.TIF"
+            rel_msk = os.path.join(dbl_base, bname_msk)
+            path_msk = os.path.join(self.dem_dir, rel_msk)
+            ImageTools.gdal_warp(self.gsw_dst, dst=path_msk, tr=coarse_res_str, multi=True)
+            rasters_written.append(rel_msk)
 
         # Write HDR Metadata:
 
@@ -308,15 +334,18 @@ class MNT(object):
                          dem_info, date_start, date_end, self.dem_version)
         XMLTools.write_xml(root, hdr)
 
+        # Remove temp files:
+        FileSystem.remove_file(tmp_asp)
+        FileSystem.remove_file(tmp_slp)
+        FileSystem.remove_file(mnt_max_res)
         return hdr, dbl_dir
 
     @staticmethod
     def _get_root():
         """
-        Create the root of a single dem file
-        :return:
+        Create the xml-root of a single dem file
+        :return: The `ElementTree.Element` root node with all namespaces and schemas filled out.
         """
-        from xml.etree import ElementTree
         xmlns = "http://eop-cfi.esa.int/CFI"
         xsi = "http://www.w3.org/2001/XMLSchema-instance"
         schema_location = "%s ./%s" % (xmlns, "AUX_REFDE2_ReferenceDemDataLevel2.xsd")
@@ -341,8 +370,6 @@ class MNT(object):
         :param rel_files: The list of files inside the .DBL.DIR. The filepaths are all relative to the HDR.
         :return: Writes the HDR in the same directory as the .DBL.DIR.
         """
-        from datetime import datetime
-        from xml.etree import ElementTree
         creation_date = datetime.now()
 
         a1 = ElementTree.SubElement(root, "Fixed_Header")
@@ -384,7 +411,6 @@ class MNT(object):
         ElementTree.SubElement(b4, "Applicable_Site_Nick_Name").text = dem_info.name
         ElementTree.SubElement(b4, "File_Version").text = str(version).zfill(4)
         b5 = ElementTree.SubElement(b3, "List_of_Applicable_SiteDefinition_Ids", count="1")
-        # TODO Correct this:
         site_defintion_base = "_".join(basename_out.split("_")[:2])  # Get e.g. 'VE_TEST' or 'S2__TEST'
         site_definiton_name = site_defintion_base + "_MPL_SITDEF_S_" + dem_info.name
         ElementTree.SubElement(b5, "Applicable_SiteDefinition_Id", sn="1").text = site_definiton_name

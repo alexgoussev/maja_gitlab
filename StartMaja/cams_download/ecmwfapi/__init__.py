@@ -1,4 +1,5 @@
-"""Python client for ECMWF web services API."""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 #
 # (C) Copyright 2012-2013 ECMWF.
 #

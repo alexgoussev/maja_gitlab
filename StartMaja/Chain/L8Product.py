@@ -1,28 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+
 """
-Author:         Peter KETTIG <peter.kettig@cnes.fr>
-Project:        Start-MAJA, CNES
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
+import re
 import os
 from datetime import datetime, timedelta
 from StartMaja.Chain.Product import MajaProduct
+from StartMaja.Common.FileSystem import symlink
+from StartMaja.prepare_mnt.mnt.SiteInfo import Site
+from StartMaja.Common import FileSystem, XMLTools
 
 
 class Landsat8Natif(MajaProduct):
@@ -31,10 +32,15 @@ class Landsat8Natif(MajaProduct):
     """
 
     base_resolution = (30, -30)
+    coarse_resolution = (240, -240)
 
     @property
     def platform(self):
         return "landsat8"
+
+    @property
+    def short_name(self):
+        return "l8"
 
     @property
     def type(self):
@@ -45,8 +51,11 @@ class Landsat8Natif(MajaProduct):
         return "l1c"
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
-        import re
         site = self.base.split("_")[4]
         tile = re.search(self.reg_tile, site)
         if tile:
@@ -56,7 +65,7 @@ class Landsat8Natif(MajaProduct):
     @property
     def metadata_file(self):
         metadata_filename = self.base.split(".")[0] + ".HDR"
-        return self.get_file(folders="../", filename=metadata_filename)
+        return self.find_file(path=os.path.join(self.fpath, ".."), pattern=metadata_filename)[0]
 
     @property
     def validity(self):
@@ -65,7 +74,6 @@ class Landsat8Natif(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
         mtd_file = self.metadata_file
         symlink(mtd_file, os.path.join(link_dir, os.path.basename(mtd_file)))
@@ -78,9 +86,8 @@ class Landsat8Natif(MajaProduct):
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*_B0?1*.tif")
+            band_bx = self.find_file(r"*_B0?1*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx)
@@ -90,7 +97,14 @@ class Landsat8Natif(MajaProduct):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
 
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=30)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError
 
 
@@ -100,10 +114,15 @@ class Landsat8Muscate(MajaProduct):
     """
 
     base_resolution = (30, -30)
+    coarse_resolution = (240, -240)
 
     @property
     def platform(self):
         return "landsat8"
+
+    @property
+    def short_name(self):
+        return "l8"
 
     @property
     def type(self):
@@ -118,20 +137,20 @@ class Landsat8Muscate(MajaProduct):
         raise ValueError("Unknown product level for %s" % self.base)
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
-        import re
-        if len(self.base.split("_")) == 7:
-            site = "_".join(self.base.split("_")[3:5])
-        else:
-            site = self.base.split("_")[3]
-        tile = re.search(self.reg_tile, site)
+        site_basic = self.base.split("_")[3]
+        tile = re.search(self.reg_tile, self.base)
         if tile:
             return tile.group()[1:]
-        return site
+        return site_basic
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="*MTD_ALL.xml")
+        return self.find_file("*MTD_ALL.xml")[0]
 
     @property
     def date(self):
@@ -142,7 +161,6 @@ class Landsat8Muscate(MajaProduct):
 
     @property
     def validity(self):
-        from StartMaja.Common import FileSystem, XMLTools
         if self.level == "l1c" and os.path.exists(self.metadata_file):
             return True
         if self.level == "l2a":
@@ -158,14 +176,12 @@ class Landsat8Muscate(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*_B0?1*.tif")
+            band_bx = self.find_file(r"*_B0?1*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx)
@@ -175,7 +191,14 @@ class Landsat8Muscate(MajaProduct):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
 
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=30)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError
 
 
@@ -185,10 +208,15 @@ class Landsat8LC1(MajaProduct):
     """
 
     base_resolution = (30, -30)
+    coarse_resolution = (240, -240)
 
     @property
     def platform(self):
         return "landsat8"
+
+    @property
+    def short_name(self):
+        return "l8"
 
     @property
     def type(self):
@@ -199,16 +227,20 @@ class Landsat8LC1(MajaProduct):
         return "l1c"
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
         return self.base[3:9]
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="*_MTL.txt")
+        return self.find_file("*_MTL.txt")[0]
 
     @property
     def date(self):
-        year_doy = self.base[9:15]
+        year_doy = self.base[9:16]
         # Add a timedelta of 12hrs in order to compensate for the missing H/M/S:
         return datetime.strptime(year_doy, "%Y%j") + timedelta(hours=12)
 
@@ -219,14 +251,12 @@ class Landsat8LC1(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*_B0?1*.tif")
+            band_bx = self.find_file(r"*_B0?1*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx)
@@ -236,7 +266,14 @@ class Landsat8LC1(MajaProduct):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
 
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=30)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError
 
 
@@ -246,10 +283,15 @@ class Landsat8LC2(MajaProduct):
     """
 
     base_resolution = (30, -30)
+    coarse_resolution = (240, -240)
 
     @property
     def platform(self):
         return "landsat8"
+
+    @property
+    def short_name(self):
+        return "l8"
 
     @property
     def type(self):
@@ -260,12 +302,16 @@ class Landsat8LC2(MajaProduct):
         return "l1c"
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
         return self.base.split("_")[2]
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="*_MTL.txt")
+        return self.find_file("*_MTL.txt")[0]
 
     @property
     def date(self):
@@ -280,14 +326,12 @@ class Landsat8LC2(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*_B0?1*.tif")
+            band_bx = self.find_file(r"*_B0?1*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx)
@@ -297,5 +341,12 @@ class Landsat8LC2(MajaProduct):
         return [{"name": "XS",
                 "val": str(self.mnt_resolution[0]) + " " + str(self.mnt_resolution[1])}]
 
+    @property
+    def max_l2_diff(self):
+        return timedelta(days=30)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError

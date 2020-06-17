@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+
 """
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-Project:        Start-MAJA, CNES
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import unittest
-from StartMaja.Common import FileSystem, DummyFiles
+from StartMaja.Common import FileSystem
 from StartMaja.Chain.Workplan import Workplan, Init, Nominal, Backward
+from StartMaja.Chain import DummyFiles
 import os
 
 
@@ -63,7 +61,7 @@ class TestWorkplan(unittest.TestCase):
 
     def test_name_hash(self):
         product_name = "S2B_MSIL1C_20400602T121200_N0044_R001_T31TCH_20400602T121200.SAFE"
-        self.assertEqual(Workplan.get_dirname(product_name), "f9bfae79e5aa4a59feda03c8d6717f35")
+        self.assertEqual(Workplan.hash_dirname(product_name), "f9bfae79e5aa4a59feda03c8d6717f35")
 
     def test_wp_init_nofolders(self):
         with self.assertRaises(AssertionError):
@@ -98,7 +96,7 @@ class TestWorkplan(unittest.TestCase):
         self.assertTrue(os.path.isdir(self.outdir))
         self.assertEqual(wp.l1, self.l1)
         self.assertEqual(wp.l2_date, self.l2.date)
-        l2_prods = wp._get_available_l2_products()
+        l2_prods = wp.get_available_products(root=self.wdir, level="l2a", tile=self.l1.tile)
         # TODO Cannot check more because of misaligned dates and validity check. Need to add JPI to dummy-files
         self.assertEqual([], l2_prods)
 

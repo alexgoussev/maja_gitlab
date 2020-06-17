@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+
 """
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-Project:        Start-MAJA, CNES
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 from __future__ import print_function
 import os
 import shutil
 import logging
-
-log = logging.getLogger(__name__)
 
 
 def create_directory(path):
@@ -55,7 +50,7 @@ def remove_file(filename):
     try:
         os.remove(filename)
     except OSError:
-        log.debug("Cannot remove file %s" % filename)
+        logger.debug("Cannot remove file %s" % filename)
     return
 
 
@@ -67,91 +62,61 @@ def remove_directory(directory):
     try:
         shutil.rmtree(directory)
     except OSError:
-        log.debug("Cannot remove directory {0}".format(directory))
+        logger.debug("Cannot remove directory {0}".format(directory))
 
 
-def __get_item(path, reg):
+def find(pattern, path, case_sensitive=False, depth=None, ftype="all"):
     """
-    Find a specific file/folder within a directory
-    :param path: The full path to the directory
-    :param reg: The regex to be searched for
-    :return: The full path to the file/folder
-    """
-    import re
-    import os
-    path = os.path.abspath(path)
-    available_dirs = [f for f in os.listdir(path) if re.search(reg.lower(), f.lower())]
-    if not available_dirs:
-        raise IOError("Cannot find %s in %s" % (reg, path))
-    return os.path.abspath(os.path.join(path, available_dirs[0]))
+    Find a file or dir in a directory-tree of given depth.
 
-
-def find(pattern, path, case_sensitive=False):
-    """
-    Find a file or dir in a directory-tree.
     :param pattern: The filename to be searched for
     :param path: The path to the root directory
-    :param case_sensitive: Do a case sensitive comparison.
+    :param case_sensitive: Do a case sensitive comparison. Default is False.
+    :param depth: Search only up to a specified depth. Default is None, signifying a maximum limit of 20.
+    :param ftype: Can be "file", "folder" or "all".
     :return: The file/directory if found. AssertionError if not.
     """
     import re
     result = []
-    parameter = pattern.replace("*", ".*")
+
+    reg_to_find = pattern.replace("*", ".*")
+
     if not case_sensitive:
-        parameter = parameter.lower()
+        reg_to_find = reg_to_find.lower()
+
+    path = os.path.abspath(path)
+    if not depth:
+        depth = 20  # Limit depth in case it is not specified.
     for root, dirs, files in os.walk(path):
-        for name in files + dirs:
-            if re.search(parameter.lower(), name if case_sensitive else name.lower()):
-                result.append(os.path.join(root, name))
+        if root[len(path):].count(os.sep) < depth:
+            if ftype == "all":
+                names = files + dirs
+            elif ftype == "file":
+                names = files
+            elif ftype == "folder":
+                names = dirs
+            else:
+                raise ValueError("Unknown type %s" % ftype)
+            for name in names:
+                if re.search(reg_to_find, name if case_sensitive else name.lower()):
+                    result.append(os.path.join(root, name))
     if not result:
-        raise ValueError("Cannot find %s in %s" % (parameter, path))
+        raise ValueError("Cannot find %s in %s" % (pattern, path))
     return result
 
 
-def find_single(pattern, path, case_sensitive=False):
+def find_single(pattern, path, case_sensitive=False, depth=None, ftype="all"):
     """
-    Find a file or dir in a directory-tree.
+    Find a single file or dir in a directory-tree.
+
     :param pattern: The filename to be searched for
     :param path: The path to the root directory
     :param case_sensitive: Do a case sensitive comparison.
-    :return: The file/directory if found. AssertionError if not.
+    :param depth: Search only up to a specified depth. Default is None, signifying a maximum limit of 20.
+    :param ftype: Can be "file", "folder" or "all".
+    :return: The file/directory if found. ValueError if not.
     """
-    return find(pattern, path, case_sensitive)[0]
-
-
-def get_file(**kwargs):
-    """
-    Get a single file from inside the root directory by glob or regex.
-    The necessary arguments:
-    - root: The root folder to start the search from.
-    The file can have one or multiple of the following characteristics:
-    - folders: Inside a (sub-)folder
-    - filename: Filename with specific pattern
-    :param kwargs: The folders and filename arguments
-    :return: The full path to the file if found or OSError if not.
-    """
-    import os
-
-    search_folder = kwargs["root"]
-    # The function supports globbing, so replace the globs for regex-like ones
-    folders = kwargs.get("folders", ".")
-    parameter = os.path.normpath(folders).replace("*", ".*")
-    subdirs = parameter.split(os.sep)
-    # Recursively update the search folder for each sub folder
-    for sub in subdirs:
-        if sub == ".":
-            continue
-        if sub == "..":
-            search_folder = os.path.dirname(search_folder)
-            continue
-        search_folder = __get_item(search_folder, sub)
-    # Now that we are in the right directory, search for the file:
-    try:
-        filename = kwargs["filename"]
-    except KeyError:
-        return search_folder
-    parameter = os.path.normpath(filename).replace("*", ".*")
-    return __get_item(search_folder, parameter)
+    return find(pattern, path, case_sensitive=case_sensitive, depth=depth, ftype=ftype)[0]
 
 
 def symlink(src, dst):
@@ -168,8 +133,9 @@ def symlink(src, dst):
     try:
         os.symlink(src, dst)
     except OSError:
-        raise OSError("Cannot create symlink for %s at %s."
-                      "Does your plaform support symlinks?" % (src, dst))
+        logger.error("Cannot create symlink for %s at %s."
+                     "Does your plaform support symlinks?" % (src, dst))
+        shutil.copy(src, dst)
 
 
 def __get_return_code(proc, log_level):
@@ -190,13 +156,15 @@ def __get_return_code(proc, log_level):
     return proc.wait(), full_log
 
 
-def run_external_app(name, args, log_level=logging.DEBUG, logfile=None):
+def run_external_app(name, args, log_level=logging.DEBUG, logfile=None, skip_error=False):
     """
     Run an external application using the subprocess module
+
     :param name: the Name of the application
     :param args: The list of arguments to run the app with
     :param log_level: The log level for the messages displayed.
     :param logfile: Save all logs of the subprocess to this file.
+    :param skip_error: Do not raise error if command fails. Default is False.
     :return: The return code of the App with logfile written to disk if desired.
     """
     from timeit import default_timer as timer
@@ -207,7 +175,7 @@ def run_external_app(name, args, log_level=logging.DEBUG, logfile=None):
     env = os.environ.copy()
     if os.name != "nt" and ";" in env["PATH"]:
         env["PATH"] = env["PATH"].split(";")[1]
-    log.log(log_level, "Executing cmd: " + cmd)
+    logger.debug("Executing cmd: %s" % cmd)
     start = timer()
     try:
         with subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env) as proc:
@@ -216,7 +184,7 @@ def run_external_app(name, args, log_level=logging.DEBUG, logfile=None):
         # For Python 2.7, popen has no context manager:
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env)
         return_code, full_log = __get_return_code(proc, log_level=log_level)
-    if return_code:
+    if return_code and not skip_error:
         raise subprocess.CalledProcessError(return_code, cmd)
     end = timer()
     if logfile and not os.path.isdir(logfile):
@@ -230,7 +198,7 @@ def run_external_app(name, args, log_level=logging.DEBUG, logfile=None):
             for item in full_log:
                 f.write("%s\n" % item)
     # Show total execution time for the App:
-    log.log(log_level, "{0} took {1:.2f}s".format(os.path.basename(name), end - start))
+    logger.debug("{0} took {1:.2f}s".format(os.path.basename(name), end - start))
     return return_code
 
 
@@ -246,7 +214,7 @@ def download_file(url, filepath, log_level=logging.DEBUG):
     import shutil
     tmp_file = tempfile.mktemp()
     args = ["--retry-connrefused", "--waitretry=1",
-            "--read-timeout=20", "--timeout=15", "--tries=3",
+            "--read-timeout=20", "--timeout=15",
             "-O", tmp_file, url]
     if log_level != logging.DEBUG:
         args.append("-nv")
@@ -285,3 +253,9 @@ def find_in_file(filename, pattern):
     if lut_url:
         return lut_url.group()
     return None
+
+
+if __name__ == "__main__":
+    pass
+else:
+    logger = logging.getLogger("root")

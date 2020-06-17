@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import os
 import re
+import numpy as np
 from datetime import datetime, timedelta
 from StartMaja.Chain.Product import MajaProduct
+from StartMaja.Common import ImageIO, FileSystem, ImageTools, XMLTools, ImageApps
+from StartMaja.Common.FileSystem import symlink
+from StartMaja.prepare_mnt.mnt.SiteInfo import Site
+from StartMaja.Common.GDalDatasetWrapper import GDalDatasetWrapper
 
 
 class Sentinel2Natif(MajaProduct):
@@ -33,10 +34,15 @@ class Sentinel2Natif(MajaProduct):
     """
 
     base_resolution = (10, -10)
+    coarse_resolution = (120, -120)
 
     @property
     def platform(self):
         return "sentinel2"
+
+    @property
+    def short_name(self):
+        return "s2"
 
     @property
     def type(self):
@@ -44,7 +50,11 @@ class Sentinel2Natif(MajaProduct):
 
     @property
     def level(self):
-        return "l1c"
+        return self.base.split("_")[1][-3:].lower()
+
+    @property
+    def nodata(self):
+        return 0
 
     @property
     def tile(self):
@@ -55,7 +65,7 @@ class Sentinel2Natif(MajaProduct):
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="MTD_MSIL1C.xml")
+        return self.find_file("MTD_MSIL1C.xml")[0]
 
     @property
     def date(self):
@@ -69,15 +79,12 @@ class Sentinel2Natif(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
-        from StartMaja.Common import FileSystem
         try:
-            band_b2 = FileSystem.find_single(pattern=r"*B0?2.jp2$", path=self.fpath)
+            band_b2 = FileSystem.find_single(pattern=r"*B0?2(_10m)?.jp2$", path=self.fpath)
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_b2)
@@ -89,45 +96,52 @@ class Sentinel2Natif(MajaProduct):
                 {"name": "R2",
                  "val": str(self.mnt_resolution[0] * 2) + " " + str(self.mnt_resolution[1] * 2)}]
 
+    @property
+    def max_l2_diff(self):
+        if self.date < datetime(year=2017, month=7, day=1):
+            return timedelta(days=30)
+        else:
+            return timedelta(days=15)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
-        from StartMaja.Common import ImageIO, FileSystem
         wdir = kwargs.get("wdir", self.fpath)
-        remove_temp = kwargs.get("remove_temp", True)
-        output_folder = os.path.join(self.fpath, "SYNTHETIC_BANDS")
-        FileSystem.create_directory(output_folder)
+        output_folder = os.path.join(wdir, self.base)
         output_bname = "_".join([self.base.split(".")[0], synthetic_band.upper() + ".tif"])
         output_filename = kwargs.get("output_filename", os.path.join(output_folder, output_bname))
-        max_value = kwargs.get("max_value", 5000)
+        max_value = kwargs.get("max_value", 10000.)
         # Skip existing:
         if os.path.exists(output_filename):
             return output_filename
         if synthetic_band.lower() == "ndvi":
-            b4 = self.find_file(pattern=r"*B0?4.jp2$")[0]
-            b8 = self.find_file(pattern=r"*B0?8.jp2$")[0]
-            expr = "{0}+{0}*(A.astype(float)-B.astype(float))/(A.astype(float)+B.astype(float))".format(max_value)
-            ImageIO.gdal_calc(output_filename,
-                              expr,
-                              b4, b8, quiet=True, type="Int16",  overwrite=True)
+            FileSystem.create_directory(output_folder)
+            b4 = self.find_file(pattern=r"*B0?4(_10m)?.jp2$")[0]
+            b8 = self.find_file(pattern=r"*B0?8(_10m)?.jp2$")[0]
+            ds_red = GDalDatasetWrapper.from_file(b4)
+            ds_nir = GDalDatasetWrapper.from_file(b8)
+            ds_ndvi = ImageApps.get_ndvi(ds_red, ds_nir, vrange=(0, max_value), dtype=np.int16)
+            ds_ndvi.write(output_filename, options=["COMPRESS=DEFLATE"])
         elif synthetic_band.lower() == "ndsi":
-            b3 = self.find_file(pattern=r"*B0?3.jp2$")[0]
-            b11 = self.find_file(pattern=r"*B11.jp2$")[0]
-            rescaled_filename = os.path.join(wdir, "res_" + output_bname)
-            expr = "{0}+{0}*(A.astype(float)-B.astype(float))/(A.astype(float)+B.astype(float))".format(max_value)
-            ImageIO.gdal_translate(rescaled_filename, b3,
-                                   tr="20 20",
-                                   q=True)
-            ImageIO.gdal_calc(output_filename,
-                              expr,
-                              rescaled_filename, b11, type="Int16", quiet=True, overwrite=True)
-            if remove_temp:
-                FileSystem.remove_file(rescaled_filename)
+            FileSystem.create_directory(output_folder)
+            b3 = self.find_file(pattern=r"*B0?3(_10m)?.jp2$")[0]
+            b11 = self.find_file(pattern=r"*B11(_20m)?.jp2$")[0]
+            ds_green = ImageTools.gdal_translate(b3, tr="20 20", r="cubic")
+            ds_swir = GDalDatasetWrapper.from_file(b11)
+            ds_ndsi = ImageApps.get_ndsi(ds_green, ds_swir, vrange=(0, max_value), dtype=np.int16)
+            ds_ndsi.write(output_filename, options=["COMPRESS=DEFLATE"])
         elif synthetic_band.lower() == "mca_sim":
-            b4 = self.find_file(pattern=r"*B0?4.jp2$")[0]
-            b3 = self.find_file(pattern=r"*B0?3.jp2$")[0]
-            ImageIO.gdal_calc(output_filename, "(A+B)/2", b3, b4, quiet=True)
+            FileSystem.create_directory(output_folder)
+            b4 = self.find_file(pattern=r"*B0?4(_10m)?.jp2$")[0]
+            b3 = self.find_file(pattern=r"*B0?3(_10m)?.jp2$")[0]
+            img_red, drv = ImageIO.tiff_to_array(b4, array_only=False)
+            img_green = ImageIO.tiff_to_array(b3)
+            img_mcasim = (img_red + img_green) / 2
+            ImageIO.write_geotiff_existing(img_mcasim, output_filename, drv, options=["COMPRESS=DEFLATE"])
         else:
             raise ValueError("Unknown synthetic band %s" % synthetic_band)
         return output_filename
+
+    def rgb_values(self):
+        raise NotImplementedError
 
 
 class Sentinel2Muscate(MajaProduct):
@@ -136,10 +150,15 @@ class Sentinel2Muscate(MajaProduct):
     """
 
     base_resolution = (10, -10)
+    coarse_resolution = (120, -120)
 
     @property
     def platform(self):
         return "sentinel2"
+
+    @property
+    def short_name(self):
+        return "s2"
 
     @property
     def type(self):
@@ -156,6 +175,10 @@ class Sentinel2Muscate(MajaProduct):
         raise ValueError("Unknown product level for %s" % self.base)
 
     @property
+    def nodata(self):
+        return -10000
+
+    @property
     def tile(self):
         tile = re.search(self.reg_tile, self.base)
         if tile:
@@ -164,7 +187,7 @@ class Sentinel2Muscate(MajaProduct):
 
     @property
     def metadata_file(self):
-        return self.get_file(filename="*MTD_ALL.xml")
+        return self.find_file("*MTD_ALL.xml")[0]
 
     @property
     def date(self):
@@ -175,7 +198,6 @@ class Sentinel2Muscate(MajaProduct):
 
     @property
     def validity(self):
-        from StartMaja.Common import FileSystem, XMLTools
         if self.level == "l1c" and os.path.exists(self.metadata_file):
             return True
         if self.level == "l2a":
@@ -191,14 +213,12 @@ class Sentinel2Muscate(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_b2 = self.get_file(filename=r"*B0?2*.tif")
+            band_b2 = self.find_file(r"*B0?2*.tif")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_b2)
@@ -210,7 +230,18 @@ class Sentinel2Muscate(MajaProduct):
                 {"name": "R2",
                  "val": str(self.mnt_resolution[0] * 2) + " " + str(self.mnt_resolution[1] * 2)}]
 
+
+    @property
+    def max_l2_diff(self):
+        if self.date < datetime(year=2017, month=7, day=1):
+            return timedelta(days=30)
+        else:
+            return timedelta(days=15)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError
 
 
@@ -220,10 +251,15 @@ class Sentinel2SSC(MajaProduct):
     """
 
     base_resolution = (10, -10)
+    coarse_resolution = (120, -120)
 
     @property
     def platform(self):
         return "sentinel2"
+
+    @property
+    def short_name(self):
+        return "s2"
 
     @property
     def type(self):
@@ -238,6 +274,10 @@ class Sentinel2SSC(MajaProduct):
         raise ValueError("Unknown product level for %s" % self.base)
 
     @property
+    def nodata(self):
+        return 0
+
+    @property
     def tile(self):
         tile = re.search(self.reg_tile[1:], self.base)
         if tile:
@@ -247,7 +287,7 @@ class Sentinel2SSC(MajaProduct):
     @property
     def metadata_file(self):
         metadata_filename = self.base.split(".")[0] + ".HDR"
-        return self.get_file(folders="../", filename=metadata_filename)
+        return self.find_file(path=os.path.join(self.fpath, ".."), pattern=metadata_filename)[0]
 
     @property
     def date(self):
@@ -262,16 +302,14 @@ class Sentinel2SSC(MajaProduct):
         return False
 
     def link(self, link_dir):
-        from StartMaja.Common.FileSystem import symlink
         symlink(self.fpath, os.path.join(link_dir, self.base))
         mtd_file = self.metadata_file
         symlink(mtd_file, os.path.join(link_dir, os.path.basename(mtd_file)))
 
     @property
     def mnt_site(self):
-        from StartMaja.prepare_mnt.mnt.SiteInfo import Site
         try:
-            band_bx = self.get_file(filename=r"*IMG*DBL.TIF")
+            band_bx = self.find_file(pattern=r"*IMG*DBL.TIF")[0]
         except IOError as e:
             raise e
         return Site.from_raster(self.tile, band_bx, shape_index_y=1, shape_index_x=2)
@@ -283,5 +321,15 @@ class Sentinel2SSC(MajaProduct):
                 {"name": "R2",
                  "val": str(self.mnt_resolution[0] * 2) + " " + str(self.mnt_resolution[1] * 2)}]
 
+    @property
+    def max_l2_diff(self):
+        if self.date < datetime(year=2017, month=7, day=1):
+            return timedelta(days=30)
+        else:
+            return timedelta(days=15)
+
     def get_synthetic_band(self, synthetic_band, **kwargs):
+        raise NotImplementedError
+
+    def rgb_values(self):
         raise NotImplementedError

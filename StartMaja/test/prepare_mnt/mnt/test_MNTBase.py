@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import unittest
 import os
 import tempfile
+import numpy as np
 from StartMaja.prepare_mnt.mnt import MNTBase, SiteInfo
+from StartMaja.Common import FileSystem
+from StartMaja.Common.GDalDatasetWrapper import GDalDatasetWrapper
 
 
 class TestMNTBase(unittest.TestCase):
@@ -34,7 +33,6 @@ class TestMNTBase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        from StartMaja.Common import FileSystem
         # Note those directories are not destroyed after executing tests.
         # This is in order to avoid multiple downloads amongst different test classes.
         FileSystem.create_directory(cls.raw_gsw)
@@ -81,7 +79,6 @@ class TestMNTBase(unittest.TestCase):
             MNTBase.MNT.get_gsw_codes(site)
 
     def test_calculate_gradient(self):
-        import numpy as np
         res_x, res_y = 10, -10
         raw = np.arange(0, 25).reshape(5, 5)
         grad_y, grad_x = MNTBase.MNT.calc_gradient(raw, res_x, res_y)
@@ -99,8 +96,6 @@ class TestMNTBase(unittest.TestCase):
         np.testing.assert_array_almost_equal(grad_x, expected_x)
 
     def test_calculate_slope_aspect(self):
-        import numpy as np
-
         raw = np.arange(0, 25).reshape(5, 5)
         raw_2 = np.array(
                 [[20, 20, 20, 20, 20],
@@ -125,7 +120,6 @@ class TestMNTBase(unittest.TestCase):
         np.testing.assert_array_almost_equal(aspect, expected_aspect)
 
     def test_resample_to_full_resolution(self):
-        import numpy as np
         res_full = (10, 10)
         res_mnt = (40, -40)
 
@@ -143,7 +137,6 @@ class TestMNTBase(unittest.TestCase):
         np.testing.assert_array_almost_equal(resampled, expected)
 
     def test_gsw_download(self):
-        from StartMaja.Common import FileSystem
         site = SiteInfo.Site("Ecuador", 32619,
                              ul=(-250000.000, 250000.000),
                              lr=(400000.000, -120000.000))
@@ -165,8 +158,6 @@ class TestMNTBase(unittest.TestCase):
         """
         Download the given gsw file and project it to a 10km x 10km resolution (11x11 image)
         """
-        import numpy as np
-        from StartMaja.Common import ImageIO, FileSystem
         resx, resy = 10000, -10000
         px, py = 11, 11
         site = SiteInfo.Site("T31TCJ", 32631,
@@ -182,7 +173,7 @@ class TestMNTBase(unittest.TestCase):
         self.assertTrue(os.path.exists(dem_dir))
         mnt.prepare_water_data()
         self.assertTrue(os.path.exists(water_mask))
-        img_read, drv = ImageIO.tiff_to_array(water_mask, array_only=False)
+        driver = GDalDatasetWrapper.from_file(water_mask)
         img_expected = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
@@ -194,26 +185,24 @@ class TestMNTBase(unittest.TestCase):
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        self.assertEqual(ImageIO.get_resolution(drv), (resx, resy))
-        self.assertEqual(ImageIO.get_epsg(drv), 32631)
-        self.assertEqual(img_read.shape, (py, py))
-        np.testing.assert_almost_equal(img_expected, img_read)
-        FileSystem.remove_file(water_mask)
+        self.assertEqual(driver.resolution, (resx, resy))
+        self.assertEqual(driver.epsg, 32631)
+        self.assertEqual(driver.array.shape, (py, px))
+        np.testing.assert_almost_equal(img_expected, driver.array)
+        self.assertIsNone(driver.nodata_value)
         FileSystem.remove_directory(dem_dir)
 
     def test_get_water_data_spain_s2(self):
         """
         Download the given gsw file and project it to a 10km x 10km resolution (11x11 image)
         """
-        import numpy as np
-        from StartMaja.Common import ImageIO, FileSystem
         resx, resy = 10000, -10000
         px, py = 11, 11
-        site = SiteInfo.Site("T30TYK", 32630,
+        site = SiteInfo.Site("T30SYJ", 32630,
                              px=px,
                              py=py,
-                             ul=(699960.000, 4500000.000),
-                             lr=(809760.000, 4390200.000),
+                             ul=(699960.000, 4400040.000),
+                             lr=(809760.000, 4290240.000),
                              res_x=resx,
                              res_y=resy)
         dem_dir = os.path.join(os.getcwd(), "test_get_water_data_spain_s2")
@@ -222,27 +211,26 @@ class TestMNTBase(unittest.TestCase):
         self.assertTrue(os.path.exists(dem_dir))
         mnt.prepare_water_data()
         self.assertTrue(os.path.exists(water_mask))
-        img_read, drv = ImageIO.tiff_to_array(water_mask, array_only=False)
-        img_expected = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-                        [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-                        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+        driver = GDalDatasetWrapper.from_file(water_mask)
+        img_expected = [[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
                         [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
-                        [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]]
-        self.assertEqual(ImageIO.get_resolution(drv), (resx, resy))
-        self.assertEqual(ImageIO.get_epsg(drv), 32630)
-        self.assertEqual(img_read.shape, (py, px))
-        np.testing.assert_almost_equal(img_expected, img_read)
+                        [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1],
+                        [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                        [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]]
+        self.assertEqual(driver.resolution, (resx, resy))
+        self.assertEqual(driver.epsg, 32630)
+        self.assertEqual(driver.array.shape, (py, px))
+        np.testing.assert_almost_equal(img_expected, driver.array)
+        self.assertIsNone(driver.nodata_value)
         FileSystem.remove_directory(dem_dir)
 
     def test_get_water_data_maccanw2_vns(self):
-        import numpy as np
-        from StartMaja.Common import ImageIO, FileSystem
         resx, resy = 5000, -5000
         px, py = 11, 14
         site = SiteInfo.Site("MACCANW2", 32633,
@@ -258,7 +246,7 @@ class TestMNTBase(unittest.TestCase):
         self.assertTrue(os.path.exists(dem_dir))
         mnt.prepare_water_data()
         self.assertTrue(os.path.exists(water_mask))
-        img_read, drv = ImageIO.tiff_to_array(water_mask, array_only=False)
+        driver = GDalDatasetWrapper.from_file(water_mask)
         img_expected = [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -273,15 +261,14 @@ class TestMNTBase(unittest.TestCase):
                         [1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
                         [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                         [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]]
-        self.assertEqual(ImageIO.get_resolution(drv), (resx, resy))
-        self.assertEqual(ImageIO.get_epsg(drv), 32633)
-        self.assertEqual(img_read.shape, (py, px))
-        np.testing.assert_almost_equal(img_expected, img_read)
+        self.assertEqual(driver.resolution, (resx, resy))
+        self.assertEqual(driver.epsg, 32633)
+        self.assertEqual(driver.array.shape, (py, px))
+        np.testing.assert_almost_equal(img_expected, driver.array)
+        self.assertIsNone(driver.nodata_value)
         FileSystem.remove_directory(dem_dir)
 
     def test_get_water_data_tls_l8(self):
-        import numpy as np
-        from StartMaja.Common import ImageIO, FileSystem
         resx, resy = 15000, -15000
         px, py = 15, 14
         site = SiteInfo.Site("19080", 32631,
@@ -297,7 +284,7 @@ class TestMNTBase(unittest.TestCase):
         self.assertTrue(os.path.exists(dem_dir))
         mnt.prepare_water_data()
         self.assertTrue(os.path.exists(water_mask))
-        img_read, drv = ImageIO.tiff_to_array(water_mask, array_only=False)
+        driver = GDalDatasetWrapper.from_file(water_mask)
         img_expected = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -312,10 +299,11 @@ class TestMNTBase(unittest.TestCase):
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
-        self.assertEqual(ImageIO.get_resolution(drv), (resx, resy))
-        self.assertEqual(ImageIO.get_epsg(drv), 32631)
-        self.assertEqual(img_read.shape, (py, px))
-        np.testing.assert_almost_equal(img_expected, img_read)
+        self.assertEqual(driver.resolution, (resx, resy))
+        self.assertEqual(driver.epsg, 32631)
+        self.assertEqual(driver.array.shape, (py, px))
+        self.assertIsNone(driver.nodata_value)
+        np.testing.assert_almost_equal(img_expected, driver.array)
         FileSystem.remove_directory(dem_dir)
 
 
