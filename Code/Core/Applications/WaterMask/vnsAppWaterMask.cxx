@@ -305,7 +305,7 @@ private:
 		m_SRTMGaussianFilter->SetVariance(l_SRTMGaussianSigma * l_SRTMGaussianSigma);
 		m_SRTMGaussianFilter->SetUseImageSpacingOff();
 		m_SRTMGaussianFilter->SetMaximumError(CONST_EPSILON_20);
-		m_SRTMGaussianFilter->SetMaximumKernelWidth(static_cast<unsigned int>(100 * l_SRTMGaussianSigma));
+		m_SRTMGaussianFilter->SetMaximumKernelWidth(static_cast<unsigned int>(40 * l_SRTMGaussianSigma));
 		m_SRTMMultiplyFilter->SetInput1(m_SRTMGaussianFilter->GetOutput());
 		m_SRTMMultiplyFilter->SetInput2(l_SRTMWATPtr);
 
