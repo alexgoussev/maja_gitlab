@@ -103,20 +103,13 @@ add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_Workplan
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
-
-add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_DateConverter
+add_test(NAME pyTu${PREFIX}_${FOLDER_CHAIN}_DummyFiles
 	COMMAND ${TEST_DRIVER}
 	Execute
-	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DateConverter.py -v
+	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Chain/test_DummyFiles.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
-add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_DummyFiles
-	COMMAND ${TEST_DRIVER}
-	Execute
-	${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_DummyFiles.py -v
-	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
-	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_FileSystem
 	COMMAND ${TEST_DRIVER}
@@ -139,6 +132,26 @@ add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_XMLTools
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
+add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_GDalDatasetWrapper
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_GDalDatasetWrapper.py -v
+	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
+	)
+
+add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_ImageApps
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_ImageApps.py -v
+	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
+	)
+
+add_test(NAME pyTu${PREFIX}_${FOLDER_COMMON}_ImageTools
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/Common/test_ImageTools.py -v
+	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
+	)
 
 add_test(NAME pyTu${PREFIX}_${FOLDER_PREPARE_MNT}_MNTBase
 	COMMAND ${TEST_DRIVER}
@@ -154,6 +167,12 @@ add_test(NAME pyTu${PREFIX}_${FOLDER_PREPARE_MNT}_SRTM
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
 
+add_test(NAME pyTu${PREFIX}_${FOLDER_PREPARE_MNT}_EuDEM
+	COMMAND ${TEST_DRIVER}
+	Execute
+	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/prepare_mnt/mnt/test_EuDEM.py -v
+	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
+	)
 
 add_test(NAME pyTu${PREFIX}_Start_maja
 	COMMAND ${TEST_DRIVER}
@@ -161,6 +180,3 @@ add_test(NAME pyTu${PREFIX}_Start_maja
 	 ${PYTHON_EXECUTABLE} ${START_MAJA}/test/test_Start_maja.py -v
 	WORKING_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TU/StartMaja
 	)
-
-
-

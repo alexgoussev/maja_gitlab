@@ -1,25 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
+
 """
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-                Bastien ROUQUIE (CESBIO),
-                Olivier HAGOLLE (CESBIO)
-Project:        Start-MAJA, CNES
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import os
@@ -60,7 +55,7 @@ def download_files(dt, file_type, t_hour, step, path_out):
             'step'    : step,
             'levtype' : "SFC",
             'date'    : date_courante,
-            'time'    : time,
+            'time'    : t_hour,
             'type'    : "fc",
             'param'   : models,
             'area'    : "G",
@@ -75,6 +70,7 @@ def download_files(dt, file_type, t_hour, step, path_out):
         nom_rh = "CAMS_RH_" + date_courante + 'UTC' + str(int(t_hour)+int(step)).zfill(2) + '0000.nc'
         path_rh = os.path.join(path_out, nom_rh)
         print('Nom fichier de sortie RH :', path_rh)
+        levellist = "1/2/3/5/7/10/20/30/50/70/100/150/200/250/300/400/500/600/700/800/850/900/925/950/1000"
         server.retrieve({
               'stream'  : "oper",
               'class'   : "mc",
@@ -82,9 +78,9 @@ def download_files(dt, file_type, t_hour, step, path_out):
               'expver'  : "0001",
               'step'    : step,
               'levtype' : "pl",
-              "levelist": "1/2/3/5/7/10/20/30/50/70/100/150/200/250/300/400/500/600/700/850/925/1000",
+              "levelist": levellist,
               'date'    : date_courante,
-              'time'    : time,
+              'time'    : t_hour,
               'type'    : "fc",
               'param'   : "157.128",
               'area'    : "G",
@@ -119,7 +115,7 @@ def download_files(dt, file_type, t_hour, step, path_out):
             'levtype' : "ml",
             "levelist": levels,
             'date'    : date_courante,
-            'time'    : time,
+            'time'    : t_hour,
             'type'    : "fc",
             'param'   : models,
             'area'    : "G",

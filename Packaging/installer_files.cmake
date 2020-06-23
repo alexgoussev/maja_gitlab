@@ -53,6 +53,14 @@ macro(installer_files)
   install(PROGRAMS
     ${START_MAJA_TEST_EXE_DIR}/startmaja
     DESTINATION ${PKG_STAGE_DIR}/bin)
+
+  install(PROGRAMS
+    ${START_MAJA_TEST_EXE_DIR}/dtmcreation
+    DESTINATION ${PKG_STAGE_DIR}/bin)
+
+  install(PROGRAMS
+    ${START_MAJA_TEST_EXE_DIR}/camsdownload
+    DESTINATION ${PKG_STAGE_DIR}/bin)
 endmacro()
 
 

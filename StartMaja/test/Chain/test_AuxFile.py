@@ -1,30 +1,26 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES), CS-SI, CESBIO - All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-"""
 
-Author:         Peter KETTIG <peter.kettig@cnes.fr>,
-Project:        Start-MAJA, CNES
+"""
+Copyright (C) 2016-2020 Centre National d'Etudes Spatiales (CNES), CSSI, CESBIO  All Rights Reserved
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import unittest
-from StartMaja.Common import TestFunctions
 from StartMaja.Chain.AuxFile import CAMSFile, DTMFile
 import os
+from StartMaja.Chain import DummyFiles
 from datetime import datetime
 
 
@@ -43,7 +39,6 @@ class TestAuxFile(unittest.TestCase):
         Similar to test_FileSystem.
         :return:
         """
-        from StartMaja.Common import DummyFiles
         os.makedirs(cls.cams_dir)
         for i in range(cls.n_cams):
             DummyFiles.CAMSGenerator(cls.cams_dir).generate()

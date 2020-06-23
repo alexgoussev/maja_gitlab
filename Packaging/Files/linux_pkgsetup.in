@@ -52,8 +52,13 @@ chmod -R +x "$OUT_DIR/bin/"
 . ./make_symlinks
 
 echo "You can now run $OUT_DIR/bin/maja"
+
 echo "You can now run $OUT_DIR/bin/startmaja"
-echo "More documentation can be found in $OUT_DIR/README"
+echo "Maja Digital-Elevation-Models (DEMs) can be created by running $OUT_DIR/bin/dtmcreation"
+echo "Maja CAMS data can be downloaded by running $OUT_DIR/bin/camsdownload"
+echo "More documentation on how to set up maja/startmaja can be found in $OUT_DIR/README"
+
+
 
 if [ -f "$OUT_DIR/CMakeLists.txt" ]; then
     sed -i "s,OUT_DIR,$OUT_DIR,g" "$OUT_DIR/CMakeLists.txt"
