@@ -376,7 +376,7 @@ class L2Processor(BaseProcessor):
         # Get the cams data use option
         l_UseCamsData = l_GIPPL2COMMHandler.get_value_b("UseCamsData") and self._CAMS_Files_HandlersMAP[l_SatelliteD].valid
         # init cloud rate boolean(false if there are to many clouds)
-        p_checking_conditional_clouds[0] = True
+        p_checking_conditional_clouds = True
         # = == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
         # Get the date in the string YYYYMMDD
         # = == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
@@ -644,7 +644,7 @@ class L2Processor(BaseProcessor):
             LOGGER.info("Cloud Rate on the Product : " + str(l_CloudRate))
             # Check validity of the  product
             if l_CloudRate > l_MaxCloudPercentage:
-                p_checking_conditional_clouds[0] = False
+                p_checking_conditional_clouds = False
                 if not p_backwardmode:
                     self._productIsValid = False
                     l_StopLevel2Processing = True
@@ -669,7 +669,7 @@ class L2Processor(BaseProcessor):
             #Log system infos
             LOGGER.progress(self._apphandler.get_system_infos())
             if not l_StopLevel2Processing:
-                if p_checking_conditional_clouds[0] or p_finalize_backward:
+                if p_checking_conditional_clouds or p_finalize_backward:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
                     # START Water Masking computation
                     water_masking_computation = MajaModule.create("WaterMask")
@@ -738,7 +738,7 @@ class L2Processor(BaseProcessor):
                 #      if it is the last product of the backward mode
                 # ========================================================================
                 if l_EnvCorOption and m_WriteL2ProductToL2Resolution and \
-                        ((p_checking_conditional_clouds[0]) or (p_finalize_backward)):
+                        ((p_checking_conditional_clouds) or (p_finalize_backward)):
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
                     # START Environment correction algorithm
                     environment_correction = MajaModule.create("EnvironmentCorrection")
@@ -767,7 +767,7 @@ class L2Processor(BaseProcessor):
                 #  --> only in backward mode
                 #  --> if the cloud rate is too high (no L2 product generated)
                 l_WriteL2Products = True
-                if p_backwardmode and p_checking_conditional_clouds[0] == False:
+                if p_backwardmode and p_checking_conditional_clouds == False:
                     # FA LAIG-FA-MAC-885-CNES : ce if etait dans le if ci-dessus. Copy
                     # uniquement si pas mode INIT (sinon segfault)
                     if p_initmode == False and p_InputL2ImageFileReader is not None:
@@ -782,7 +782,7 @@ class L2Processor(BaseProcessor):
                     LOGGER.debug(k + " : " + str(v))
 
                 LOGGER.debug("global_output_dict %s", global_output_dict)
-                l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds[0]
+                l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds
 
                 # Setup image writer
                 l2_processor_image_writer_setup.setup_l2_image_writer(self, p_OutputL2ImageFileWriter, global_input_dict,
@@ -806,7 +806,7 @@ class L2Processor(BaseProcessor):
 
         # Compute NDT ratio to insure product validity (FA1395)
         # --------------------------------------------------
-        if not l_StopLevel2Processing and (p_checking_conditional_clouds[0] or p_finalize_backward):
+        if not l_StopLevel2Processing and (p_checking_conditional_clouds or p_finalize_backward):
             LOGGER.debug("MaxNoDataPercentage  : " + str(l_MaxNoDataPercentage)+"%")
             validity_l2_nodata_percentage = MajaModule.create("ValidityL2NoData")
             validity_l2_nodata_percentage.launch(global_input_dict, global_output_dict)
@@ -834,7 +834,7 @@ class L2Processor(BaseProcessor):
         LOGGER.debug("       *  l_DealingLTC                     = " + str(l_global_params_dict["DealingLTC"]))
         LOGGER.debug("       *  l_IgnoreCurrentLTC               = " + str(l_IgnoreCurrentLTC))
         LOGGER.debug("  ->  self._productIsValid                     = " + str(self._productIsValid))
-        LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(p_checking_conditional_clouds[0]))
+        LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(p_checking_conditional_clouds))
         LOGGER.debug("  ->  use_cams_datas                       = " + str(l_UseCamsData))
         # Log system infos
         LOGGER.progress(self._apphandler.get_system_infos())
