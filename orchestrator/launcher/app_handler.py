@@ -157,7 +157,7 @@ class AppHandler:
         cpu_nb = os.cpu_count()
         total_disc = disk_space_used(self._workingDirectory)
         self._max_disc = max(total_disc,self._max_disc)
-        return "System infos (RAM;DISK;HOUR;MIN;SEC) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
+        return "System infos (RAM;DISK;HOUR;MIN;SEC;LOAD) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
             int(self._max_disc)) + ";" + str(int(total_time.tm_hour)) + ";" + str(
             int(total_time.tm_min)) + ";" + str(int(total_time.tm_sec)) + ";" + str(int(100.0 * cpu_load[0] / self._nbThreads))
 
