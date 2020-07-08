@@ -241,8 +241,11 @@ class L2Processor(BaseProcessor):
                     # Init the cams data file handler
                     l_extinctionData = {}
                     for m in l_modelList:
+                        LOGGER.debug("Extracting info for model : "+str(m))
                         l_extinctionData[m] = AthmosphericLutHandler.extract_cams_info(
                             self._apphandler.get_input_directory(), l_sat, m)
+                        if l_extinctionData[m] is None:
+                            raise MajaDataException("Input TOCR GIPP for model "+m+" doesn't have CAMS informations requested (Extinction_Coefs, RH_Tab, RH_dep ...)")
                     self._CAMS_Files_HandlersMAP[l_sat].set_extinction_map(l_extinctionData)
                     self._CAMS_Files_HandlersMAP[l_sat].set_rh_tab(list(l_extinctionData.values())[0]["rh_tab"])
 

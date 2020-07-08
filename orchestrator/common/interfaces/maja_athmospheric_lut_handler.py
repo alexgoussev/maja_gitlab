@@ -388,4 +388,5 @@ class AthmosphericLutHandler(object):
         if l_lut_xml_handler.has_cams_info():
             return l_lut_xml_handler.get_cams_info()
         else:
+            LOGGER.debug("GIPP doesn't have CAMS info available")
             return None
