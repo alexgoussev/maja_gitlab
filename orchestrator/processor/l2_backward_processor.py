@@ -117,7 +117,7 @@ class L2BackwardProcessor(L2Processor):
         # ----------------------------------------------------------------
         # Initialize the flag to validate the clouds probably
         # ----------------------------------------------------------------
-        l_checking_conditional_clouds = False
+        l_checking_conditional_clouds = [False]
         l_conditional_loop = False
         l_write_earthexplorer_headers = False
         l_write_temporary_l2_product = True
@@ -220,8 +220,8 @@ class L2BackwardProcessor(L2Processor):
                 l2_image_file_writer,
                 l_GIPPL2COMMHandler)
             LOGGER.debug("  ->  self._productIsValid                     = " + str(self._productIsValid))
-            LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(l_checking_conditional_clouds))
-            if (l_checking_conditional_clouds is True) and (self._productIsValid is True):
+            LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(l_checking_conditional_clouds[0]))
+            if (l_checking_conditional_clouds[0] is True) and (self._productIsValid is True):
                 l_conditional_loop = True
             elif l_IndexOfL1Product == 1:
                 l_conditional_loop = True
@@ -243,7 +243,7 @@ class L2BackwardProcessor(L2Processor):
 
         # LAIG-DM-MAC-143599-CS
         # LAIG-FA-MAC-1658-CNES
-        if (l_checking_conditional_clouds == False) or (self._productIsValid == False):
+        if (l_checking_conditional_clouds[0] == False) or (self._productIsValid == False):
             LOGGER.warn(
                 "The INIT mode in Backward processing fail: all L1 products are not valid (too cloudy or too cirrus)"
                 " or the output L2 product generated contains too NoData values! "

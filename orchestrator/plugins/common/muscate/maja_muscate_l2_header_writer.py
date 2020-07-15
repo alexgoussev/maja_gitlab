@@ -24,7 +24,7 @@
 #                        o     o oooooo      o oooooo      / \
 #                        o     o o    o o    o o    o      `-^
 #                        o     o o    o  oooo  o    o
-#
+#l
 ###################################################################################################
 
 orchestrator.plugins.maja_dataset -- shortdesc
@@ -698,9 +698,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
                     l_XPathRootDetFoot = "//Mask_List/Mask[Mask_Properties/NATURE='Detector_Footprint']/Mask_File_List"
                     xnode = xml_tools.get_only_value(output_handler.root, l_XPathRootDetFoot)
                     main_node = xnode
-                    for bd in range(l_NumberOfBands):
-                        LOGGER.debug("liiiiiiiiiiiiiist")
-                        LOGGER.debug(l_ListOfBand[bd])
+                    for bd in range(l_NumberOfBands):                        
                         l1BandId = l_BandsDefinitions.get_band_id_in_l1(l_ListOfBand[bd])
                         l_MapBandDetFnames = l_Muscate["ZoneMaskFileNames"][l1BandId]
                         for it in list(l_MapBandDetFnames.values()):
