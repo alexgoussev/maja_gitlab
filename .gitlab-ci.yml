@@ -1,4 +1,3 @@
-
 variables:
   BUILD_ENV_REGISTRY: $CI_REGISTRY/maja/maja-build-env
 
@@ -102,7 +101,7 @@ build-centos7:
     - sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
     - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
   artifacts:
-    expire_in: 5 days
+    expire_in: 20 days
     when: on_success
     paths:
       - sha1.txt
@@ -144,7 +143,7 @@ tv-centos7:
     - time rclone copy s3_otb:maja-data/TV/VENUS data/TV/VENUS
     - CI/run_tv.sh tv_content.txt
   artifacts:
-    expire_in: 5 days
+    expire_in: 20 days
     when: on_failure
     paths:
       - logs/*.log

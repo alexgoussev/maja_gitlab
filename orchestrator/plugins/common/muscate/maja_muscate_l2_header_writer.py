@@ -24,7 +24,7 @@
 #                        o     o oooooo      o oooooo      / \
 #                        o     o o    o o    o o    o      `-^
 #                        o     o o    o  oooo  o    o
-#l
+#
 ###################################################################################################
 
 orchestrator.plugins.maja_dataset -- shortdesc
