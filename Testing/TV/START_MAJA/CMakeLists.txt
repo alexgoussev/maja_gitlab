@@ -63,6 +63,9 @@
 SET(MAJADATA_TV_STARTMAJA_INPUT ${MAJADATA_TV}/START_MAJA)
 SET(MAJADATA_TV_STARTMAJA_BASELINE ${MAJADATA_TV}/START_MAJA/Baseline)
 
+set(TEST_DRIVER ${CMAKE_INSTALL_PREFIX}/bin/otbTestDriver.sh)
+
+
 if(ENABLE_TV)
     file(MAKE_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TV_START_MAJA/L2-Products)
     file(MAKE_DIRECTORY ${MAJA_TEST_OUTPUT_ROOT}/TV_START_MAJA/work)
@@ -72,9 +75,10 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/folders.txt.in
   ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt @ONLY)
 
 
-
 add_test(NAME pyTv_START_MAJA
-	COMMAND ${PYTHON_EXECUTABLE} ${MAJA_SOURCE_DIR}/StartMaja/Start_maja.py -f ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt -t 31UDQ --nbackward 2 -y -v)
+         COMMAND ${TEST_DRIVER}
+         Execute
+	     ${PYTHON_EXECUTABLE} ${MAJA_SOURCE_DIR}/StartMaja/Start_maja.py -f ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt -t 31UDQ --nbackward 2 -y -v)
 
 set_tests_properties(pyTv_START_MAJA PROPERTIES TIMEOUT 300000)
 
