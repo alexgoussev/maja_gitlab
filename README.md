@@ -124,16 +124,20 @@ The description below will explain how to process a set of data above tile 31TFJ
 ### Prepare folders and input files
 
 - To use the start_maja script, you need to configure the directories, within the folder.txt file.
-Here is my own configuration, also provided in the folders.txt file in this repository.
+Here is an example of configuration that must be adapted to your own directory structure.
 ```
-[PATH]
-repWork=maja-work
-repGipp=maja-gipp
-repMnt=/work/Maja/DTM
-repL1  =/datalake/S2-L1C
-repL2  =/mnt/data/SENTINEL2/L2A_MAJA
-exeMaja=/opt/Maja_3.3.1/bin/maja
-repCAMS=/mnt/data/CAMS
+[Maja_Inputs]
+repWork=./work
+repGipp=./gipp
+repMNT=./dtm
+repL1  =/path/to/L1C
+repL2  =/path/to/L2A
+exeMaja=/path/to/bin/maja
+repCAMS=/path/to/CAMS
+
+[DTM_Creation]
+repRAW=./dtm/raw 
+repGSW=./dtm/gsw 
 ```
 - repWork is a directory to store the temporary files
 - repL1 is where to find the L1C data (without the site name which is added aferward optionally)
