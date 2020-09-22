@@ -142,7 +142,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         param_oneband_concat = {"il": m_ResamplingList,
                              "out": out_concat + ":uint8"
                              }
-        qoth_concat_app = OtbAppHandler("ConcatenateImages", param_oneband_concat, write_output=False)
+        qoth_concat_app = OtbAppHandler("ConcatenateMaskImages", param_oneband_concat, write_output=False)
         tmp_edg_pipe.add_otb_app(qoth_concat_app)
         out_or0 = os.path.join(working, "MaskOrMask_0.tif")
         band_math_or_b1 = one_band_equal_value(qoth_concat_app.getoutput().get("out"),

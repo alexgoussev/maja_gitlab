@@ -1,19 +1,24 @@
 /*
-* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+ * Copyright (C) 2005-2019 Centre National d'Etudes Spatiales (CNES)
+ *
+ * This file is part of Orfeo Toolbox
+ *
+ *     https://www.orfeo-toolbox.org/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -53,103 +58,108 @@
  * $Id$
  *                                                                                                          *
  ************************************************************************************************************/
+
+
 #include "otbWrapperApplication.h"
 #include "otbWrapperApplicationFactory.h"
-#include "vnsOneBandEqualThresholdFunctor.h"
-#include "otbFunctorImageFilter.h"
-#include <string>
+#include "otbMultiToMonoChannelExtractROI.h"
+#include "otbWrapperListViewParameter.h"
+#include "vnsMacro.h"
 
 namespace vns
 {
-
 namespace Wrapper
 {
-
 using namespace otb::Wrapper;
 
-class OneBandEqualThreshold : public Application
+class ExtractOneChannel : public Application
 {
 public:
-	/** Standard class typedefs. */
-	typedef OneBandEqualThreshold 		  Self;
-	typedef otb::Wrapper::Application     Superclass;
-	typedef itk::SmartPointer<Self>       Pointer;
-	typedef itk::SmartPointer<const Self> ConstPointer;
+  /** Standard class typedefs. */
+  typedef ExtractOneChannel               Self;
+  typedef Application                   Superclass;
+  typedef itk::SmartPointer<Self>       Pointer;
+  typedef itk::SmartPointer<const Self> ConstPointer;
 
-	/** Standard macro */
-	itkNewMacro(Self);
+  /** Standard macro */
+  itkNewMacro(Self);
 
-	itkTypeMacro(OneBandEqualThreshold, otb::Wrapper::Application);
+  itkTypeMacro(ExtractChannels, otb::Application);
 
-	/** Some convenient typedefs. */
-	typedef DoubleVectorImageType VectorImageType;
-	typedef UInt8ImageType MaskType;
-	typedef DoubleVectorImageType::PixelType RealVectorPixelType;
-	typedef MaskType::InternalPixelType MaskPixelType;
-	typedef Functor::OneBandEqualThresholdFunctor<RealVectorPixelType, MaskPixelType> OneBandEqualThresholdFunctorType;
-	typedef itk::UnaryFunctorImageFilter<VectorImageType, MaskType, OneBandEqualThresholdFunctorType> OneBandEqualThresholdFilterType;
-	typedef typename OneBandEqualThresholdFilterType::Pointer OneBandEqualThresholdFilterPointer;
+  /** Filters typedef */
+  typedef otb::MultiToMonoChannelExtractROI<DoubleVectorImageType::InternalPixelType, DoubleVectorImageType::InternalPixelType> ExtractROIFilterType;
+
+  typedef ExtractROIFilterType::InputImageType ImageType;
+  typedef ExtractROIFilterType::OutputImageType OutputImageType;
+
+protected:
+  ExtractOneChannel()
+  {
+  }
 
 private:
-	void DoInit()
-	{
-		SetName("OneBandEqualThreshold");
-		SetDescription("If one band equal threshold the band equal value.");
-		Loggers::GetInstance()->Initialize(GetName());
-		// Documentation
-		SetDocLongDescription("If one band equal threshold the band equal value");
-		SetDocLimitations("None");
-		SetDocAuthors("MAJA-Team");
-		SetDocSeeAlso("MAJA Doc");
+  void DoInit() override
+  {
+    SetName("ExtractChannels");
+    SetDescription("Extract channels defined by the user.");
 
-		AddDocTag("Mask");
+    // Documentation
+    SetDocLongDescription(
+        "This application extracts a list of channels with "
+        "user parameters. ");
+    SetDocLimitations("None");
+    SetDocAuthors("MAJA-OTB-Team");
+    SetDocSeeAlso(" ");
 
-		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
-		AddParameter(ParameterType_Float, "thresholdvalue","ThresholdCoeff to detect");
-		AddParameter(ParameterType_Float, "equalvalue","Equal value for output");
-		AddParameter(ParameterType_Float, "outsidevalue","Outside value for output");
-		AddParameter(ParameterType_OutputImage, "out", "image");
-		SetParameterDescription("out","output image");
-		SetParameterOutputImagePixelType("out",ImagePixelType_uint8);
+    AddDocTag(Tags::Manip);
 
-		AddRAMParameter("ram");
-		SetDefaultParameterInt("ram",2048);
+    // Set parameter input
+    AddParameter(ParameterType_InputImage, "in", "Input Image");
+    SetParameterDescription("in", "Image to be processed.");
+    AddParameter(ParameterType_OutputImage, "out", "Output Image");
+    SetParameterDescription("out", "Region of interest from the input image");
+    SetParameterOutputImagePixelType("out",ImagePixelType_double);
 
-	}
+    // Channelist Parameters
+    AddParameter(ParameterType_Int, "cl", "Output Image channel");
+    SetParameterDescription("cl", "Channel to write in the output image.");
 
-	void DoUpdateParameters()
-	{
+    AddRAMParameter();
 
-	}
+    SetOfficialDocLink();
+  }
 
+  void DoUpdateParameters() override
+  {
+  }
 
-	void DoExecute()
-	{
-		// Init filters
-		m_filter = OneBandEqualThresholdFilterType::New();
-		m_filter->SetReleaseDataFlag(true);
-		m_filter->SetReleaseDataBeforeUpdateFlag(true);
-		//Get Image
-		VectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
-		const double l_thresholdValue = this->GetParameterFloat("thresholdvalue");
-		const double l_equalValue = this->GetParameterFloat("equalvalue");
-		const double l_outsideValue = this->GetParameterFloat("outsidevalue");
+  void DoExecute() override
+  {
+    ImageType* inImage = GetParameterDoubleVectorImage("in");
+    inImage->UpdateOutputInformation();
 
-		m_filter->SetInput(l_im);
-		m_filter->GetFunctor().SetThresholdValue(l_thresholdValue); // 0
-		m_filter->GetFunctor().SetEqualValue(l_equalValue); // 255
-		m_filter->GetFunctor().SetOutsideValue(l_outsideValue); //0
-		m_filter->UpdateOutputInformation();
-		SetParameterOutputImage<MaskType>("out",m_filter->GetOutput());
+    m_extractROIFilter = ExtractROIFilterType::New();
+    m_extractROIFilter->SetInput(inImage);
 
-	}
+    const unsigned int channel_idx = GetParameterInt("cl");
+    if (channel_idx == 0)
+    {
+    	vnsExceptionDataMacro("Channels starts at 1");
+    }
+    if (channel_idx <= inImage->GetNumberOfComponentsPerPixel())
+    {
+    	  m_extractROIFilter->SetChannel(channel_idx);
+    } else {
+    	vnsExceptionDataMacro("The requested channel is more than the number of components of input");
+    }
 
+    SetParameterOutputImage<OutputImageType>("out", m_extractROIFilter->GetOutput());
 
-	/** Filters declaration */
-	OneBandEqualThresholdFilterType::Pointer m_filter;
+  }
+  ExtractROIFilterType::Pointer m_extractROIFilter;
+
 };
-
 }
 }
 
-OTB_APPLICATION_EXPORT(vns::Wrapper::OneBandEqualThreshold)
+OTB_APPLICATION_EXPORT(vns::Wrapper::ExtractOneChannel)

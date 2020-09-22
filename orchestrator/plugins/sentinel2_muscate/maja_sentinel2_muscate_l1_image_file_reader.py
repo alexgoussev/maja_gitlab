@@ -100,7 +100,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         param_concatenate = {"il": self._satmasksublist,
                              "out": out_concatenate + ":uint8"
                              }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
         self._sub_sat_pipeline.free_otb_app()
 
@@ -361,7 +361,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                        "exp": masterExpr,
                                        "out": tmp_zone_with_nodata
                                    }
-                zone_thresh_bandmath_app = OtbAppHandler("BandMath", param_bandmath_zone, write_output=False)
+                zone_thresh_bandmath_app = OtbAppHandler("BandMathDouble", param_bandmath_zone, write_output=False)
                 # LAIG-FA-MAC-1652-CNES : probleme reech detecteur en unsigned char : detecteur 1 devient 0.....
                 tmp_zone_resample = os.path.join(working, "tmp_extract_roi_zone_resample_{}.tif".format(l1BandIdx))
                 zone_resample_app = resample(
@@ -378,7 +378,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                                  "out": tmp_zone_threshold
                                                  }
                 zone_bandmath_threshold_app = OtbAppHandler(
-                    "BandMath", param_bandmath_zone_threshold, write_output=False)
+                    "BandMathDouble", param_bandmath_zone_threshold, write_output=False)
                 # Rounding
                 tmp_zone_round = os.path.join(working, "tmp_zone_round_{}".format(l1BandIdx))
                 param_bandmath_zone_round = {"im": zone_bandmath_threshold_app.getoutput().get("out"),

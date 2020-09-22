@@ -128,19 +128,37 @@ private:
 	void DoExecute()
 	{
 		// Get input image pointers
-		// Init filters
-		DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
-		m_filter = RealToRealRoundVectorImageFilterType::New();
-		m_filter->SetInput(l_im);
-		if(HasValue("coef"))
-		{
-			m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
+		ImageBaseType* l_inPtr = GetParameterImageBase("im",0);
+		// Guess the image type
+		std::string className(l_inPtr->GetNameOfClass());
+
+
+		if (className == "VectorImage") {
+			// Init filters
+			DoubleVectorImageType::ConstPointer l_im = this->GetParameterDoubleVectorImage("im");
+			m_filter = RealToRealRoundVectorImageFilterType::New();
+			m_filter->SetInput(l_im);
+			if(HasValue("coef"))
+			{
+				m_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
+			}
+			SetParameterOutputImage<InputImageType>("out", m_filter->GetOutput());
+		} else {
+			// Init filters
+			DoubleImageType::ConstPointer l_im = this->GetParameterDoubleImage("im");
+			m_single_filter = RealToRealRoundImageFilterType::New();
+			m_single_filter->SetInput(l_im);
+			if(HasValue("coef"))
+			{
+				m_single_filter->GetFunctor().SetCoef(this->GetParameterFloat("coef"));
+			}
+			SetParameterOutputImage<DoubleImageType>("out", m_single_filter->GetOutput());
 		}
-		SetParameterOutputImage<InputImageType>("out", m_filter->GetOutput());
 	}
 
 	/** Filters declaration */
 	 RealToRealRoundVectorImageFilterType::Pointer m_filter;
+	 RealToRealRoundImageFilterType::Pointer m_single_filter;
 };
 
 }

@@ -114,11 +114,11 @@ OTB_CREATE_APPLICATION(NAME           OzoneExtractor
 OTB_CREATE_APPLICATION(NAME           OneBandEqualThreshold
                        SOURCES        vnsAppOneBandEqualThreshold.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
-                      
+
 OTB_CREATE_APPLICATION(NAME           RoundImage
                        SOURCES        vnsAppRoundImage.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
-
+                       
 OTB_CREATE_APPLICATION(NAME           ConstantImage
                        SOURCES        vnsAppConstantImage.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
@@ -131,3 +131,26 @@ OTB_CREATE_APPLICATION(NAME           ChangeValues
                        SOURCES        vnsAppChangeValues.cxx
                        LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
                        
+OTB_CREATE_APPLICATION(NAME           ThresholdImage
+                       SOURCES        vnsAppThresholdImage.cxx
+                       LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                       
+OTB_CREATE_APPLICATION(NAME           ExtractChannels
+                      SOURCES        vnsAppExtractChannels.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                      
+OTB_CREATE_APPLICATION(NAME           ExtractOneChannel
+                      SOURCES        vnsAppExtractOneChannel.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+
+OTB_CREATE_APPLICATION(NAME          ConcatenateDoubleImages
+                      SOURCES        vnsAppConcatenateDoubleImages.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+
+OTB_CREATE_APPLICATION(NAME          ConcatenateMaskImages
+                      SOURCES        vnsAppConcatenateMaskImages.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)
+                      
+OTB_CREATE_APPLICATION(NAME          BandMathDouble
+                      SOURCES        vnsAppBandMathDouble.cxx
+                      LINK_LIBRARIES OTBImageIO ITKMetaIO ${MAJA_LIBRARY_PREFIXNAME}DataIO)

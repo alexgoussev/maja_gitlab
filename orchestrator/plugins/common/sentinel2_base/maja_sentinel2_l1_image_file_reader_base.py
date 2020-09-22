@@ -184,7 +184,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._toa_sub_list,
                              "out": toa_sub_image
                              }
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sub_toa = toa_sub_image
         tmp_sub_toa_pipe.free_otb_app()
 
@@ -407,7 +407,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_concatenate = {"il": self._l2zonemasklist[l2res],
                                      "out": zone_mask+":uint8"
                                      }
-                l2zoneimage_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+                l2zoneimage_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,
                                                 write_output=(False or is_croco_on("sentinel2.l1reader.l2zone")))
                 self._l2zoneimagelist.append(l2zoneimage_app.getoutput().get("out"))
                 self._pipeline.add_otb_app(l2zoneimage_app)
@@ -422,7 +422,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
                 param_concatenate = {"il": self._l2defectmasklist[l2res],
                                      "out": pix_vector_mask + ":uint8"
                                      }
-                pix_vector = OtbAppHandler("ConcatenateImages", param_concatenate)
+                pix_vector = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
                 pix_mask = os.path.join(working, "Masks_Defect_{}.tif".format(l2res))
                 param_binconcatenate = {"im": pix_vector.getoutput().get("out"),
                                         "out": pix_mask + ":uint16"
@@ -819,7 +819,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            l2toa_concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,
+            l2toa_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,
                                              write_output=(False or is_croco_on("sentinel2.l1reader.l2toa")))
             self._pipeline.add_otb_app(l2toa_concat_app)
             self._l2toaimagelist.append(l2toa_concat_app.getoutput().get("out"))
@@ -837,7 +837,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._satmasksublist,
                              "out": out_concatenate + ":uint8"
                              }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
         # *******************************************************************************************************
         # L2SAT image pipeline connection
@@ -852,7 +852,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
             param_concatenate = {"il": self._l2satimagelist[i],
                                  "out": out_concatenate + ":uint8"
                                  }
-            sat_image = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+            sat_image = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
             self._pipeline.add_otb_app(sat_image)
             self._l2satmasklist.append(sat_image.getoutput().get("out"))
 
