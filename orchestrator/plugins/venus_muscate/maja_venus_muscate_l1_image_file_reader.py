@@ -97,7 +97,7 @@ class VenusMuscateL1ImageFileReader(MuscateL1ImageFileReaderBase):
         out_concatenate = os.path.join(working_dir, "sol1_concat.tif")
         param_concatenate = {"il": [sol1_mult_DX_app.getoutput().get("out"), sol1_mult_DY_app.getoutput().get("out")],
                              "out": out_concatenate}
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
         # Resample the SOL images
         out_resample = os.path.join(working_dir, "sol1_concat_resamp.tif")
         resamp_app = resample(concat_app.getoutput().get("out"), self._dem.ALC, out_resample, OtbResampleType.LINEAR,
@@ -144,7 +144,7 @@ class VenusMuscateL1ImageFileReader(MuscateL1ImageFileReaderBase):
         out_concatenate = os.path.join(working_dir, "sol2_concat.tif")
         param_concatenate = {"il": [sol2_mult_DX_app.getoutput().get("out"), sol2_mult_DY_app.getoutput().get("out")],
                              "out": out_concatenate}
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
         # Resample the SOL images
         out_resample = os.path.join(working_dir, "sol2_concat_resamp.tif")
         resamp_app = resample(concat_app.getoutput().get("out"), self._dem.ALC, out_resample,
@@ -193,7 +193,7 @@ class VenusMuscateL1ImageFileReader(MuscateL1ImageFileReaderBase):
         param_concatenate = {"il": [vie5b1_mult_app.getoutput().get("out"), vie5b2_mult_app.getoutput().get("out"),
                                     vie6b1_mult_app.getoutput().get("out"), vie6b2_mult_app.getoutput().get("out")],
                              "out": out_concatenate}
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
 
         LOGGER.debug("Start DTMVIEExpand ...")
         out_resample = os.path.join(working_dir, "vie_concat_resamp.tif")
@@ -208,7 +208,7 @@ class VenusMuscateL1ImageFileReader(MuscateL1ImageFileReaderBase):
         out_shad_concatenate = os.path.join(working_dir, "vie_concat.tif")
         param_shad_concatenate = {"il": [l_D01_DX_ImageFileName, l_D01_DY_ImageFileName],
                                   "out": out_shad_concatenate}
-        concat_shad_app = OtbAppHandler("ConcatenateImages", param_shad_concatenate, write_output=False)
+        concat_shad_app = OtbAppHandler("ConcatenateDoubleImages", param_shad_concatenate, write_output=False)
 
         LOGGER.debug("Start DTMSHADExpand ...")
         out_shad_resample = os.path.join(working_dir, "vieshadconcat_resamp.tif")

@@ -317,7 +317,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                           p_VAPQuantificationValue),
                                       "out": tmp_vap
                                       }
-                vap_scal_app = OtbAppHandler("BandMath", param_bandmath_vap, write_output=False)
+                vap_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_vap, write_output=False)
                 atb_pipeline.add_otb_app(vap_scal_app)
 
                 tmp_round_vap = os.path.join(working_dir, "tmp_vap_round_" + l_StrResolution + ".tif")
@@ -332,7 +332,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                          p_AOTQuantificationValue),
                                       "out": tmp_aot
                                       }
-                aot_scal_app = OtbAppHandler("BandMath", param_bandmath_aot, write_output=False)
+                aot_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_aot, write_output=False)
                 atb_pipeline.add_otb_app(aot_scal_app)
                 tmp_round_aot = os.path.join(working_dir, "tmp_aot_round_" + l_StrResolution + ".tif")
                 param_round_aot = {"im": aot_scal_app.getoutput().get("out"),

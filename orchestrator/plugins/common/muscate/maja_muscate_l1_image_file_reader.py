@@ -128,7 +128,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "sol1_concat.tif")
         param_concatenate = {"il": [cla_app_1.getoutput().get("out"), cla_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sol1image = out_concatenate
 
     def generate_sol2_image(self, sol_h2, working_dir):
@@ -148,7 +148,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "cla_constant.tif")
         param_concatenate = {"il": [vie_app_1.getoutput().get("out"), vie_app_2.getoutput().get("out")],
                              "out": out_concatenate}
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         l_BandsDefinitions = self._plugin.BandsDefinitions
         self._vieimagelist.append(out_concatenate)
 
@@ -217,7 +217,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
             out_concatenate = os.path.join(working_dir, "L2TOAImageListVector_" + curRes + ".tif")
             param_concatenate = {"il": list_of_image,
                                  "out": out_concatenate}
-            concat_app = OtbAppHandler("ConcatenateImages", param_concatenate,write_output=False)
+            concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate,write_output=False)
             self._toa_pipeline.add_otb_app(concat_app)
             self._l2toaimagelist.append(concat_app.getoutput().get("out"))
 
@@ -230,7 +230,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         out_concatenate = os.path.join(working_dir, "L1TOAVector.tif")
         param_concatenate = {"il": self._toa_scalar_list,
                              "out": out_concatenate}
-        app = OtbAppHandler("ConcatenateImages", param_concatenate, write_output=False)
+        app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate, write_output=False)
         self._l1toa_pipeline.add_otb_app(app)
         self._l1toaimagelist.append(app.getoutput()["out"])
 
@@ -255,7 +255,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._toa_sub_list,
                              "out": toa_sub_image
                              }
-        OtbAppHandler("ConcatenateImages", param_concatenate)
+        OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._sub_toa = toa_sub_image
         toa_sub_mini_pipe.free_otb_app()
 
@@ -473,7 +473,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         param_concatenate = {"il": self._satmasksublist,
                              "out": out_concatenate + ":uint8"
                              }
-        concat_app = OtbAppHandler("ConcatenateImages", param_concatenate)
+        concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concatenate)
         self._subsatimage = concat_app.getoutput().get("out")
 
     def generate_edg_images(self, working_dir):
