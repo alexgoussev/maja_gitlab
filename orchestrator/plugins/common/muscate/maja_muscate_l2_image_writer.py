@@ -47,7 +47,7 @@ import orchestrator.cots.otb.otb_file_utils as otb_file_utils
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.plugins.common.base.maja_l2_private_image_filenames_provider import L2PrivateImageFilenamesProvider
-from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
+from orchestrator.cots.otb.otb_file_utils import otb_is_swig_pointer
 from orchestrator.plugins.common.base.maja_l2_image_writer_base import L2ImageWriterBase
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.common.logger.maja_logging import configure_logger
@@ -522,9 +522,13 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 # Connect the CLD image
                 # Connect the CLD image
                 # -------------------------------------
+                l_cld_uses_filenames = True
+                for f in self._l2cldlist:
+                    if not os.path.exists(f):
+                        l_cld_uses_filenames = False
                 self.write_cld_image(self._l2cldlist[resol], p_CLDDataBandsSelected,
                                    l_BaseL2FullMASKSFilename + "_CLM_" +
-                                   l_grpSuffix + ".tif")
+                                   l_grpSuffix + ".tif", use_filenames=l_cld_uses_filenames)
                 LOGGER.debug("Writing L2 resolution image done !")
 
             # *************************************************************************************************************

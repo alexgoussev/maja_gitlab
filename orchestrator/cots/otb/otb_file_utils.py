@@ -77,3 +77,7 @@ def otb_copy_image_to_file(source, dest, raise_exceptions=True):
     else:
         with open(dest, 'a'):
             os.utime(dest, None)
+
+
+def otb_is_swig_pointer(im):
+    return type(im).__name__ == "SwigPyObject"

@@ -129,6 +129,14 @@ if l1_reader.has_value("CLAImage") and l1_reader.get_value("CLAImage"):
 if l1_reader.has_value("ShadowVIEImage") and l1_reader.get_value("ShadowVIEImage"):
     otb_copy_image_to_file(l1_reader.get_value("ShadowVIEImage"), os.path.join(args.output_dir,"ShadowVIEImage.tif"))
 
+LOGGER.info("L1 PIX Begin ...")
+if l1_reader.has_value("L1PIXImageList") and l1_reader.get_value("L1PIXImageList"):
+    for i in range(0,len(l1_reader.get_value("L1PIXImageList"))):
+        otb_copy_image_to_file(l1_reader.get_value("L1PIXImageList")[i],
+                               os.path.join(args.output_dir,"L1PIXImageList_R"+str(i+1)+".tif"))
+
+LOGGER.info("L1 PIX Done ...")
+
 if l1_reader.has_value("L2TOAImageList") and l1_reader.get_value("L2TOAImageList"):
     for i in range(0,len(l1_reader.get_value("L2TOAImageList"))):
         otb_copy_image_to_file(l1_reader.get_value("L2TOAImageList")[i],
@@ -156,11 +164,6 @@ if l1_reader.has_value("L2DFPImageList") and l1_reader.get_value("L2DFPImageList
         otb_copy_image_to_file(l1_reader.get_value("L2DFPImageList")[i],
                                os.path.join(args.output_dir,"L2DFPImageList_R"+str(i+1)+".tif"))
 
-if l1_reader.has_value("L1PIXImageList") and l1_reader.get_value("L1PIXImageList"):
-    for i in range(0,len(l1_reader.get_value("L1PIXImageList"))):
-        otb_copy_image_to_file(l1_reader.get_value("L1PIXImageList")[i],
-                               os.path.join(args.output_dir,"L1PIXImageList_R"+str(i+1)+".tif"))
-
 if l1_reader.has_value("L1CLDImageList") and l1_reader.get_value("L1CLDImageList"):
     for i in range(0,len(l1_reader.get_value("L1CLDImageList"))):
         otb_copy_image_to_file(l1_reader.get_value("L1CLDImageList")[i],
@@ -170,7 +173,6 @@ if l1_reader.has_value("AngleZoneMaskList") and l1_reader.get_value("AngleZoneMa
     for i in range(0, len(l1_reader.get_value("AngleZoneMaskList"))):
         otb_copy_image_to_file(l1_reader.get_value("AngleZoneMaskList")[i],
                                os.path.join(args.output_dir,"AngleZoneMaskList_R"+str(i+1)+".tif"))
-
 
 if l1_reader.has_value("L1TOAImageList") and l1_reader.get_value("L1TOAImageList"):
     for i in range(0, len(l1_reader.get_value("L1TOAImageList"))):
