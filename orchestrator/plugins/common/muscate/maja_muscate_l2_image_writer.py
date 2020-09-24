@@ -522,10 +522,10 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 # Connect the CLD image
                 # Connect the CLD image
                 # -------------------------------------
-                l_cld_uses_filenames = True
-                for f in self._l2cldlist:
-                    if not os.path.exists(f):
-                        l_cld_uses_filenames = False
+                l_cld_uses_filenames = False
+                for f in self._l2cldlist[resol]:
+                    if not otb_is_swig_pointer(f) and os.path.exists(f):
+                        l_cld_uses_filenames = True
                 self.write_cld_image(self._l2cldlist[resol], p_CLDDataBandsSelected,
                                    l_BaseL2FullMASKSFilename + "_CLM_" +
                                    l_grpSuffix + ".tif", use_filenames=l_cld_uses_filenames)
