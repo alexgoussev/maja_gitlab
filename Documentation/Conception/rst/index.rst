@@ -14,7 +14,7 @@
 Software: **MAJA**
 **SETG-**\ **CG-**\ **MAJA-**\ **010-**\ **CS**                       
 Change                                          02 Date              29/11/2019
-Issue                                           00 Date              29/11/2019
+Issue                                           02 Date              05/05/2020
 Distribution Code                               E
 Ref. : CSSI/SPACE/PD&A/MAJA/DCG 
 =============================================== == ================= ============
@@ -22,14 +22,13 @@ Ref. : CSSI/SPACE/PD&A/MAJA/DCG
 **DOCUMENT DE CONCEPTION GLOBALE POUR LES CHAINES MAJA [DCG]**
 
 =================================== ===============
-Rédigé par :                        le : 29/11/2019
+Rédigé par :                        le : 05/05/2020
                                                    
 ESQUIS Benjamin  CSSI/ESPACE/PDA/IP                
-BRICIER Aurélien CSSI/ESPACE/PDA/IP                
-Validé par :                        le : 18/04/2018
+Validé par :                        le : 05/05/2020
                                                    
 OLIVIE Francis CSSI/ESPACE/DSM                     
-Pour application :                  le : 29/11/2019
+Pour application :                  le : 05/05/2020
                                                    
 ESQUIS Benjamin CSSI/ESPACE/PDA/IP                
 =================================== ===============
@@ -53,7 +52,7 @@ ESQUIS Benjamin CSSI/ESPACE/PDA/IP
 | Documents Rattaches : Le document [SDM] complète ce document...                        | LOCALISATION :                                                                               |
 |                                                                                        | CSSI/SPACE/PD&A/MAJA                                                                         |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| Volume : 1                                                                             | Nombre total de pages : 60                          | Doc composite : N      | LANGUAGE : FR |
+| Volume : 1                                                                             | Nombre total de pages : N/A                         | Doc composite : N      | LANGUAGE : FR |
 |                                                                                        |                                                     |                        |               |
 |                                                                                        | Dont pages préliminaires : 0                        |                        |               |
 |                                                                                        |                                                     |                        |               |
@@ -61,17 +60,18 @@ ESQUIS Benjamin CSSI/ESPACE/PDA/IP
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | GESTION DE CONF. : NG                                                                  | CM RESP. :                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CAUSE D'EVOLUTION : Mise à jour pour MAJA v4.0.0                                                                                                                                      |
+| CAUSE D'EVOLUTION : Mise à jour pour MAJA v4.1.0                                                                                                                                      |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CONTRAT : Marché ACIS n°131348                                                                                                                                                        |
+| CONTRAT : Marché ACSIS n°181112                                                                                                                                                       |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 
 **Diffusion interne**
 
 ================== ====================
-BRICIER Aurélien   CSSI/ESPACE/PDA/IP   
+ESQUIS Benjamin    CSSI/ESPACE/PDA/IP   
+BROSSARD Julie     CSSI/ESPACE/PDA/IP   
 OLIVIE Francis     CSSI/ESPACE/DSM      
-CHOGNARD Catherine CSSI/ESPACE/PDA/PDGS 
+RECULEAU SERGE     CSSI/ESPACE/PDA/PDGS 
 \                                       
 \                                       
 \                                       
@@ -85,22 +85,18 @@ CHOGNARD Catherine CSSI/ESPACE/PDA/PDGS
 
 **Diffusion externe**
 
-================== ===================== ============
-Nom                Sigle                 Observations
-BAILLARIN Simon    DNO/OT/IS            
-DESJARDINS Camille DSO/SI/MO            
-HAGOLLE Olivier    DSO/SI/CB            
-LARIF Marie-France DNO/SC/3S            
-LASSALLE Pierre    DNO/OT/IS            
-SAMSON Laetitia    EQUERT POUR DCT/AQ/SO
-\                                       
-\                                       
-\                                       
-\                                       
-\                                       
-\                                       
-\                                       
-================== ===================== ============
+=================== ======================== ============
+Name                Entity                   Observations
+BAILLARIN Simon     DNO/OT/IS                
+HAGOLLE Olivier     DSO/SI/CB                
+KETTIG Peter        DNO/OT/IS                
+LARIF Marie-France  DNO/OT/PE                
+SELLE Arnaud        DNO/OT/TA                
+PACHOLCZYK Philippe DNO/OT/TA                
+PUJOL Mathilde      DNO/DA/AQ                
+\                                            
+=================== ======================== ============
+
 
 **Modification**
 
@@ -108,6 +104,18 @@ SAMSON Laetitia    EQUERT POUR DCT/AQ/SO
 
 === ==== ========== ================================================================================
 Ed. Rév. Date       Référence, Auteur(s), Causes d’évolution
+02  02   05/05/2020 CSSI/ESPACE/PDA/IP/MAJA/DCG
+                   
+                    ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                   
+                    MAJ pour MAJA 4.2
+
+02  01   10/03/2020 CSSI/ESPACE/PDA/IP/MAJA/DCG
+                   
+                    ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                   
+                    Refonte pour MAJA 4.1
+
 02  00   29/11/2019 CSSI/ESPACE/PDA/IP/MAJA/DCG
                    
                     ESQUIS Benjamin CSSI/ESPACE/PDA/IP

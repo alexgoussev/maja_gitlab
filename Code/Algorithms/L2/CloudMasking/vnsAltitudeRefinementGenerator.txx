@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -59,7 +75,6 @@ namespace vns
 
             // Parameters initialization
             m_NoData = static_cast<RealNoDataType>(0);
-            m_L2CoarseResolution = 1;
 
             m_DeltaHMax = 0;
             m_DeltaHMin = 0;
@@ -164,7 +179,6 @@ namespace vns
                 m_ShadowProjectionFilter->SetDTMInput(this->GetDTMInput());
                 m_ShadowProjectionFilter->SetIPVIEInput(this->GetIPVIEInput());
                 m_ShadowProjectionFilter->SetIPCLAInput(m_AddConstantFilter->GetOutput());
-                m_ShadowProjectionFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 
                 m_ShadowProjectionFilter->SetI3D(m_I3D);
 
@@ -178,7 +192,7 @@ namespace vns
                 // Generate the shadow mask with the shadow map (previously generated)
                 this->GetIPCLDSubInput()->UpdateOutputInformation();
                 m_ShadowMaskProjectionFilter->SetSize(this->GetIPCLDSubInput()->GetLargestPossibleRegion().GetSize());
-                m_ShadowMaskProjectionFilter->SetSpacing(this->GetIPCLDSubInput()->GetSpacing());
+                m_ShadowMaskProjectionFilter->SetSpacing(this->GetIPCLDSubInput()->GetSignedSpacing());
                 m_ShadowMaskProjectionFilter->SetOrigin(this->GetIPCLDSubInput()->GetOrigin());
 
                 // Persistent filter
@@ -271,7 +285,6 @@ namespace vns
             os << "m_AbsNbpixThreshold:    " << m_AbsNbpixThreshold << std::endl;
             os << "m_ThresholdDiffImage:    " << m_ThresholdDiffImage << std::endl;
 
-            os << "m_L2CoarseResolution:    " << m_L2CoarseResolution << std::endl;
             os << "m_ShadowBand:    " << m_ShadowBand << std::endl;
         }
 

@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -116,7 +132,6 @@ private:
 		SetDescription("Generate the darkest pixel aot.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("DarkestPixelAOT");
 		SetDocLongDescription("This application computes the darkest pixel aot");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -145,7 +160,7 @@ private:
 		AddParameter(ParameterType_String,  "lutimage",   "Lut image");
 		SetParameterDescription("lutimage", "Lut image");
 
-		AddParameter(ParameterType_Empty, "init","init mode");
+		AddParameter(ParameterType_Bool, "init","init mode");
 		AddParameter(ParameterType_Int, "darkestchanneltoac","darkestchanneltoac");
 		AddParameter(ParameterType_Float, "thresholddarkpixel","thresholddarkpixel");
 		AddParameter(ParameterType_Float, "darksurfacereflectance","darksurfacereflectance");
@@ -184,7 +199,7 @@ private:
 
 
 		//GetParams
-		const bool l_InitMode = IsParameterEnabled("init");
+		const bool l_InitMode = GetParameterInt("init");
 		const unsigned int l_DarkestChannelTOAC = GetParameterInt("darkestchanneltoac");
 		const double l_ThresholdDarkPixel = GetParameterFloat("thresholddarkpixel");
 		const double l_DarkSurfaceReflectance = GetParameterFloat("darksurfacereflectance");

@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.plugins.maja_dataset is a description
 
 It defines classes_and_methods
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -32,9 +43,11 @@ from orchestrator.common.earth_explorer.gipp_lut_earch_explorer_xml_file_handler
     import GippLUTEarthExplorerXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
+from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.maja_utils as maja_utils
 import orchestrator.common.file_utils as file_utils
-from orchestrator.cots.otb.algorithms.otb_band_math import *
+from orchestrator.common.logger.maja_logging import configure_logger
+from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.common.interfaces.maja_xml_app_lutmap import *
 import orchestrator.common.date_utils as date_utils
 import os
@@ -162,7 +175,7 @@ class L2ImageReaderBase(object):
                             }
         rcr_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rcr, write_output=True)
         self._coarse_pipeline.add_otb_app(rcr_scal_app)
-        self.dict_of_vals["RCRImage"] = rtc_scal_app.getoutput()["out"]
+        self.dict_of_vals["RCRImage"] = rcr_scal_app.getoutput()["out"]
         # ********************************************************************************************************/
         # * PXD Reader connection */
         # ********************************************************************************************************/
@@ -178,7 +191,7 @@ class L2ImageReaderBase(object):
             p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
             [0],
             tmp_was,
-            write_output=False)
+            write_output=True)
         self._coarse_pipeline.add_otb_app(was_extr_app)
         self.dict_of_vals["WASImage"] = was_extr_app.getoutput()["out"]
         # ********************************************************************************************************/
@@ -186,7 +199,7 @@ class L2ImageReaderBase(object):
         # ********************************************************************************************************/
         tmp_pwa = os.path.join(working_dir, "tmp_pwa.tif")
         pwa_image_app = extract_roi(p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
-                                    [1], tmp_pwa, write_output=False)
+                                    [1], tmp_pwa + ":uint8", write_output=False)
         self._coarse_pipeline.add_otb_app(pwa_image_app)
         tmp_vecpwa = os.path.join(working_dir, "tmp_pwa_vec.tif")
         param_binpwa = {"im": pwa_image_app.getoutput()["out"],
@@ -203,7 +216,7 @@ class L2ImageReaderBase(object):
         twa_image = extract_roi(
             p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
             [2],
-            tmp_twa,
+            tmp_twa + ":uint8",
             write_output=False)
         tmp_vectwa = os.path.join(working_dir, "tmp_twa_vec.tif")
         param_bintwa = {"im": twa_image.getoutput().get("out"),
@@ -273,8 +286,8 @@ class L2ImageReaderBase(object):
         tmp_cld_zero = os.path.join(working_dir, "tmp_cld_zero.tif")
         cld_const_zero_app = None
         if len(p_PluginBase.CLDCoreAlgorithmsMapBand) > len(p_PluginBase.CLDDataBandsSelected):
-            cld_const_zero_app = band_math(
-                [cld_vec_image], "0", os.path.join(
+            cld_const_zero_app = constant_image(
+                cld_vec_image, 0, os.path.join(
                     working_dir, "tmp_zero_cld.tif"), write_output=False)
             self._coarse_pipeline.add_otb_app(cld_const_zero_app)
         self.dict_of_vals["VectorizedCLDSubOutput"] = {}

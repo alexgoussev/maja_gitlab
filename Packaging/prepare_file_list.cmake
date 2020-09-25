@@ -34,6 +34,7 @@ function(prepare_file_list file_list_result)
     "${SUPERBUILD_INSTALL_DIR}/bin/ogr*${EXE_EXT}"
     "${SUPERBUILD_INSTALL_DIR}/lib/otb/applications/*${LIB_EXT}"
     "${SUPERBUILD_INSTALL_DIR}/lib/applications/*${LIB_EXT}"
+    "${SUPERBUILD_INSTALL_DIR}/bin/otbTestDriver*"
     "${MAJA_TEST_EXE_DIR}/*[T|t]est*${EXE_EXT}"
     )
 

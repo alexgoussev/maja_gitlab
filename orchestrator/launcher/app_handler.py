@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 
@@ -18,11 +33,6 @@ orchestrator.launcher.app_handler is a description
 It defines classes_and_methods
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 
 
@@ -38,7 +48,8 @@ from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.maja_exceptions import MajaProcessingError
 from orchestrator.common.directory_manager import DirectoryManager
 from orchestrator.common import version
-import logging
+from orchestrator.common.system_utils import memory_used_by_process2,disk_space_used
+import logging,time
 
 LOGGER = configure_logger(__name__)
 
@@ -71,7 +82,8 @@ class AppHandler:
 
         self._logLevel = ""
         self._processorName = AppHandler.L2INIT
-        self._nbThreads = 1
+        self._nbThreads = 4
+        self._max_disc = 0
         self._adminConfigSystemFileName = ""
         self._stylesheet = None
         self._userConf = None
@@ -80,6 +92,7 @@ class AppHandler:
         self._tile_id = None
         self._validate_schemas = False
         self._directory_manager = DirectoryManager(self._workingDirectory)
+        self._start_time = time.time()
 
     def get_stylesheet(self):
         return self._stylesheet
@@ -137,6 +150,16 @@ class AppHandler:
 
     def get_validate_schemas(self):
         return self._validate_schemas
+
+    def get_system_infos(self):
+        total_time =time.gmtime(time.time() - self._start_time)
+        cpu_load = os.getloadavg()
+        cpu_nb = os.cpu_count()
+        total_disc = disk_space_used(self._workingDirectory)
+        self._max_disc = max(total_disc,self._max_disc)
+        return "System infos (RAM;DISK;HOUR;MIN;SEC;LOAD) : " + str(int(memory_used_by_process2(os.getpid()))) + ";" + str(
+            int(self._max_disc)) + ";" + str(int(total_time.tm_hour)) + ";" + str(
+            int(total_time.tm_min)) + ";" + str(int(total_time.tm_sec)) + ";" + str(int(100.0 * cpu_load[0] / self._nbThreads))
 
     def initialize(self):
         maja_description = """ ./maja [options] \n\n
@@ -276,8 +299,7 @@ class AppHandler:
         parser.add_argument(
             "--NbThreads",
             type=int,
-            help="UserConfigSystem overloads value for the parameter 'NbThreads'",
-            default=1)
+            help="UserConfigSystem overloads value for the parameter 'NbThreads'")
         parser.add_argument(
             "--CheckXMLFilesWithSchema",
             help="UserConfigSystem overloads value for the parameter 'CheckXMLFilesWithSchema'",
@@ -331,6 +353,23 @@ class AppHandler:
         if args.version :
             LOGGER.info("Maja Software Version: "+version.MAJA_VERSION)
             exit(0)
+
+        # Set the log level
+        self._logLevel = args.loglevel
+        os.environ["MAJA_LOGGER_LEVEL"] = args.loglevel
+        if args.loglevel == "INFO":
+            LOGGER.setLevel(logging.INFO)
+        elif args.loglevel == "PROGRESS":
+            LOGGER.setLevel(logging.PROGRESS)
+        elif args.loglevel == "WARNING":
+            LOGGER.setLevel(logging.WARNING)
+        elif args.loglevel == "DEBUG":
+            LOGGER.setLevel(logging.DEBUG)
+            os.environ["OTB_LOGGER_LEVEL"] = "DEBUG"
+        elif args.loglevel == "ERROR":
+            LOGGER.setLevel(logging.ERROR)
+
+        LOGGER.info("Logger in %s mode ( %s )", args.loglevel, LOGGER.getEffectiveLevel())
 
         if args.output is not None:
             self._outputDirectory = args.output + os.path.sep
@@ -401,7 +440,9 @@ class AppHandler:
         if args.EnableCleaningTemporaryDirectory:
             self._userConf.get_Computing().set_EnableCleaningTemporaryDirectory(True)
         if args.NbThreads is not None:
-            self._userConf.get_Computing().set_NbThreads(args.NbThreads)
+            self._nbThreads = args.NbThreads
+        else:
+            self._nbThreads = self._userConf.get_Computing().get_NbThreads()
 
         # Admin config
         if args.adminconf is not None:
@@ -415,24 +456,6 @@ class AppHandler:
             translate_xsl(self._adminConfigSystemFileName, self._stylesheet)
         # Load the file
         self._adminConf = admin_conf.parse(self._adminConfigSystemFileName, True)
-
-        # Set the log level
-        self._logLevel = args.loglevel
-        os.environ["OTB_LOGGER_LEVEL"] = "CRITICAL"
-        os.environ["MAJA_LOGGER_LEVEL"] = args.loglevel
-        if args.loglevel == "INFO":
-            LOGGER.setLevel(logging.INFO)
-        elif args.loglevel == "PROGRESS":
-            LOGGER.setLevel(logging.INFO)
-        elif args.loglevel == "WARNING":
-            LOGGER.setLevel(logging.WARNING)
-        elif args.loglevel == "DEBUG":
-            LOGGER.setLevel(logging.DEBUG)
-            os.environ["OTB_LOGGER_LEVEL"] = "INFO"
-        elif args.loglevel == "ERROR":
-            LOGGER.setLevel(logging.ERROR)
-
-        LOGGER.info("Logger in %s mode ( %s )", args.loglevel, LOGGER.getEffectiveLevel())
 
         if args.mode is not None:
             lProcessorName = args.mode
@@ -450,8 +473,8 @@ class AppHandler:
             raise MajaDataException("Unknown mode in parameters")
 
         LOGGER.info("Processor is %s", self._processorName)
+        LOGGER.progress("Starting " + self._processorName)
 
-        self._nbThreads = args.NbThreads
         LOGGER.info("Number of theads %i", self._nbThreads)
 
     def get_admin_conf_camera_filename(self, plugin_name):

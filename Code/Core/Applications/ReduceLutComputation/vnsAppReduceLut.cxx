@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -45,7 +61,7 @@
 #include "vnsVectorLookUpTableExtractor.h"
 #include "vnsDirectionalCorrectionCompute.h"
 #include "vnsMultiplyByVectorFunctor.h"
-#include "otbUnaryFunctorImageFilter.h"
+#include "itkUnaryFunctorImageFilter.h"
 #include "vnsLookUpTableFileReader.h"
 #include "itkImageFileWriter.h"
 #include "vnsAtomicRegistry.h"
@@ -90,7 +106,7 @@ public:
 	typedef LookUpTableFileReader<LutType> LookUpTableReaderType;
 	typedef LookUpTableReaderType::Pointer LookUpTableReaderPointer;
 	typedef vns::Functor::MultiplyByVectorFunctor<ReducedLutType::PixelType, ReducedLutType::PixelType> FunctorType;
-	typedef otb::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
+	typedef itk::UnaryFunctorImageFilter<ReducedLutType, ReducedLutType, FunctorType> MultiplyByVectorFilterType;
 	typedef MultiplyByVectorFilterType::Pointer MultiplyByVectorFilterPointerType;
 	//Extract LUT filter
 	typedef VectorLookUpTableExtractor<LutType,ReducedLutType> VectorLookUpTableExtractorType;
@@ -107,7 +123,6 @@ private:
 		SetDescription("Generate the reduce lut 3D from a 6D lut.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("ReduceLut");
 		SetDocLongDescription("This application computes the reduced lut in 3D from a 6D lut");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");

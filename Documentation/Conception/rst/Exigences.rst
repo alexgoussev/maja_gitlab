@@ -40,7 +40,7 @@ En intégrant les produits Sentinel-2 à la chaîne MAJA, elle doit
 maintenant gérer des **résolutions multiples** dans un même produit de
 niveau 1.
 
-La version 4.0.0 marque un tournant dans MAJA. En effet l'ensemble du logiciel
+La version 4.0.0 à marqué un tournant dans MAJA. En effet l'ensemble du logiciel
 à été remanié pour permettre une plus grande souplesse quand aux futurs développements.
 L'enchainement des algorithms ainsi que la lecture des produits se font dorénavant en python.
 Les algorithms quand à eux sont implémentés sous forme d'applications OTB indépendantes.
@@ -48,7 +48,7 @@ Cela permet alors de pouvoir tester chaque algorithm indépendament de MAJA, de 
 modifiés simplement ou encore de les utilisés dans un contexte différent. Cela permet
 également à d'autres contributeurs de pouvoir fournir une application à integrer dans MAJA.
 
-A noté également que la version 4.0.0 n'implémente plus certains plugins obsolètes.
+A noté également qu'a partir de la version 4.0.0 Maja n'implémente plus certains plugins obsolètes.
 
 L’outil MAJA doit pouvoir être utilisé sous deux formes :
 
@@ -81,11 +81,15 @@ En python :
 Exigences d’interfaces
 ----------------------
 
-MAJA 4.0.0 peut traiter en entrée des produits de niveau 1 :
+MAJA 4.1.0 peut traiter en entrée des produits de niveau 1 :
 
 -  Venus (format MUSCATE)
 
+-  Venus (format NATIF)
+
 -  Landsat 8 (format MUSCATE)
+
+-  Landsat 8 (format NATIF)
 
 -  Sentinel2 (format MUSCATE)
 
@@ -97,15 +101,28 @@ les cas suivants :
 
 -  Venus (format MUSCATE) 
 
+-  Venus (format Natif) 
+
 -  Sentinel-2A 1-C (format MUSCATE)
 
 -  Sentinel-2B 1-C (format MUSCATE)
 
 -  Landsat 8 (format MUSCATE)
 
+-  Landsat 8 (format Natif)
+
 -  Sentinel-2A 1-C (format natif)
 
 -  Sentinel-2B 1-C (format natif)
+
+
+La trans-écriture de Natif vers Muscate est nativement possible dans Maja et est activée par défaut sauf si l'option de choix du format de sortie est utilisée.
+
+A noter que certains plugins ne permettent pas l'écriture vers le format Natif mais uniquement la lecture ainsi le produit de sortie sera obligatoirement au format muscate:
+
+- Venus Natif
+
+- Landsat 8 Natif
 
 
 Remarque : Pour Sentinel 2, un produit niveau 1-C couvre une « tuile »

@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -502,6 +518,18 @@ namespace vns
         return lstring;
     }
 
+    unsigned char
+    Utilities::AsUnsignedChar(const std::string & value)
+    {
+        // ---------------------------------------------------------------------------------------------
+        // Convert the band index integer value in string
+        std::stringstream oss;
+        unsigned char lint(0);
+        oss << value;
+        oss >> lint;
+        return lint;
+    }
+
     int
     Utilities::AsInt(const std::string & value)
     {
@@ -860,6 +888,18 @@ namespace vns
         	}
         	return l_outlist;
         }
+
+    Utilities::ListOfUInt8
+	Utilities::StringListAsUnsignedChar(const ListOfStrings& list)
+    {
+    	ListOfUInt8 l_outlist;
+    	ListOfStrings::const_iterator itConst = list.begin();
+    	for (;itConst != list.end(); ++itConst)
+    	{
+    		l_outlist.push_back(AsUnsignedChar(*itConst));
+    	}
+    	return l_outlist;
+    }
 
     std::string
     Utilities::JoinFilenames(const std::string& filename1, const std::string& filename2)

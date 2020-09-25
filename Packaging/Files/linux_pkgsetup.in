@@ -1,5 +1,19 @@
 #!/bin/sh
-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 set -e
 # verify basic tools are here
 for tool in dirname find file grep cut sed chmod readlink ; do
@@ -38,7 +52,13 @@ chmod -R +x "$OUT_DIR/bin/"
 . ./make_symlinks
 
 echo "You can now run $OUT_DIR/bin/maja"
-echo "More documentation can be found in $OUT_DIR/README"
+
+echo "You can now run $OUT_DIR/bin/startmaja"
+echo "Maja Digital-Elevation-Models (DEMs) can be created by running $OUT_DIR/bin/dtmcreation"
+echo "Maja CAMS data can be downloaded by running $OUT_DIR/bin/camsdownload"
+echo "More documentation on how to set up maja/startmaja can be found in $OUT_DIR/README"
+
+
 
 if [ -f "$OUT_DIR/CMakeLists.txt" ]; then
     sed -i "s,OUT_DIR,$OUT_DIR,g" "$OUT_DIR/CMakeLists.txt"
@@ -46,7 +66,7 @@ if [ -f "$OUT_DIR/CMakeLists.txt" ]; then
     echo "mkdir $OUT_DIR/test_build"
     echo "cd $OUT_DIR/test_build"
     echo "cmake .. -DENABLE_TVA=ON -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
-    echo "cmake .. -DENABLE_TV=ON -DTEST_CAMERA=VENUS -DTEST_ONLY=CHAIN -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
+    echo "cmake .. -DENABLE_TV=ON -DMAJA_TEST_OUTPUT_ROOT=/path/to/test/output_dir (must exists)"
 fi
 
 rm -f  "$OUT_DIR/make_symlinks"

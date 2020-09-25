@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -581,7 +597,7 @@ namespace vns
                 {
                     RealType stdv = streamFirstOrderSquareComponentAccumulator / static_cast<double>(totalValidPixelsPerBand);
                     stdv -= vcl_pow(streamFirstOrderComponentAccumulator / static_cast<double>(totalValidPixelsPerBand),2);
-                    this->GetComponentStandardDeviationOutput()->Set(static_cast<RealType>(vcl_sqrt(vcl_abs(stdv)))); //(nbPixels * numberOfComponent));
+                    this->GetComponentStandardDeviationOutput()->Set(static_cast<RealType>(std::sqrt(vcl_abs(stdv)))); //(nbPixels * numberOfComponent));
                 }
                 // Per Band case
 
@@ -606,7 +622,7 @@ namespace vns
                         {
                             RealType stdvPix = streamFirstOrderSquareAccumulator[j] / static_cast<RealType>(nbValidPixelsPerBand[j]);
                             stdvPix -= static_cast<RealType>(vcl_pow(streamFirstOrderAccumulator[j] / static_cast<double>(nbValidPixelsPerBand[j]),2));
-                            stdvPix = static_cast<RealType>(vcl_sqrt(vcl_abs(stdvPix)));
+                            stdvPix = static_cast<RealType>(std::sqrt(vcl_abs(stdvPix)));
                             l_Stdv[j] = stdvPix;
                         }
                     }

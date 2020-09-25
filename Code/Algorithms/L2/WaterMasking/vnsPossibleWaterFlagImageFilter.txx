@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -230,7 +246,12 @@ namespace vns
             p_IPTWAIt.Set(static_cast<OutputImagePixelType>(1));
 
             // Compute NDVI indice
-            const InputImageInternalPixelType l_NDVIValue = m_NDVIFunctor(p_IPTOCRIt.Get()[m_RedBandTOCR], p_IPTOCRIt.Get()[m_NIRBandTOCR]);
+            itk::VariableLengthVector<double> v(2);
+            v[0] = p_IPTOCRIt.Get()[m_RedBandTOCR];
+            v[1] = p_IPTOCRIt.Get()[m_NIRBandTOCR];
+            m_NDVIFunctor.SetBandIndex(CommonBandNames::RED, 1);
+            m_NDVIFunctor.SetBandIndex(CommonBandNames::NIR, 2);
+            const InputImageInternalPixelType l_NDVIValue = m_NDVIFunctor(v);
 
             // A pixel is declared as "possible water" if :
             // - it is dark and not located within a topographic shadow

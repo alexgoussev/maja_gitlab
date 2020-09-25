@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -220,7 +236,6 @@ private:
 		SetDescription("Generate the AOTEstimation.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("AOTEstimation");
 		SetDocLongDescription("This application computes the AOT");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -264,7 +279,7 @@ private:
 		SetParameterDescription("lutimage", "Lut image");
 		AddParameter(ParameterType_InputImage,  "cld",   "CLD image");
 		SetParameterDescription("cld", "CLD image at coarse");
-		AddParameter(ParameterType_Empty, "init","init mode");
+		AddParameter(ParameterType_Bool, "init","init mode");
 
 		//Choose the mode
 		AddParameter(ParameterType_Choice,"mode", "compute mode");
@@ -315,8 +330,6 @@ private:
 	void DoExecute()
 	{
 		// Init filters
-		itk::MultiThreader::SetGlobalDefaultNumberOfThreads(1);
-
 		m_MTThresholdsFilter = MTThreholdsFilterType::New();
 		m_MTComputeAOTImageFilter = MTComputeAOTImageFilterType::New();
 		m_MSComputeAOTImageFilter = MSComputeAOTImageFilterType::New();
@@ -615,7 +628,8 @@ private:
 		}
 
 		//Commons params
-		const bool l_InitMode = IsParameterEnabled("init");
+		const bool l_InitMode = GetParameterInt("init");
+		vnsLogDebugMacro("========init: " << l_InitMode);
 		unsigned int l_MinSamplingInterval = lAOTParamsXMLHandler->GetSamplingIntervalMin();
 		vnsLogDebugDoubleValueMacro(l_MinSamplingInterval);
 		unsigned int l_MaxSamplingInterval = lAOTParamsXMLHandler->GetSamplingIntervalMax();
@@ -657,6 +671,7 @@ private:
 
 		if (l_InitMode == false)
 		{
+		    vnsLogDebugMacro("====== init False");
 			if (!HasValue("l2ndt") || !HasValue("l2rta") || !HasValue("l2rtc")
 					|| !HasValue("l2pxd"))
 			{
@@ -848,7 +863,6 @@ private:
 				SetParameterOutputImage<OutputImageType>("aotcams",m_MTComputeAOTImageFilter->GetIPAOTCams());
 				m_AOTSelectionFilter->SetInput(1,m_MTComputeAOTImageFilter->GetIPAOTCams());
 			}
-			std::cout<<m_MTComputeAOTImageFilter<<std::endl;
 
 		} // end MULTITEMPORAL METHOD
 

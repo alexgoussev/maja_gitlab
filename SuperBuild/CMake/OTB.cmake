@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -17,8 +33,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(OTB_URL "https://www.orfeo-toolbox.org/packages/archives/OTB/OTB-6.6.0.tar.gz")
-set(OTB_URL_MD5 0c5cf6ab4d41db83489eb2dd05a833b1)
+set(OTB_URL "https://www.orfeo-toolbox.org/packages/archives/OTB/OTB-7.0.0.tar.gz")
+set(OTB_URL_MD5 314b985d112dab6d407dd6d35bccc790    )
 
 set(OTB_DEPENDS GDAL ITK OPENJPEG GEOTIFF OSSIM TINYXML MUPARSER BOOST SWIG NUMPY PYTHON)
 build_projects(OTB_DEPENDS)
@@ -45,6 +61,10 @@ ExternalProject_Add(OTB
   -DOTBGroup_Core:BOOL=OFF
   -DOTBGroup_IO:BOOL=ON
   -DModule_OTBIndices:BOOL=ON
+  -DModule_OTBAppImageUtils:BOOL=ON
+  -DModule_OTBAppMathParser:BOOL=ON
+  -DModule_OTBAppMorphology:BOOL=ON
+  -DModule_OTBAppProjection:BOOL=ON
   -DModule_OTBStreaming:BOOL=ON
   -DModule_OTBStatistics:BOOL=ON
   -DModule_OTBConvolution:BOOL=ON

@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         #
@@ -118,19 +134,6 @@ ADD_TEST(${PREFIX}OneBandEqualThresholdFunctorTest1 ${TESTS1}
     )
 
 
-# -------    vnsOneBandEqualThresholdFunctorTest.cxx
-ADD_TEST(${PREFIX}OneBandEqualThresholdFunctorBIGTest ${TESTS1}
-    --compare-n-images ${NOTOL} 1
-        ${BASELINEDATATU_IMAGES}/${PREFIX}OneBandEqualThresholdFunctorBIGTest.tif
-        ${TEMP}/${PREFIX}OneBandEqualThresholdFunctorBIGTest.tif
-    vnsOneBandEqualThresholdFunctorTest
-    ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.tif
-    ${TEMP}/${PREFIX}OneBandEqualThresholdFunctorBIGTest.tif
-    150
-    1
-    0
-    )
-
 # -------    vnsGreaterConditionalThresholdImageFunctorTest.cxx
 ADD_TEST(${PREFIX}GreaterConditionalThresholdImageFunctorTest ${TESTS1}
     --compare-n-images ${NOTOL} 1
@@ -140,18 +143,6 @@ ADD_TEST(${PREFIX}GreaterConditionalThresholdImageFunctorTest ${TESTS1}
     ${INPUT_MAJADATATU_IMAGES}/Romania_Extract.tif
     ${INPUT_MAJADATATU_IMAGES}/Mask_Romania_Extract.tif
     ${TEMP}/${PREFIX}GreaterConditionalThresholdImageFunctorTest.tif
-    0
-    -999
-    )  
-
-ADD_TEST(${PREFIX}GreaterConditionnalThresholdImageFunctorBIGTest ${TESTS1}
---compare-image ${NOTOL}
-    ${BASELINEDATATU_IMAGES}/${PREFIX}GreaterConditionalThresholdImageFunctorBIGTest.tif
-    ${TEMP}/${PREFIX}GreaterConditionalThresholdImageFunctorBIGTest.tif
-    vnsGreaterConditionalThresholdImageFunctorTest
-     ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.tif
-     ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.msq.tif
-    ${TEMP}/${PREFIX}GreaterConditionalThresholdImageFunctorBIGTest.tif
     0
     -999
     )  
@@ -171,16 +162,6 @@ ADD_TEST(${PREFIX}LinearSubSampleVectorImageFilterRomania ${TESTS1}
     2 # sample ratio
 )
 
-
-ADD_TEST(${PREFIX}LinearSubSampleVectorImageFilterBIG ${TESTS1}
---compare-image ${NOTOL}
-    ${BASELINEDATATU_IMAGES}/${PREFIX}LinearSubSampleVectorImageFilterBIG.tif
-    ${TEMP}/${PREFIX}LinearSubSampleVectorImageFilterBIG.tif
-   vnsLinearSubSampleVectorImageFilter
-    ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.tif
-    ${TEMP}/${PREFIX}LinearSubSampleVectorImageFilterBIG.tif
-    2 # sample ratio   
-)
 
 # ------------------   vnsLinearSubSampleImageFilterNew
 ADD_TEST(${PREFIX}LinearSubSampleImageFilterNew ${TESTS1}
@@ -213,17 +194,6 @@ ADD_TEST(${PREFIX}LinearSubSampleImageFilterFullL1 ${TESTS1}
     20  # extract size
     
 )
-
-ADD_TEST(${PREFIX}LinearSubSampleImageFilterFullL1BIG ${TESTS1}
---compare-image ${NOTOL}
-    ${BASELINEDATATU_IMAGES}/${PREFIX}LinearSubSampleImageFilterBIG.tif
-    ${TEMP}/${PREFIX}LinearSubSampleImageFilterBIG.tif
-   vnsLinearSubSampleImageFilter
-    ${INPUT_MAJADATATU_IMAGES}/Sudouest_20060329_MS_fmsat_ortho_toa.msq.tif
-    ${TEMP}/${PREFIX}LinearSubSampleImageFilterBIG.tif
-    2 # sample ratio
-    1 # nb threads
-)  
 
         
 # Src1 sources files

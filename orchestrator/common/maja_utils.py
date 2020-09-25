@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 
@@ -17,11 +32,6 @@ orchestrator.common.earth_explorer.gipp_l2_comm_earth_explorer_xml_file_handler 
 orchestrator.common.earth_explorer.gipp_l2_comm_earth_explorer_xml_file_handler is a description
 
 It defines classes_and_methods
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -86,5 +96,25 @@ def get_integer_jday_from_filename(filename):
 def get_test_mode():
     if "MAJA_ORCH_TEST_MODE" in os.environ:
         return True
+    else:
+        return False
+
+
+def is_croco_on(module=None):
+    if "MAJA_CROCO_MODE" in os.environ:
+        if module is None:
+            return "GLOBAL_ON" in os.environ["MAJA_CROCO_MODE"]
+        else:
+            return module+"_ON" in os.environ["MAJA_CROCO_MODE"]
+    else:
+        return False
+
+
+def is_croco_off(module=None):
+    if "MAJA_CROCO_MODE" in os.environ:
+        if module is None:
+            return "GLOBAL_OFF" in os.environ["MAJA_CROCO_MODE"]
+        else:
+            return module+"_OFF" in os.environ["MAJA_CROCO_MODE"]
     else:
         return False

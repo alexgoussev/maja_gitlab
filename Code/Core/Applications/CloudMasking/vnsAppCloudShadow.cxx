@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -144,7 +160,6 @@ private:
 		SetDescription("Cloud shadow algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudShadow");
 		SetDocLongDescription("This application computes the cloud shadow mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -176,7 +191,7 @@ private:
 		MandatoryOff("l2ndt");
 
 		//Set parameters
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		AddParameter(ParameterType_Group, "sol1", "SOL1 parameters");
 		AddParameter(ParameterType_InputImage,  "sol1.in",   "SOL1 image");
 		SetParameterDescription("sol1.in", "Image used as solar angle 1");
@@ -186,7 +201,7 @@ private:
 		SetParameterDescription("solhref","solar height ref");
 		AddParameter(ParameterType_Int,  "defaultalt","defaultalt");
 		AddParameter(ParameterType_Int,  "ksigma","ksigma");
-		AddParameter(ParameterType_Int,  "l2coarseres","l2coarseres");
+
 		AddParameter(ParameterType_Int,  "deltahmax","deltahmax");
 		AddParameter(ParameterType_Int,  "deltahmin","deltahmin");
 		AddParameter(ParameterType_Int,  "deltahstep","deltahstep");
@@ -200,7 +215,7 @@ private:
 
 		//With alt spec
 		AddChoice("algo.withalt","With altitude");
-		AddParameter(ParameterType_Empty,"algo.withalt.refinement","refinement");
+		AddParameter(ParameterType_Bool,"algo.withalt.refinement","refinement");
 
 		AddParameter(ParameterType_Float, "algo.withalt.absnbpixthresh","absnbpixthresh");
 		MandatoryOff("algo.withalt.absnbpixthresh");
@@ -276,11 +291,10 @@ private:
 		const short m_DefaultAltitude = static_cast<short>(this->GetParameterInt("defaultalt"));
 		const double l_SOLHRef = this->GetParameterFloat("solhref");
 		const double l_SOLH1 = this->GetParameterFloat("sol1.h");
-		const unsigned short m_L2CoarseResolution = static_cast<unsigned short>(this->GetParameterInt("l2coarseres"));
 		const short m_DeltaHMax = static_cast<short>(this->GetParameterInt("deltahmax"));
 		const short m_DeltaHMin = static_cast<short>(this->GetParameterInt("deltahmin"));
 		const short m_DeltaHStep = static_cast<short>(this->GetParameterInt("deltahstep"));
-		const bool m_InitMode = IsParameterEnabled("initmode");
+		const bool m_InitMode = GetParameterInt("initmode");
 		const unsigned int m_ShadowBandTOCR = GetParameterInt("shadbandtocr");
 		const unsigned int m_ShadowBandRCR = GetParameterInt("shadbandrcr");
 		const double m_VIEHRef = GetParameterFloat("viehref");
@@ -372,7 +386,6 @@ private:
 
 			// parameters
 			m_ShadowMaskDeterminationFilter->SetNoData(l_NoData);
-			m_ShadowMaskDeterminationFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 			m_ShadowMaskDeterminationFilter->SetInitMode(m_InitMode);
 			m_ShadowMaskDeterminationFilter->SetRefinementOption(m_RefinementOption);
 			m_ShadowMaskDeterminationFilter->SetDeltaHMax(m_DeltaHMax);
@@ -423,7 +436,6 @@ private:
 
 				//Shadow filter
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetNoData(l_NoData);
-				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHMin(m_DeltaHMin);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHMax(m_DeltaHMax);
 				m_ShadowMaskDeterminationWithoutCloudAltitudeFilter->SetDeltaHStep(m_DeltaHStep);

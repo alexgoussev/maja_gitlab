@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -19,11 +34,6 @@ orchestrator.processor.base_processor is the base of all processors
 It defines method mandatory for a processor
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-
-###################################################################################################
 """
 
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
@@ -39,9 +49,9 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
                                             do_always_remove=True)
     l_WriteL2ProductToL2Resolution = in_global_dict["Params"]["WriteL2ProductToL2Resolution"]
     l_EnvCorOption = in_global_dict["Params"]["EnvCorOption"]
-    l_bandsdefinition = in_global_dict.get("Plugin").BandsDefinitions
+
     p_OutputL2ImageFileWriter.set_dtm(in_global_dict["DEM"])
-    p_OutputL2ImageFileWriter.set_current_plugin_base(in_global_dict["Plugin"])
+    p_OutputL2ImageFileWriter.set_current_plugin_base(p_OutputL2ImageFileWriter.plugin)
     p_OutputL2ImageFileWriter.set_copy_private_from_l2_input_to_l2_output(l_CopyPrivateFromL2InputToL2Output)
     p_OutputL2ImageFileWriter.set_write_l2_products(l_WriteL2Products)
     p_OutputL2ImageFileWriter.set_output_directory(in_global_dict["Params"]["L2OutputDirectory"])
@@ -49,6 +59,7 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
     p_OutputL2ImageFileWriter.set_l1_image_informations_provider(in_global_dict["L1Info"])
     p_OutputL2ImageFileWriter.set_real_l2_nodata(in_global_dict["Params"]["RealL2NoData"])
     l_GIPPL2COMMHandler = in_global_dict["L2COMM"]
+    l_bandsdefinition = in_global_dict.get("Plugin").BandsDefinitions
     # Set the L1 Data Filter informations
     # ReflectanceQuantification is 0.001(not 1000)
     # VAP_Quantification_Value is 0.050(not 20)
@@ -99,7 +110,6 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
             l2_list = []
             for r in range(0, l_nbRes):
                 l_res = l_bandsdefinition.ListOfL2Resolution[r]
-                # TODO create constant masks
                 const_mask = os.path.join(l2_write_working, "constant_mask_" + l_res + ".tif:uint8")
                 out_const_app = constant_image(in_global_dict.get("DEM").ALTList[r], 0, const_mask)
                 l2_list.append(out_const_app.getoutput().get("out"))
@@ -134,6 +144,8 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
     # = > NO, because the first step of Backward is to find the first valid product to start the loop of backward.
     # The first valid could be the last product.
     #  In this case, p_finalize_backward == True and the mode is INIT
+    LOGGER.debug(in_global_dict["Params"]["CheckingConditionalClouds"])
+
     if in_global_dict["Params"]["FinalizeBackWard"] and in_global_dict["Params"]["BackWardMode"]\
             and in_global_dict["Params"]["CheckingConditionalClouds"] == False:
         LOGGER.debug(
@@ -192,7 +204,8 @@ def setup_l2_image_writer(self, p_OutputL2ImageFileWriter, in_global_dict, out_g
                     str(i) for i in in_global_dict["Params"]["ListOfBandIndexForLTCComposite_DateD"]]}
             extractChannels_app = OtbAppHandler("LutExtractChannels", param_extractchannels)
             p_OutputL2ImageFileWriter.set_ltc_image(extractChannels_app.getoutput()["lut"])
-        LOGGER.debug("Starting L2 product writing ...")
-        p_OutputL2ImageFileWriter.write(l2_write_working)
-        LOGGER.debug("End of L2 product writing ...")
-        # ** ** * END WRITING DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
+
+    LOGGER.debug("Starting L2 product writing ...")
+    p_OutputL2ImageFileWriter.write(l2_write_working)
+    LOGGER.debug("End of L2 product writing ...")
+    # ** ** * END WRITING DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **

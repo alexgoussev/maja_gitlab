@@ -1,4 +1,3 @@
-#TODO
 #
 # Copyright (C) 2005-2017 Centre National d'Etudes Spatiales (CNES)
 #
@@ -19,7 +18,7 @@
 # limitations under the License.
 #
 
-cmake_minimum_required(VERSION 3.3.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 project(MAJAPackaging)
 
@@ -54,6 +53,38 @@ if(NOT EXISTS "${MAJA_TEST_EXE_DIR}/maja")
   message(FATAL_ERROR "${MAJA_TEST_EXE_DIR}/maja not found")
 endif()
 
+
+# find startmaja in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/startmaja")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/startmaja")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/startmaja")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/startmaja not found")
+endif()
+
+# find dtmcreation in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/dtmcreation")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/dtmcreation")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/dtmcreation")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/dtmcreation not found")
+endif()
+
+# find camsdownload in binary dir:
+if(EXISTS "${SUPERBUILD_BINARY_DIR}/MAJA/build/bin/camsdownload")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/MAJA/build/bin)
+elseif(EXISTS "${SUPERBUILD_BINARY_DIR}/bin/camsdownload")
+  set(START_MAJA_TEST_EXE_DIR ${SUPERBUILD_BINARY_DIR}/bin)
+endif()
+if(NOT EXISTS "${START_MAJA_TEST_EXE_DIR}/camsdownload")
+  message(FATAL_ERROR "${START_MAJA_TEST_EXE_DIR}/camsdownload not found")
+endif()
+
+
 if(PROJECT_NAME STREQUAL "MAJAPackaging")
   if(EXISTS "${SUPERBUILD_INSTALL_DIR}/maja/")
     file(GLOB maja_install_dirs "${SUPERBUILD_INSTALL_DIR}/maja/*.*")
@@ -81,25 +112,28 @@ find_program(READLINK NAMES "readlink")
 set(CMAKE_INSTALL_PREFIX "${SUPERBUILD_INSTALL_DIR}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(camera_list)
 include(${CMAKE_SOURCE_DIR}/../CMakeConfig/CommonCmakeOptions.cmake)
 
 if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/maja")
   message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/maja not found.")
 endif()
 
-file(STRINGS "${SUPERBUILD_BINARY_DIR}/CMakeCache.txt"
-  enable_camera_vars
-  REGEX "PLUGIN_(VENUS|SPOT4|FORMOSAT_MUSCATE_PROTO|LANDSAT8|LANDSAT8_MUSCATE|LANDSAT8_MUSCATE_PROTO|LANDSAT_MUSCATE|LANDSAT_MUSCATE_PROTO|SENTINEL2|SENTINEL2_GPP|SENTINEL2_MUSCATE).BOOL.")
-foreach(camera_option ${enable_camera_vars})
-  if(${camera_option} MATCHES "^PLUGIN_*.*BOOL=ON$")
-    string(REPLACE "PLUGIN_" "" camera_option "${camera_option}")
-    string(REPLACE ":BOOL=ON" "" camera_option "${camera_option}")
-    list(APPEND camera_list "${camera_option}")
-  endif()
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/startmaja")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/startmaja not found.")
+endif()
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/dtmcreation")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/dtmcreation not found.")
+endif()
+if(NOT EXISTS "${SUPERBUILD_INSTALL_DIR}/bin/camsdownload")
+  message(FATAL_ERROR "${SUPERBUILD_INSTALL_DIR}/bin/camsdownload not found.")
+endif()
+
+
+set(plugins_enabled)
+FOREACH(plugin_name  ${MAJA_LIST_OF_SPECTRAL_CAMERA_AVAILABLE})
+  list(APPEND plugins_enabled "${plugin_name}")
 endforeach()
-string(REPLACE ";" " " camera_list "${camera_list}")
-message(STATUS "specrtal camera enabled:\n '${camera_list}'")
+message (STATUS "List of plugins enabled: ${plugins_enabled}")
 
 set(PKG_MAJA_VERSION_STRING ${MAJA_VERSION})
 
@@ -109,9 +143,9 @@ set(PACKAGE_NAME MAJA)
 # This directory is important.
 # We stage/keep files that goes into final package in this directory
 set(PKG_STAGE_DIR ${PACKAGE_NAME}-${PKG_MAJA_VERSION_STRING})
-if(WITH_VALIDATION)
-  set(PKG_STAGE_DIR ${PACKAGE_NAME}-${PKG_MAJA_VERSION_STRING}-VALIDATION)
-endif()
+#~ if(WITH_VALIDATION)
+  #~ set(PKG_STAGE_DIR ${PACKAGE_NAME}-${PKG_MAJA_VERSION_STRING}-VALIDATION)
+#~ endif()
 
 # try to detect patchelf
 find_program(PATCHELF_PROGRAM NAMES patchelf)
@@ -143,10 +177,10 @@ include(update_make_symlinks_script)
 include(detect_using_file_command)
 include(cleanup_package)
 include(install_orchestrator)
+include(install_startmaja)
 include(install_python_bindings)
 include(install_share_dirs)
 include(installer_files)
-include(validation_files)
 include(create_package)
 
 configure_loader(LOADER_PROGRAM LOADER_ARGS LOADER_REGEX)
@@ -156,11 +190,11 @@ check_cmake_variables()
 
 cleanup_package()
 
-if(WITH_VALIDATION)
-  update_make_symlinks_script(
-    "bin/vnsInstallDataCxx-${MAJA_VERSION}"
-    "bin/vnsInstallDataCxx")
-endif()
+#~ if(WITH_VALIDATION)
+  #~ update_make_symlinks_script(
+    #~ "bin/vnsInstallDataCxx-${MAJA_VERSION}"
+    #~ "bin/vnsInstallDataCxx")
+#~ endif()
 
 #remove all *_USED|*_RESOLVED variables from CMakeCache.txt
 clear_cmakecache_variables()
@@ -182,14 +216,12 @@ install_python_bindings()
 
 install_orchestrator()
 
+install_startmaja()
+
 install_share_dirs()
 
 install(DIRECTORY "${SUPERBUILD_INSTALL_DIR}/etc" DESTINATION ${PKG_STAGE_DIR})
 
 installer_files()
-
-if(WITH_VALIDATION)
-  validation_files()
-endif()
 
 create_package()

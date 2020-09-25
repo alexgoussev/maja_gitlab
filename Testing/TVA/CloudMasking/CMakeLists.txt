@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                        o     o                                                                           #
@@ -154,7 +170,6 @@ maja_test_application(NAME apTvCloudShadVar
                      -l2shad ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_shad.tif
                      -l2shadvar ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_shad_var.tif
                      -l2sto ${MAJADATA_TVA_INPUT}/CloudMaskingTest/Lacrau_20060813_MS_fmsat_ortho_l2sto.tif
-                     -l2coarseres 96
                      -shadbandtocr 2
                      -shadbandrcr 2
                      -viehref 3000
@@ -231,7 +246,6 @@ maja_test_application(NAME apTvCloudShadowWithAltitudeFilterInit
                      -solhref 1000
                      -defaultalt 500
                      -ksigma 3
-                     -l2coarseres 96
                      -deltahmax 8000
                      -deltahmin 0
                      -deltahstep 500
@@ -280,7 +294,6 @@ maja_test_application(NAME apTvCloudShadowWithoutAltitudeFilterNominal
                      -solhref 4000
                      -defaultalt 500
                      -ksigma 0
-                     -l2coarseres 96
                      -deltahmax 8000
                      -deltahmin 0
                      -deltahstep 250

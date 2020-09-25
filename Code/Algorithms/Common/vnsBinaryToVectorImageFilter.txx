@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -110,18 +126,17 @@ namespace vns
             inputIt.GoToBegin();
             outputIt.GoToBegin();
 
+
+            OutputImagePixelType outputVectorValue;
+            outputVectorValue.SetSize(m_NumberOfComponentsPerPixel);
+            outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
+            const unsigned int nbValue = outputVectorValue.GetSize();
+
             // Pixel loop
             while (inputIt.IsAtEnd() == false)
             {
                 InputImagePixelType inputValue = inputIt.Get();
-
-                OutputImagePixelType outputVectorValue;
-
-                outputVectorValue.SetSize(m_NumberOfComponentsPerPixel);
-                outputVectorValue.Fill(itk::NumericTraits<OutputImageInternalPixelType>::Zero);
-
                 // Band loop
-                const unsigned int nbValue = outputVectorValue.GetSize();
                 for (unsigned int j = 0 ; j < nbValue ; j++)
                 {
                     // Set to one the bit to the associated band
@@ -129,7 +144,6 @@ namespace vns
                             & m_BitWeight[j]) >> j);
 
                 }
-
                 // Set the output pixel value
                 outputIt.Set(static_cast<OutputImagePixelType> (outputVectorValue));
 

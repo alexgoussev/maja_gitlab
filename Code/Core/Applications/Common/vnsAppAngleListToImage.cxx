@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -90,7 +106,6 @@ private:
 		SetDescription("AngleListToImage algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("AngleListToImage");
 		SetDocLongDescription("This application compute angle grid from angle list");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -102,7 +117,7 @@ private:
 		SetParameterDescription("dtm", "Image used as reference grid");
 		AddParameter(ParameterType_InputFilename,  "angles",   "XML Angle Files");
 		SetParameterDescription("angles", "XML Angle Files");
-		AddParameter(ParameterType_Empty,"extrapol","extrapol");
+		AddParameter(ParameterType_Bool,"extrapol","extrapol");
 
 
 		AddParameter(ParameterType_OutputImage, "out", "image");

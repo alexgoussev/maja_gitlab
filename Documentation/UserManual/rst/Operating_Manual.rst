@@ -44,6 +44,8 @@ Note:
 -  Number of cores used for the execution (“NbThreads’ field). By
    default, the number of threads is set to 1,
 
+-  RAM maximum usage. By default, the RAM max is set to 8192,
+
 -  The notes (or comments) inserted in the "Note” field in the output
    header product,
 
@@ -81,8 +83,6 @@ Note:
 
    The “MAJAUserConfig_<MISSION>.xml” contains for example the following
    parameters:
-
--  L2 coarse resolution set in the “L2CoarseResolution” field
 
 -  | The option parameter that defines if a default constant value is
      used to set the ozone content
@@ -145,10 +145,6 @@ Note:
    </NbStrips>
 
    </ImageDivision>
-
-   <!-- L2 coarse resolution in meter -->
-
-   <L2CoarseResolution>240</L2CoarseResolution>
 
    </Business>
 
@@ -396,6 +392,8 @@ One log message consists of:
 
 -  The process identifier (PID),
 
+- For Progress : Maximum RAM used during the processing, disk usage in working directory, time spend, cpu average load
+
 -  The type of message in increasing order of severity:
 
 -  [D] for Debug,
@@ -615,7 +613,7 @@ helper lines
      -w WORKINGDIR, --workingdir WORKINGDIR
                            Working directory (working 'temporary' directory). Default value: the '--output parameter value'
      -p PLUGIN, --plugin PLUGIN
-                           Output plugin to use to write L2 product. Available plugins : SENTINEL2 , SENTINEL2_MUSCATE , VENUS_MUSCATE , LANDSAT8_MUSCATE , 
+                           Output plugin to use to write L2 product. Available plugins : SENTINEL2 , SENTINEL2_MUSCATE , VENUS_MUSCATE , LANDSAT8_MUSCATE. Default is to use the MUSCATE version of the input L1 product plugin
      -ucs CONF, --conf CONF
                            User Configuration directory (contains for example MAJAUserConfigSystem.xml)
      --NbThreads NBTHREADS

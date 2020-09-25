@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -139,7 +155,7 @@ namespace vns
                 SetThetaS(const double & thetaS)
                 {
                     m_ThetaS = thetaS;
-                    m_InvCosThetaS = 1. / vcl_cos(m_ThetaS * otb::CONST_PI_180);
+                    m_InvCosThetaS = 1. / std::cos(m_ThetaS * otb::CONST_PI_180);
                     const unsigned int size = m_InvCosThetaV.size();
                     if (m_AirMass.size() != size)
                     {
@@ -174,7 +190,7 @@ namespace vns
                     m_AirMass.clear();
                     for (unsigned int i = 0; i < size; i++)
                     {
-                        double val = (1. / vcl_cos(m_ThetaV[i] * otb::CONST_PI_180));
+                        double val = (1. / std::cos(m_ThetaV[i] * otb::CONST_PI_180));
                     m_InvCosThetaV.push_back(val);
                     m_AirMass.push_back(m_InvCosThetaS + val);
                 }

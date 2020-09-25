@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -17,11 +32,6 @@ orchestrator.processor.base_processor -- shortdesc
 orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -55,6 +65,9 @@ class MajaValidityL2Cloud(MajaModule):
                        "exclude": 1}
         l2_stat = OtbAppHandler("Stats", param_stats)
         # Test on the value
+        LOGGER.debug("L2Cloud : excludedcount : "+str(l2_stat.getoutput()["excludedcount"]))
+        LOGGER.debug("L2Cloud : validcount : " + str(l2_stat.getoutput()["validcount"]))
+        LOGGER.debug("L2Cloud : nodatanumber : " + str(dict_of_output["L2NoDataNumber"]))
         l_cloudrate = 0
         if l2_stat.getoutput()["excludedcount"] == 0 and l2_stat.getoutput()["validcount"] == 0:
             l_cloudrate = 0

@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -45,7 +61,7 @@
 #include "otbVectorImage.h"
 #include "otbImageFileWriter.h"
 
-#include "otbUnaryFunctorImageFilter.h"
+#include "otbFunctorImageFilter.h"
 
 int
 vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
@@ -74,7 +90,7 @@ vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
 
     typedef vns::Functor::ThresholdVectorImageFunctor<InputImageType::PixelType, OutputImageType::PixelType> FunctorType;
 
-    typedef otb::UnaryFunctorImageFilter<InputImageType, OutputImageType, FunctorType> ImageFilterType;
+    typedef otb::FunctorImageFilter<FunctorType> ImageFilterType;
 
     /** Parameters definition */
     PixelType lThresholdValue = static_cast<double>(atoi(argv[3]));
@@ -98,11 +114,11 @@ vnsThresholdVectorImageFunctorTest(int argc, char * argv[])
     // Get image information ( number of bands, dimension, ...)
     reader->GenerateOutputInformation();
     // Set the size of the output image ( because the Unary Functor calls GetOutputSize() )
-    filter->GetFunctor().SetOutputSize(reader->GetOutput()->GetNumberOfComponentsPerPixel());
+    filter->GetModifiableFunctor().SetOutputSize(reader->GetOutput()->GetNumberOfComponentsPerPixel());
 
-    filter->GetFunctor().SetThresholdValue(lThresholdValue);
-    filter->GetFunctor().SetInsideValue(lInsideValue);
-    filter->GetFunctor().SetOutputValue(lOutputValue);
+    filter->GetModifiableFunctor().SetThresholdValue(lThresholdValue);
+    filter->GetModifiableFunctor().SetInsideValue(lInsideValue);
+    filter->GetModifiableFunctor().SetOutputValue(lOutputValue);
 
     filter->SetInput(reader->GetOutput());
     writer->SetInput(filter->GetOutput());

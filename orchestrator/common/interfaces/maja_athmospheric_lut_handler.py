@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 """
 ###################################################################################################
 
@@ -17,11 +33,6 @@ orchestrator.common.interfaces.maja_xml_input -- shortdesc
 orchestrator.common.interfaces.maja_xml_input is a description
 
 It defines classes_and_methods
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -315,7 +326,7 @@ class AthmosphericLutHandler(object):
 
         # TOCR
         # build root node
-        new_lut_tocr = LUT(list(self.GIP_L2TOCR_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_tocr)
+        new_lut_tocr = LUT(self.GIP_L2TOCR_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_tocr)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -325,7 +336,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_tocr_filename)
         # DIFT
         # build root node
-        new_lut_dift = LUT(list(self.GIP_L2DIFT_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_dift)
+        new_lut_dift = LUT(self.GIP_L2DIFT_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_dift)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -335,7 +346,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_dift_filename)
         # DIRT
         # build root node
-        new_lut_dirt = LUT(list(self.GIP_L2DIRT_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_dirt)
+        new_lut_dirt = LUT(self.GIP_L2DIRT_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_dirt)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -345,7 +356,7 @@ class AthmosphericLutHandler(object):
             LOGGER.info("Writed new gipp lut to " + new_gipp_dirt_filename)
         # ALBD
         # build root node
-        new_lut_albd = LUT(list(self.GIP_L2ALBD_LookUpTableConverter.values())[0].new_lut_indexes, new_dbl_albd)
+        new_lut_albd = LUT(self.GIP_L2ALBD_LookUpTableConverter[list(self._proportions.keys())[0]].new_lut_indexes, new_dbl_albd)
         # build file
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
@@ -377,4 +388,5 @@ class AthmosphericLutHandler(object):
         if l_lut_xml_handler.has_cams_info():
             return l_lut_xml_handler.get_cams_info()
         else:
+            LOGGER.debug("GIPP doesn't have CAMS info available")
             return None

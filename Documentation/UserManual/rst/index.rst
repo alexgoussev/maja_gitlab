@@ -14,7 +14,7 @@
 Software: **MAJA**
 **SETG-**\ **MU-**\ **MAJA-**\ **010-**\ **CS**                       
 Change                                          02 Date              29/11/2019
-Issue                                           00 Date              29/11/2019
+Issue                                           02 Date              05/05/2020
 Distribution Code                               E
 Ref. : CSSI/SPACE/PD&A/MAJA/MU 
 =============================================== == ================= ============
@@ -22,14 +22,14 @@ Ref. : CSSI/SPACE/PD&A/MAJA/MU
 **USER, INSTALLATION AND OPERATING MANUAL FOR MAJA CHAINS [MU]**
 
 =================================== =================
-Written by :                        Date : 29/11/2011 
+Written by :                        Date : 05/05/2020 
                                                     
 ESQUIS Benjamin CSSI/ESPACE/PDA/IP                   
 BRICIER Aurélien CSSI/ESPACE/PDA/IP                  
-Approved by :                       Date : 22/05/2018 
+Approved by :                       Date : 05/05/2020 
                                                      
 OLIVIE Francis CSSI/ESPACE/DSM                       
-For application :                   Date : 29/11/2019
+For application :                   Date : 05/05/2020
                                                      
 Esquis Benjamin CSSI/ESPACE/PDA/IP                   
 =================================== =================
@@ -61,9 +61,7 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | CONFIGURATION MANAGEMENT : NG                                                          | CM RESP. :                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CAUSE D'EVOLUTION : Update document for MAJA v4.0.0                                                                                                                                   |
-+----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
-| CONTRACT : Marché ACIS n°131348                                                                                                                                                       |
+| CAUSE D'EVOLUTION : Update document for MAJA v4.2.0                                                                                                                                   |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
 | HOST SYSTEM : WordVersion                                                                                                                                                             |
 +----------------------------------------------------------------------------------------+-----------------------------------------------------+------------------------+---------------+
@@ -73,8 +71,9 @@ Esquis Benjamin CSSI/ESPACE/PDA/IP
 ================== ==================== =================== ============
 Name               Entity               Internal Postal Box Observations
 OLIVIE Francis     CSSI/ESPACE/DSM                         
-CHOGNARD Catherine CSSI/ESPACE/PDA/PDGS                    
-BRICIER Aurélien   CSSI/ESPACE/PDA/IP                      
+RECULEAU Serge     CSSI/ESPACE/PDA/PDGS                    
+BROSSARD julie     CSSI/ESPACE/PDA/IP                      
+ESQUIS Benjamin    CSSI/ESPACE/PDA/IP                      
 \                                                          
 \                                                          
 \                                                          
@@ -88,18 +87,17 @@ BRICIER Aurélien   CSSI/ESPACE/PDA/IP
 
 **External Distribution :**
 
-================== ======================== ============
-Name               Entity                   Observations
-BAILLARIN Simon    DNO/OT/IS               
-DESJARDINS Camille DSO/SI/MO               
-HAGOLLE Olivier    DSO/SI/CB               
-LARIF Marie-France DNO/SC/3S               
-LONJOU Vincent     DSO/SI/MO               
-PETRUCCI Beatrice  DNO/OT/IS               
-DELHEM Yamina      SCALAGENT POUR DNO/DA/AQ
-LASSALLE Pierre    DNO/OT/IS               
-\                                          
-================== ======================== ============
+=================== ======================== ============
+Name                Entity                   Observations
+BAILLARIN Simon     DNO/OT/IS                
+HAGOLLE Olivier     DSO/SI/CB                
+KETTIG Peter        DNO/OT/IS                
+LARIF Marie-France  DNO/OT/PE                
+SELLE Arnaud        DNO/OT/TA                
+PACHOLCZYK Philippe DNO/OT/TA                
+PUJOL Mathilde      DNO/DA/AQ                
+\                                            
+=================== ======================== ============
 
 **Changes history :**
 
@@ -107,6 +105,16 @@ LASSALLE Pierre    DNO/OT/IS
 		    
 ===== ==== ========== ===============================================================================================
 Issue Rev. Date       Reference, Author(s), Reasons for evolution
+02    02   05/05/2020  CSSI/SPACE/PD&A/MAJA/MU
+                     
+                      ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                     
+                      Update document for MAJA v4.2.0
+02    01   10/03/2020  CSSI/SPACE/PD&A/MAJA/MU
+                     
+                      ESQUIS Benjamin CSSI/ESPACE/PDA/IP
+                     
+                      Update document for MAJA v4.1.0
 02    00   29/11/2019  CSSI/SPACE/PD&A/MAJA/MU
                      
                       ESQUIS Benjamin CSSI/ESPACE/PDA/IP

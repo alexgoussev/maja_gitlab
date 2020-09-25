@@ -1,0 +1,149 @@
+variables:
+  BUILD_ENV_REGISTRY: $CI_REGISTRY/maja/maja-build-env
+
+stages:
+  - prepare
+  - build
+  - validation
+
+# ---------------------------- fast pipeline ----------------------------------
+
+prepare-centos7:
+  stage: prepare
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  tags:
+    - docker
+  except:
+    - schedules
+    - web
+  before_script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
+           > /kaniko/.docker/config.json
+    - sed -i "s,^FROM maja-build-env,FROM $BUILD_ENV_REGISTRY/maja-env-centos:7," SuperBuild/CentOS_7/Dockerfile
+  script:
+     - echo $CI_COMMIT_SHA > sha1.txt
+     - /kaniko/executor --cleanup
+                        --cache=true
+                        --cache-repo=$CI_REGISTRY_IMAGE/maja-cots-centos7-cache
+                        --verbosity warn
+                        --dockerfile $CI_PROJECT_DIR/SuperBuild/CentOS_7/Dockerfile
+                        --context $CI_PROJECT_DIR
+                        --destination $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+  only:
+    changes:
+      - SuperBuild/**/*
+      - CMakeConfig/CommonCmakeOptions.cmake
+      - CMakeConfig/MAJAConfigurationSetting.cmake
+      - .gitlab-ci.yml
+
+prepare-ubuntu18:
+  stage: prepare
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  tags:
+    - docker
+  except:
+    - schedules
+    - web
+  before_script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}"
+           > /kaniko/.docker/config.json
+    - sed -i "s,^FROM maja-build-env,FROM $BUILD_ENV_REGISTRY/maja-env-ubuntu:18.04," SuperBuild/Ubuntu_18.04/Dockerfile
+  script:
+    - /kaniko/executor --cleanup
+                       --cache=true
+                       --cache-repo=$CI_REGISTRY_IMAGE/maja-cots-ubuntu18-cache
+                       --verbosity warn
+                       --dockerfile $CI_PROJECT_DIR/SuperBuild/Ubuntu_18.04/Dockerfile
+                       --context $CI_PROJECT_DIR
+                       --destination $CI_REGISTRY_IMAGE/maja-cots-ubuntu18:$CI_COMMIT_REF_NAME
+  only:
+    changes:
+      - SuperBuild/**/*
+      - CMakeConfig/CommonCmakeOptions.cmake
+      - CMakeConfig/MAJAConfigurationSetting.cmake
+      - .gitlab-ci.yml
+
+
+build-centos7:
+  stage: build
+  image: $CI_REGISTRY_IMAGE/maja-cots-centos7:$CI_COMMIT_REF_NAME
+  timeout: 1h 15m
+  tags:
+    - docker
+  except:
+    - schedules
+    - web
+  variables:
+    OTB_MAX_RAM_HINT: 20000
+    ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 8
+  script:
+    - echo $CI_COMMIT_SHA > sha1.txt
+    - ctest -V -S CI/maja_build.cmake
+    - ctest -VV -S CI/maja_pkg.cmake
+    - time rclone copy s3_otb:maja-data/TVA data/TVA
+    - time rclone copy s3_otb:maja-data/cropped_context/TV/SENTINEL2_MUSCATE data/TV/SENTINEL2_MUSCATE
+    - time rclone copy s3_otb:maja-data/TU data/TU
+    - cd build
+    - ctest -V -N -R pyTv- > ../tv_content.txt
+    - ctest -R pyTv-S2-L2INIT-012-SENTINEL2-MUSCATE-NEWCAMS
+    - ctest -R pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-GENERAL
+    - ctest -E pyTv 
+    - cd ..
+    - ls -lh build/Testing/*-*/
+    # Filter tv_content.txt to be used in a different job
+    - sed -i "s,$(pwd)/data,\$MAJA_DATA,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/Testing/Temporary,\$MAJA_TEST_OUTPUT_ROOT,g" tv_content.txt
+    - sed -i "s,/opt/cots/maja/[0-9]*\.[0-9]*\.[0-9]*/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/build/bin,\$MAJA_BIN,g" tv_content.txt
+    - sed -i "s,$(pwd)/orchestrator/launcher,\$MAJA_LAUNCHER_PYTHON,g" tv_content.txt
+  artifacts:
+    expire_in: 20 days
+    when: on_success
+    paths:
+      - sha1.txt
+      - tv_content.txt
+      - build-pkg/*.run
+    
+
+# ---------------------------- heavy pipeline ----------------------------------
+tv-centos7:
+  stage: validation
+  image: $BUILD_ENV_REGISTRY/maja-env-centos:7
+  timeout: 20h
+  tags:
+    - docker
+    - heavy-task
+  only:
+    - schedules
+    - web
+  variables:
+    MAJA_DATA: "data"
+    MAJA_TEST_OUTPUT_ROOT: "test_output"
+    MAJA_BIN: "/opt/maja/bin"
+    MAJA_LAUNCHER_PYTHON: "/opt/maja/lib/python/orchestrator/launcher"
+    OTB_MAX_RAM_HINT: 40000
+    ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 16
+  script:
+    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $MAJA_ARTIFACTS" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-centos7"'
+    - file artifacts.zip
+    - unzip artifacts.zip
+    - mkdir test_output
+    - mkdir /opt/maja
+    - chmod +x build-pkg/*.run
+    - $(ls build-pkg/*.run) --target /opt/maja
+    - ln -s /opt/maja/bin/python3.7 /opt/maja/bin/python3
+    - source /opt/maja/bin/.majaenv.sh
+    - time rclone copy s3_otb:maja-data/TV/SENTINEL2_MUSCATE data/TV/SENTINEL2_MUSCATE
+    - time rclone copy s3_otb:maja-data/TV/SENTINEL2 data/TV/SENTINEL2
+    - time rclone copy s3_otb:maja-data/TV/LANDSAT8 data/TV/LANDSAT8
+    - time rclone copy s3_otb:maja-data/TV/VENUS data/TV/VENUS
+    - CI/run_tv.sh tv_content.txt
+  artifacts:
+    expire_in: 20 days
+    when: on_failure
+    paths:
+      - logs/*.log

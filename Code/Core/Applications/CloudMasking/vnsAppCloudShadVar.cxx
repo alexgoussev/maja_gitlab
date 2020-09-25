@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -156,7 +172,6 @@ private:
 		SetDescription("Cloud shadvar algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudShadVar");
 		SetDocLongDescription("This application computes the cloud shadow variation mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -192,8 +207,7 @@ private:
 		AddParameter(ParameterType_InputImage,  "l2sto",   "L2 STO");
 		SetParameterDescription("l2sto", "L2 STO");
 		//Set parameters
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
-		AddParameter(ParameterType_Int,  "l2coarseres","l2coarseres");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		AddParameter(ParameterType_Int,  "shadbandtocr","ShadBandTOCR");
 		AddParameter(ParameterType_Int,  "shadbandrcr","ShadBandRCR");
 		AddParameter(ParameterType_Float, "viehref","viehref");
@@ -258,7 +272,6 @@ private:
 		GRIDImageConstPointer l_IPVIEPtr = this->GetParameterDoubleVectorImage("vie");
 		//Get parameters
 		const double m_NoData = GetParameterFloat("nodata");
-		const unsigned short m_L2CoarseResolution = static_cast<unsigned short>(this->GetParameterInt("l2coarseres"));
 		const double m_VIEHRef = GetParameterFloat("viehref");
 		const unsigned int m_ShadowBandTOCR = GetParameterInt("shadbandtocr");
 		const unsigned int m_ShadowBandRCR = GetParameterInt("shadbandrcr");
@@ -284,7 +297,6 @@ private:
 		m_OutsideCloudShadowMaskFilter->SetIPEDGInput(l_IPEDGPtr);
 		m_OutsideCloudShadowMaskFilter->SetDTMInput(l_DTMPtr);
 		m_OutsideCloudShadowMaskFilter->SetIPVIEInput(l_IPVIEPtr);
-		m_OutsideCloudShadowMaskFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 		m_OutsideCloudShadowMaskFilter->SetMaxCLA(m_MaxCLA);
 		m_OutsideCloudShadowMaskFilter->SetVIEHRef(m_VIEHRef);
 		m_OutsideCloudShadowMaskFilter->UpdateOutputInformation();

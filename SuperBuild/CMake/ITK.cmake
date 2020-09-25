@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -107,10 +123,8 @@ set(ITK_MODULES_CMAKE_CACHE)
 foreach(ITK_MODULE ${ITK_ENABLED_MODULES})
   list(APPEND ITK_MODULES_CMAKE_CACHE -DModule_ITK${ITK_MODULE}:BOOL=ON)
 endforeach()
-#set(ITK_URL  "http://download.sourceforge.net/project/itk/itk/4.7/InsightToolkit-4.7.2.tar.gz")
-#set(ITK_URL_MD5 75ec63834ae59bc120a138d58ba3fa99)
-set(ITK_URL  "https://sourceforge.net/projects/itk/files/itk/4.12/InsightToolkit-4.12.0.tar.gz")
-set(ITK_URL_MD5 561a403f93c88c64085b5623e8e61f79)
+set(ITK_URL  "https://sourceforge.net/projects/itk/files/itk/4.13/InsightToolkit-4.13.1.tar.gz")
+set(ITK_URL_MD5 c7e229802c4ee64e1b2a6d48b1df67e9)
 set(ITK_DEPENDS ZLIB TIFF JPEG PNG EXPAT)
 build_projects(ITK_DEPENDS)
 

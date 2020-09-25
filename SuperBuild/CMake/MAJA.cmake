@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -18,7 +34,7 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(MAJA_DEPENDS OTB PUGIXML LIBGD LIBXSLT LXML)
+set(MAJA_DEPENDS OTB PUGIXML LIBGD LIBXSLT LXML SCIPY)
 build_projects(MAJA_DEPENDS)
 
 add_custom_target(COTS
@@ -46,15 +62,11 @@ ExternalProject_Add(MAJA
   ${SB_CMAKE_CACHE_ARGS}
   ${DISABLE_CXX_WARNING_OPTION}
   -DBUILD_TESTING:BOOL=${BUILD_TESTING}
-  -DMAJA_TU_ENABLE_LONG_TESTING:BOOL=OFF
   -DMAJA_ENABLE_COVERAGE:BOOL=OFF
-  -DMAJA_ENABLE_EXAMPLES:BOOL=ON
   -DENABLE_TU:BOOL=${ENABLE_TU}
   -DENABLE_TV:BOOL=${ENABLE_TV}
   -DENABLE_TVA:BOOL=${ENABLE_TVA}
-  -DTEST_TYPE:STRING=${TEST_TYPE}
   -DMAJA_TEST_OUTPUT_ROOT:PATH=${MAJA_TEST_OUTPUT_ROOT}
-  -DMAJA_VALIDATION_SRC_DIR:PATH=${MAJA_VALIDATION_SRC_DIR}
   -DMAJADATA_SOURCE_DIR:PATH=${MAJADATA_SOURCE_DIR}
   -DPYTHON_EXECUTABLE:PATH=${SB_INSTALL_PREFIX}/bin/python3
   DEPENDS ${MAJA_DEPENDS}

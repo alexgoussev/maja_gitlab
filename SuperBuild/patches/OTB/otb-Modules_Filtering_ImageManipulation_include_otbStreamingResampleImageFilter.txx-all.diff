@@ -1,17 +1,17 @@
-diff -burN OTB-6.0.1.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx OTB-6.0.1/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx
---- OTB-6.0.1.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx	2017-12-12 15:02:41.000000000 +0100
-+++ OTB-6.0.1/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.txx	2017-12-12 15:19:14.000000000 +0100
+diff -burN OTB-7.0.0.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.hxx OTB-7.0.0/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.hxx
+--- OTB-7.0.0.orig/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.hxx	2020-03-10 11:26:16.037865195 +0100
++++ OTB-7.0.0/Modules/Filtering/ImageManipulation/include/otbStreamingResampleImageFilter.hxx	2020-03-10 14:52:18.722171735 +0100
 @@ -22,7 +22,6 @@
- #define otbStreamingResampleImageFilter_txx
- 
+ #define otbStreamingResampleImageFilter_hxx
+
  #include "otbStreamingResampleImageFilter.h"
 -#include "itkProgressAccumulator.h"
  #include "otbImage.h"
- 
+
  namespace otb
-@@ -49,11 +48,6 @@
- StreamingResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType>
- ::GenerateData()
+@@ -46,11 +45,6 @@
+ template <class TInputImage, class TOutputImage, class TInterpolatorPrecisionType>
+ void StreamingResampleImageFilter<TInputImage, TOutputImage, TInterpolatorPrecisionType>::GenerateData()
  {
 -  // Set up progress reporting
 -  typename itk::ProgressAccumulator::Pointer progress = itk::ProgressAccumulator::New();

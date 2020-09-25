@@ -21,11 +21,10 @@ cd ~/projects/maja/build
 cmake /MAJA_SHARED_FOLDER/Logiciel/MAJA/SuperBuild \
 -DMAJADATA_SOURCE_DIR=/MAJA_SHARED_FOLDER/MAJA-Data \
 -DMAJA_TEST_OUTPUT_ROOT=/MAJA_SHARED_FOLDER/$(hostname -s) \
--DMAJA_VALIDATION_SRC_DIR=/MAJA_SHARED_FOLDER/Logiciel/MAJA-Validation \
 -DDOWNLOAD_DIR=/MAJA_SHARED_FOLDER/superbuild-archives
 ```
 
-Default values are set for ``MAJADATA_SOURCE_DIR, DMAJA_TEST_OUTPUT_ROOT, MAJA_VALIDATION_SRC_DIR, DOWNLOAD_DIR``. This is to ease building for developers and users. one has to make sure these directories exists and serve their purpose. So on your host machine, download directory must be a copy of ``/MAJA_SHARED_FOLDER/superbuild-archives``. A typical configure command with default values is a simple one liner!
+Default values are set for ``MAJADATA_SOURCE_DIR, DMAJA_TEST_OUTPUT_ROOT, DOWNLOAD_DIR``. This is to ease building for developers and users. one has to make sure these directories exists and serve their purpose. So on your host machine, download directory must be a copy of ``/MAJA_SHARED_FOLDER/superbuild-archives``. A typical configure command with default values is a simple one liner!
 ``
  cd ~/projects/maja/build && cmake /MAJA_SHARED_FOLDER/Logiciel/MAJA/SuperBuild
 ``

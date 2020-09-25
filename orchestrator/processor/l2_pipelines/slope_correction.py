@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -19,15 +34,13 @@ orchestrator.processor.base_processor is the base of all processors
 It defines method mandatory for a processor
 
 ###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
-###################################################################################################
 """
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
+from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
+from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_exceptions import *
 import os
@@ -50,6 +63,7 @@ class MajaSlopeCorrection(MajaModule):
                                 "L2DIRT", "L2DIFT","L1Info"]
         self.out_keys_to_check = ["AOT_Sub"]
         self.out_keys_provided = ["FRE_List","STL_List","TGS_List"]
+        self._l2_app_pipeline = OtbPipelineManager()
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Slope Correction start")
@@ -88,15 +102,19 @@ class MajaSlopeCorrection(MajaModule):
             stl_image = os.path.join(slope_working, "stl_" + l_res + ".tif")
             incangle_image = os.path.join(slope_working, "incangle_" + l_res + ".tif")
             # Extract tdif
-            tdifl2_image = extract_roi(
+            tdifl2_app = extract_roi(
                 interpolate_app.getoutput()["tdif"],
                 l_l2bandidx,
-                tdifl2_filename).getoutput()["out"]
+                tdifl2_filename,write_output=False)
+            self._l2_app_pipeline.add_otb_app(tdifl2_app)
+            tdifl2_image = tdifl2_app.getoutput()["out"]
             # Extract tdir
-            tdirl2_image = extract_roi(
+            tdirl2_app = extract_roi(
                 interpolate_app.getoutput()["tdir"],
                 l_l2bandidx,
-                tdirl2_filename).getoutput()["out"]
+                tdirl2_filename, write_output=False)
+            self._l2_app_pipeline.add_otb_app(tdirl2_app)
+            tdirl2_image = tdirl2_app.getoutput()["out"]
             # Compute incidence angles
             param_incangle = {"demasc": dict_of_input.get("DEM").ASPList[r],
                               "demslc": dict_of_input.get("DEM").SLPList[r],
@@ -104,7 +122,8 @@ class MajaSlopeCorrection(MajaModule):
                               "phis": float(dict_of_input.get("L1Info").SolarAngle["sun_azimuth_angle"]),
                               "angles": incangle_image
                               }
-            incangle_app = OtbAppHandler("IncidenceAngle", param_incangle)
+            incangle_app = OtbAppHandler("IncidenceAngle", param_incangle,write_output=False)
+            self._l2_app_pipeline.add_otb_app(incangle_app)
             # Compute slope correction
             l_thetav = []
             l_phiv = []
@@ -119,7 +138,7 @@ class MajaSlopeCorrection(MajaModule):
                                "dtmasc": dict_of_input.get("DEM").ASPList[r],
                                "dtmslc": dict_of_input.get("DEM").SLPList[r],
                                "rhoenv": dict_of_output["RhoEnv_" + l_res],
-                               "incangle": incangle_image,
+                               "incangle": incangle_app.getoutput().get("angles"),
                                "sre": dict_of_output["SRE_" + l_res],
                                "thetas": float(dict_of_input.get("L1Info").SolarAngle["sun_zenith_angle"]),
                                "phis": float(dict_of_input.get("L1Info").SolarAngle["sun_azimuth_angle"]),
@@ -133,10 +152,18 @@ class MajaSlopeCorrection(MajaModule):
                                "tgs": tgs_image,
                                "stl": stl_image
                                }
-            OtbAppHandler("SlopeCorrection", param_slopecorr)
-            dict_of_output["FRE_" + l_res] = fre_image
-            dict_of_output["TGS_" + l_res] = tgs_image
-            dict_of_output["STL_" + l_res] = stl_image
+            slope_app = OtbAppHandler("SlopeCorrection", param_slopecorr,write_output=False)
+            self._l2_app_pipeline.add_otb_app(slope_app)
+            if is_croco_on("slopecorrection"):
+                dict_of_output["FRE_" + l_res] = fre_image
+                dict_of_output["TGS_" + l_res] = tgs_image
+                dict_of_output["STL_" + l_res] = stl_image
+                write_images([slope_app.getoutput().get("fre"),slope_app.getoutput().get("tgs"),slope_app.getoutput().get("stl")],
+                             [fre_image,tgs_image,stl_image])
+            else:
+                dict_of_output["FRE_" + l_res] = slope_app.getoutput().get("fre")
+                dict_of_output["TGS_" + l_res] = slope_app.getoutput().get("tgs")
+                dict_of_output["STL_" + l_res] = slope_app.getoutput().get("stl")
             fre_list.append(dict_of_output["FRE_" + l_res])
             tgs_list.append(dict_of_output["TGS_" + l_res])
             stl_list.append(dict_of_output["STL_" + l_res])

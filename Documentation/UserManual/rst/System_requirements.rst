@@ -27,7 +27,7 @@ run one single execution of MAJA:
 
 -  Output data volume: 4 GBytes (L2 image product)
 
--  Caching data directory volume: ~30 GBytes
+-  Caching data directory volume: ~100 GBytes
 
    The caching directory is named “.maja-temporary-directory” and it is
    created in the output directory; by default, it is automatically

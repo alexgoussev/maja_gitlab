@@ -1,4 +1,21 @@
-#!/bin/bash 
+#!/bin/bash
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -506,7 +523,6 @@ if [ "-${exit_code}" == "-Y" ]; then
     MAJA_INSTALL_NO_DEVELOPMENT=ON
     MAJA_INSTALL_NO_RUNTIME=OFF
     MAJA_ENABLE_GEN_TESTHELPER_LIBRARY_UTILITIES=OFF
-    MAJA_ENABLE_EXAMPLES=ON
     MAJA_ENABLE_VALIDATION=OFF
     
     if [ "x${TARGET_DEVEL_NAME}" == "x-devel" ] ; then
@@ -514,14 +530,12 @@ if [ "-${exit_code}" == "-Y" ]; then
         MAJA_INSTALL_NO_DEVELOPMENT=OFF
         MAJA_INSTALL_NO_RUNTIME=ON
         MAJA_ENABLE_GEN_TESTHELPER_LIBRARY_UTILITIES=ON
-        MAJA_ENABLE_EXAMPLES=OFF
         MAJA_ENABLE_VALIDATION=ON
     fi
     
     # Option use only for CS developer 
     BUILD_TESTING=OFF
     ENABLE_MAJA_BUILD_TESTING=OFF
-    MAJA_TU_ENABLE_LONG_TESTING=OFF
     MAJA_ENABLE_COVERAGE=OFF
     MAJA_CPPCHECK_TEST=OFF
     if [ "-${MAJA_DEVELOPMENT_CONTEXT}" == "-YES"  ] ; then
@@ -530,7 +544,6 @@ if [ "-${exit_code}" == "-Y" ]; then
         MAJA_INSTALL_NO_DEVELOPMENT=OFF
         MAJA_INSTALL_NO_RUNTIME=OFF
         MAJA_ENABLE_GEN_TESTHELPER_LIBRARY_UTILITIES=ON
-        MAJA_ENABLE_EXAMPLES=ON
         MAJA_ENABLE_VALIDATION=ON
         if [ "-${ENABLE_LAUNCHES}" != "-NO"  ] ; then
             if [ "-${ENABLE_LAUNCHES}" == "-tu"  ] ; then
@@ -575,14 +588,12 @@ if [ "-${exit_code}" == "-Y" ]; then
      -D "MAJA_ENABLE_GEN_TESTHELPER_LIBRARY_UTILITIES:BOOL=${MAJA_ENABLE_GEN_TESTHELPER_LIBRARY_UTILITIES}" \
      -D "BUILD_TESTING:BOOL=${BUILD_TESTING}" \
      -D "ENABLE_MAJA_BUILD_TESTING:BOOL=${ENABLE_MAJA_BUILD_TESTING}" \
-     -D "MAJA_TU_ENABLE_LONG_TESTING:BOOL=${MAJA_TU_ENABLE_LONG_TESTING}" \
      -D "MAJA_ENABLE_COVERAGE:BOOL=${MAJA_ENABLE_COVERAGE}" \
      -D "MAJA_CPPCHECK_TEST:BOOL=${MAJA_CPPCHECK_TEST}" \
      -D "CMAKE_BUILD_TYPE:STRING='${MAJA_BUILD_TYPE}'" \
      -D "BUILD_DOXYGEN:BOOL=OFF" \
      -D "BUILD_SHARED_LIBS:BOOL=ON" \
      -D "MAJA_COTS_INSTALL_DIR:PATH='${MAJA_COTS_INSTALL_DIR}'" \
-     -D "MAJA_ENABLE_EXAMPLES:BOOL=${MAJA_ENABLE_EXAMPLES}" \
      -D "MAJA_ENABLE_VALIDATION:BOOL=${MAJA_ENABLE_VALIDATION}" \
      -D "MAJA_USE_CPACK:BOOL=ON" \
      -D "MAJA_PACKAGE_NAME:STRING='${MAJA_PACKAGE_NAME}'" \

@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -17,8 +33,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(HDF4_URL "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.5/src/hdf-4.2.5.tar.gz")
-set(HDF4_URL_MD5 7241a34b722d29d8561da0947c06069f)
+set(HDF4_URL "http://support.hdfgroup.org/ftp/HDF/HDF_Current/src/hdf-4.2.13.tar.gz")
+set(HDF4_URL_MD5 a6aa950b3fce5162b96496d8ea0b82bf)
 set(HDF4_DEPENDS ZLIB JPEG)
 build_projects(HDF4_DEPENDS)
 set(HDF4_CONFIG_ARGS

@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -17,11 +32,6 @@ orchestrator.processor.base_processor -- shortdesc
 orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -192,6 +202,8 @@ class L2BackwardProcessor(L2Processor):
                 raise MajaDriverException(
                     "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
 
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
             # Compute the Single product
             # ----------------------------------------------------------------
             self.single_product_processing(
@@ -222,6 +234,9 @@ class L2BackwardProcessor(L2Processor):
 
             # Decrement the input L1 index product
             l_IndexOfL1Product = l_IndexOfL1Product - 1
+
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
 
         # Check the Init mode
         # ----------------------------------------------------------------
@@ -312,6 +327,8 @@ class L2BackwardProcessor(L2Processor):
                 if not l2_image_file_writer.can_write(l_InputL1ProductInfo.PluginName):
                     raise MajaDriverException(
                         "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
                 # Compute the L2 temporary product
                 # ----------------------------------------------------------------
                 self.single_product_processing(
@@ -335,6 +352,9 @@ class L2BackwardProcessor(L2Processor):
                 # Decrement Index of L1 image input
                 # ----------------------------------------------------------------
                 l_IndexOfL1Product = l_IndexOfL1Product - 1
+
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
 
             # Finalize the product
             # Compute the last L2 product
@@ -407,6 +427,8 @@ class L2BackwardProcessor(L2Processor):
                 raise MajaDriverException(
                     "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + l_InputL1ProductInfo.PluginName + "' products ")
 
+            # Log system infos
+            LOGGER.info(self._apphandler.get_system_infos())
             self.single_product_processing(
                 l_InitMode,
                 l_BackwardMode,
@@ -422,11 +444,13 @@ class L2BackwardProcessor(L2Processor):
                 l_GIPPL2COMMHandler)
 
         # end if it is not the last product
+
         else:
-            raise MajaDriverException(
-                "L1ImageInformationProvider initialized during backward but no associated valid L2 product.")
+            LOGGER.debug("L1ImageInformationProvider initialized during backward but no associated valid L2 product. No more products.")
 
         LOGGER.info("L2BackwardProcessor::ScientificProcessing() done.")
+        # Log system infos
+        LOGGER.info(self._apphandler.get_system_infos())
 
     def single_product_processing(self, initmode, backwardmode, p_finalize_backward, p_L1ImageInformationsProvider,
                                 p_InputL1ImageFileReader, p_write_earthexplorer_headers, p_write_temporary_l2_product,

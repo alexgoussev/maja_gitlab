@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -56,7 +67,6 @@ import os
 import math
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.plugins.common.factory.maja_l2_header_writer_provider import L2HeaderWriterProvider
-from orchestrator.common.directory_manager import DirectoryManager
 
 
 LOGGER = configure_logger(__name__)
@@ -76,7 +86,7 @@ class L2Processor(BaseProcessor):
         super(L2Processor, self).__init__(apphandler)
 
         # Get the thread value
-        self._nbThreads = 4  # self._apphandler.get_user_conf().get_Computing().get_NbThreads()
+        self._nbThreads = self._apphandler.get_nb_threads()
         os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(self._nbThreads)
 
         LOGGER.info("Using " + str(self._nbThreads) + " Threads")
@@ -88,6 +98,8 @@ class L2Processor(BaseProcessor):
         LOGGER.info("Using " + str(self._ram) + " MB of RAM")
         # Set ram to use in otb apps
         OtbAppHandler.set_ram_to_use(self._ram)
+        os.environ["OTB_MAX_RAM_HINT"] = str(self._ram)
+        os.environ["GDAL_CACHEMAX"] = str(max(64,self._ram/20))
         self._validate_schemas = self._apphandler.get_user_conf().get_Processing().get_CheckXMLFilesWithSchema()
         LOGGER.info("Validating xml : " + str(self._validate_schemas))
 
@@ -102,13 +114,15 @@ class L2Processor(BaseProcessor):
             LOGGER.info("DEM found : " + dem_filename)
             dem = DEMBase()
             l_plugin = MAJAPluginProvider.create_with_unique_sat(sat, self._apphandler)
-            dem.initialize(dem_filename, self._apphandler.get_working_directory(), l_plugin.SnowMasking)
+            dem_working = self._apphandler.get_directory_manager().get_temporary_directory("DTMRead_",do_always_remove=False)
+            dem.initialize(dem_filename, dem_working, l_plugin.SnowMasking)
             self.DataDEMMap[sat] = dem
 
         # Init ozone files
         list_of_meteo_files = gipp_utils.get_list_of_gipp_filenames(self._apphandler.get_input_directory(), "EXO_METDTA")
         LOGGER.info("There is(are) " + str(len(list_of_unique_sat)) + " meteo files (EXO METDTA)")
         for met in list_of_meteo_files:
+            met_dbl = os.path.splitext(met)[0] + ".DBL"
             met_dbl = os.path.splitext(met)[0] + ".DBL"
             gipp_utils.uncompress_dbl_product(met_dbl)
             # retrieve the mission in HDR file
@@ -217,7 +231,7 @@ class L2Processor(BaseProcessor):
                 l_rhsampling = l_gippl2commhandler.get_value("RHSampling").split()
                 l_models = l_gippl2commhandler.get_value("ListOfModels").split()
                 l_time_window = l_gippl2commhandler.get_value_f("TimeWindowsCAMS")
-                tmp_cams_dir = self._apphandler.get_directory_manager().get_temporary_directory("CAMSRead_",do_always_remove=True)
+                tmp_cams_dir = self._apphandler.get_directory_manager().get_temporary_directory("CAMSRead_",do_always_remove=False)
                 self._CAMS_Files_HandlersMAP[l_sat] = CAMSFileHandler(
                     l_limaot, l_rhsampling, l_models, l_time_window, tmp_cams_dir)
                 self._CAMS_Files_HandlersMAP[l_sat].initializelistofcamsfiledescription(l_ListOfCAMSDataFilenames)
@@ -227,8 +241,11 @@ class L2Processor(BaseProcessor):
                     # Init the cams data file handler
                     l_extinctionData = {}
                     for m in l_modelList:
+                        LOGGER.debug("Extracting info for model : "+str(m))
                         l_extinctionData[m] = AthmosphericLutHandler.extract_cams_info(
                             self._apphandler.get_input_directory(), l_sat, m)
+                        if l_extinctionData[m] is None:
+                            raise MajaDataException("Input TOCR GIPP for model "+m+" doesn't have CAMS informations requested (Extinction_Coefs, RH_Tab, RH_dep ...)")
                     self._CAMS_Files_HandlersMAP[l_sat].set_extinction_map(l_extinctionData)
                     self._CAMS_Files_HandlersMAP[l_sat].set_rh_tab(list(l_extinctionData.values())[0]["rh_tab"])
 
@@ -356,6 +373,7 @@ class L2Processor(BaseProcessor):
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
         # Get the maximum cloud percentage for which a L2 product is generated
         l_MaxCloudPercentage = float(l_GIPPL2COMMHandler.get_value("MaxCloudPercentage"))
+        l_MaxNoDataPercentage = float(l_GIPPL2COMMHandler.get_value("MaxNoDataPercentage"))
         # Get the environment correction option
         l_EnvCorOption = xml_tools.as_bool(l_GIPPL2COMMHandler.get_value("EnvCorrOption"))
         # Get the cams data use option
@@ -497,7 +515,7 @@ class L2Processor(BaseProcessor):
         l_global_params_dict["EnvCorOption"] = l_EnvCorOption
         l_global_params_dict["FinalizeBackWard"] = p_finalize_backward
         l_global_params_dict["BackWardMode"] = p_backwardmode
-        l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds[0]
+
         l_global_params_dict["UseCamsData"] = l_UseCamsData
         l_global_params_dict["Caching"] = caching
         l_global_params_dict["Threads"] = self._nbThreads
@@ -531,9 +549,6 @@ class L2Processor(BaseProcessor):
                 l_SatelliteD).get_dirt_for_model(l_constant_model)
             global_input_dict["L2ALBD"] = self._AthmosphericLutHandlerMap.get(
                 l_SatelliteD).get_albd_for_model(l_constant_model)
-
-        LOGGER.debug("global_input_dict %s", global_input_dict)
-        LOGGER.debug("Params %s", l_global_params_dict)
 
         global_output_dict = {}
         # Create now the header writer to ensure it is available
@@ -580,7 +595,6 @@ class L2Processor(BaseProcessor):
             l_module_list.append(reduce_lut_computation)
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
             # START ALGORITHMS RAYLEIGH CORRECTION
-            rayleigh_correction = MajaModule.create("RayleighCorrection")
             rayleigh_correction = MajaModule.create("RayleighCorrection")
             rayleigh_correction.launch(global_input_dict, global_output_dict)
             l_module_list.append(rayleigh_correction)
@@ -655,7 +669,8 @@ class L2Processor(BaseProcessor):
                         if p_finalize_backward:
                             LOGGER.warning(
                                 "Last product in backward mode is cloudy. It will be considered as a valid product.")
-
+            #Log system infos
+            LOGGER.progress(self._apphandler.get_system_infos())
             if not l_StopLevel2Processing:
                 if p_checking_conditional_clouds[0] or p_finalize_backward:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
@@ -676,7 +691,7 @@ class L2Processor(BaseProcessor):
                     if l_SnowBandAvailable:
                         snow_percentage_computation = MajaModule.create("SnowPercentage")
                         snow_percentage_computation.launch(global_input_dict, global_output_dict)
-                        l_module_list.append(snow_mask_computation)
+                        l_module_list.append(snow_percentage_computation)
                         l_SnowRate = global_output_dict["SnowRate"]
                     # == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
                     # IF INIT MODE(AOT ESTIMATION) AND MULTITEMPORAL METHOD
@@ -717,7 +732,8 @@ class L2Processor(BaseProcessor):
                     composite_computation = MajaModule.create("Composite")
                     composite_computation.launch(global_input_dict, global_output_dict)
                     l_module_list.append(composite_computation)
-
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
                 # =======================================================================
                 # IF ENVIRONMENT CORRECTION OPTION IS TRUE AND
                 # IF THE OPTION "WRITE L2 PRODUCT TO L2 RESOLUTION" IS TRUE
@@ -736,12 +752,16 @@ class L2Processor(BaseProcessor):
                     slope_correction = MajaModule.create("SlopeCorrection")
                     slope_correction.launch(global_input_dict, global_output_dict)
                     l_module_list.append(slope_correction)
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
                 if m_WriteL2ProductToL2Resolution:
                     # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
                     # START Water vapor post processing algo
                     water_vapor_post_processing_correction = MajaModule.create("WaterVaporPostProcessing")
                     water_vapor_post_processing_correction.launch(global_input_dict, global_output_dict)
                     l_module_list.append(water_vapor_post_processing_correction)
+                    # Log system infos
+                    LOGGER.info(self._apphandler.get_system_infos())
 
                 # *************************************************************************************************************
                 # ***** START WRITING DATA   *********************************************
@@ -765,12 +785,16 @@ class L2Processor(BaseProcessor):
                     LOGGER.debug(k + " : " + str(v))
 
                 LOGGER.debug("global_output_dict %s", global_output_dict)
+                l_global_params_dict["CheckingConditionalClouds"] = p_checking_conditional_clouds[0]
+
                 # Setup image writer
                 l2_processor_image_writer_setup.setup_l2_image_writer(self, p_OutputL2ImageFileWriter, global_input_dict,
                                                        global_output_dict,
                                                        l_WriteL2Products, l_CopyPrivateFromL2InputToL2Output,
                                                        l_IsDefaultAOT)
                 l_NumberOfStackImages = len(l_STOListOfStringDates)
+                # Log system infos
+                LOGGER.info(self._apphandler.get_system_infos())
 
             # Fin l_StopLevelProcessing Faux
         # Fin l_StopLevelProcessing Faux
@@ -779,40 +803,25 @@ class L2Processor(BaseProcessor):
         p_OutputL2ImageFileWriter.set_output_directory(global_input_dict["Params"]["L2OutputDirectory"])
         p_OutputL2ImageFileWriter.initialize_product()
 
+        LOGGER.debug("global_input_dict %s", global_input_dict)
+        LOGGER.debug("Params %s", l_global_params_dict)
+
+
         # Compute NDT ratio to insure product validity (FA1395)
         # --------------------------------------------------
-        if l_StopLevel2Processing == False and (
-                p_checking_conditional_clouds[0] == True or p_finalize_backward == True):
-            pass
-            # TODO put in processors
-            """ValueCountFilterType::Pointer l_L2outNDTCount = ValueCountFilterType::New()
-            l_L2outNDTCount.SetImage(l_CompositeImage.GetL2NDTOutput())
-            l_L2outNDTCount.SetPixelValue(static_cast<MaskType::PixelType>(1))
-            vnsLaunchBasicOnlyCommandInDebug(l_L2outNDTCount.Update())
+        if not l_StopLevel2Processing and (p_checking_conditional_clouds[0] or p_finalize_backward):
+            LOGGER.debug("MaxNoDataPercentage  : " + str(l_MaxNoDataPercentage)+"%")
+            validity_l2_nodata_percentage = MajaModule.create("ValidityL2NoData")
+            validity_l2_nodata_percentage.launch(global_input_dict, global_output_dict)
+            l_module_list.append(validity_l2_nodata_percentage)
+            l_NoDataRate = global_output_dict["NoDataRate"]
+            LOGGER.info("NoData Rate on the Product : " + str(l_NoDataRate))
 
-            const unsigned long l_L2outNoDataNumber(l_L2outNDTCount.GetValueCount())
-
-            const double l_L2outNoDataRate(
-                    static_cast<double>(l_L2outNoDataNumber) * 100.
-                    / static_cast<double>(l_AreaToL2CoarseResolution.Size[0] * l_AreaToL2CoarseResolution.Size[1]))
-
-            LOGGER.debug(
-                    "Image Size [XY]                  : " + l_AreaToL2CoarseResolution.Size[0] + ""+l_AreaToL2CoarseResolution.Size[0]+" . "+ l_AreaToL2CoarseResolution.Size[0] * l_AreaToL2CoarseResolution.Size[1])
-            LOGGER.debug("l_L2outNDTCount.GetValueCount()  : " + l_L2outNoDataNumber)
-            LOGGER.debug(" . L2outNoDataRate (pourcentage) : " + l_L2outNoDataRate+"%")
-            LOGGER.debug("MaxNoDataPercentage               : " + l_GIPPL2COMMHandler.GetMaxNoDataPercentage()+"%")
-
-            if (l_L2outNoDataRate > l_GIPPL2COMMHandler.GetMaxNoDataPercentage())
-            {
-                self._productIsValid = false
-                p_checking_conditional_clouds = false
+            if l_NoDataRate > l_MaxNoDataPercentage:
+                self._productIsValid = False
+                p_checking_conditional_clouds = False
                 # Stop the level2 processing
-                vnsLogWarningMacro("The number of NoData pixel in the output L2 composite product is too high.")
-            }"""
-
-        #         LOGGER.debug(js.dumps(global_output_dict))
-        #         LOGGER.debug(str(self._productIsValid))
-        #         LOGGER.debug(str(l_IgnoreCurrentLTC))
+                LOGGER.warn("The number of NoData pixel in the output L2 composite product is too high.")
 
         l2_processor_header_writer_setup.setup_l2_header_writer(l_L2HeaderFileWriter, l_CurrentPluginBase, p_OutputL2ImageFileWriter, global_input_dict,
                                                 global_output_dict, self._productIsValid, l_WriteL2Products,
@@ -830,7 +839,8 @@ class L2Processor(BaseProcessor):
         LOGGER.debug("  ->  self._productIsValid                     = " + str(self._productIsValid))
         LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(p_checking_conditional_clouds[0]))
         LOGGER.debug("  ->  use_cams_datas                       = " + str(l_UseCamsData))
-
+        # Log system infos
+        LOGGER.progress(self._apphandler.get_system_infos())
         for mod in l_module_list:
             LOGGER.debug("Deleting module : "+mod.NAME)
             mod.cleanup()
@@ -840,6 +850,8 @@ class L2Processor(BaseProcessor):
         if self._apphandler.get_user_conf().get_Computing().get_EnableCleaningTemporaryDirectory():
             LOGGER.debug(self._apphandler.get_directory_manager())
             self._apphandler.get_directory_manager().clean()
+            # Log system infos
+            LOGGER.progress(self._apphandler.get_system_infos())
 
     def scientific_processing(self):
         raise NotImplementedError

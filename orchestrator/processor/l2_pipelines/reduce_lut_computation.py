@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -56,6 +67,7 @@ class MajaReduceLutComputation(MajaModule):
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("Lut computation start")
+        l_writeL2 = dict_of_input.get("Params").get("WriteL2ProductToL2Resolution")
         viewing_zenith = dict_of_input.get("L1Info").ListOfViewingZenithAnglesPerBandAtL2CoarseResolution
         viewing_azimuth = dict_of_input.get("L1Info").ListOfViewingAzimuthAnglesPerBandAtL2CoarseResolution
         # CR Lut generation
@@ -80,7 +92,7 @@ class MajaReduceLutComputation(MajaModule):
         OtbAppHandler("ReduceLut", param_cr_lut)
         dict_of_output["cr_lut"] = cr_lut_file
         # Read the input lut header to get indexes
-        old_lut = maja_xml_app_lut.parse(dict_of_input.get("L2TOCR"))
+        old_lut = maja_xml_app_lut.parse(dict_of_input.get("L2TOCR"),True)
         # HR lut if wide field
         l_lutmap = LUTMap()
         # Add cr lut to map
@@ -88,7 +100,7 @@ class MajaReduceLutComputation(MajaModule):
         l_listoffile.add_Relative_File_Path(os.path.basename(cr_lut_file))
         l_lut = LUT(index=0, Indexes=old_lut.get_Indexes(), List_Of_Files=l_listoffile)
         l_lutmap.add_LUT(l_lut)
-        if dict_of_input.get("Plugin").WideFieldSensor:
+        if dict_of_input.get("Plugin").WideFieldSensor and l_writeL2:
             m_ViewingZenithAnglesMap = dict_of_input.get("L1Reader").get_value("ViewingZenithMeanMap")
             m_ViewingAzimuthAnglesMap = dict_of_input.get("L1Reader").get_value("ViewingAzimuthMeanMap")
             for key in list(m_ViewingZenithAnglesMap.keys()):
@@ -116,7 +128,6 @@ class MajaReduceLutComputation(MajaModule):
         # Write down the lut map
         output = io.StringIO()
         output.write('<?xml version="1.0" ?>\n')
-
         l_lutmap.export(output, 0, name_='LUTMap', namespacedef_='', pretty_print=True)
         l_lutmap_filename = os.path.join(rlc_working, "HR_LutMap.xml")
         with open(l_lutmap_filename, "w") as fh:

@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -103,6 +119,7 @@ namespace vns
                 if (IsSaturatedPixel == false)
                 {
                     // Discard pixels for which the red reflectance and the NDVI are greater than thresholds
+
                     const InternalPixelType lrTOA_RED = pIPTOACSubPix[pRedChannel];
                     InternalPixelType l_NDVIValue;
 
@@ -111,9 +128,14 @@ namespace vns
                     {
                         const InternalPixelType lrTOA_NDVI1 = pIPTOACSubPix[pNDVIAOTBand1];
                         const InternalPixelType lrTOA_NDVI2 = pIPTOACSubPix[pNDVIAOTBand2];
+                        itk::VariableLengthVector<InternalPixelType> v(2);
+                        v[0] = lrTOA_NDVI2 ;
+                        v[1] = lrTOA_NDVI1 ;
 
+                        lNDVIFunctor.SetBandIndex(CommonBandNames::RED, 1);
+                        lNDVIFunctor.SetBandIndex(CommonBandNames::NIR, 2);
                         // Compute NDVI indice
-                        l_NDVIValue = lNDVIFunctor(lrTOA_NDVI2, lrTOA_NDVI1);
+                        l_NDVIValue = lNDVIFunctor(v);
 
                         // Discard pixels for which NDVI < m_NDVIThreshold
                         if (l_NDVIValue >= pNDVIThreshold)

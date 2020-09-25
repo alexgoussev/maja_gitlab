@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 get_filename_component(MAJA_SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR} DIRECTORY)
 get_filename_component(MAJA_SOURCE_DIR ${MAJA_SOURCE_DIR} DIRECTORY)
 get_filename_component(CI_BASE_DIR ${MAJA_SOURCE_DIR} DIRECTORY)
@@ -8,20 +24,13 @@ set (CTEST_PROJECT_NAME "maja-cots")
 set ( CTEST_BUILD_CONFIGURATION "Release" )
 
 set ( CTEST_CMAKE_GENERATOR "Unix Makefiles" )
-set ( CTEST_BUILD_FLAGS "-j3")
+set ( CTEST_BUILD_FLAGS "-j8")
 
 set ( PROJECT_SOURCE_DIR "${SUPERBUILD_SOURCE_DIR}" )
 set ( CTEST_SOURCE_DIRECTORY "${SUPERBUILD_SOURCE_DIR}" )
 set ( CTEST_BINARY_DIRECTORY "${CI_BASE_DIR}/build-cots" )
 
-find_program(CTEST_GIT_COMMAND NAMES git git.cmd)
-
-# Detect sha1
-execute_process(COMMAND ${CTEST_GIT_COMMAND} log -1 --pretty=format:%h
-                WORKING_DIRECTORY ${MAJA_SOURCE_DIR}
-                OUTPUT_VARIABLE ci_short_sha)
-
-# Detect site ( xenial / rh6 / rh7 )
+# Detect site ( bionic / xenial / rh6 / rh7 )
 if(NOT DEFINED IMAGE_NAME)
   if(DEFINED ENV{IMAGE_NAME})
     set(IMAGE_NAME $ENV{IMAGE_NAME})
@@ -29,7 +38,7 @@ if(NOT DEFINED IMAGE_NAME)
 endif()
 set ( CTEST_SITE "${IMAGE_NAME}" )
 
-set (CTEST_BUILD_NAME ${ci_short_sha})
+set (CTEST_BUILD_NAME maja-cots)
 
 set (CTEST_INSTALL_DIRECTORY "${CI_BASE_DIR}/cots")
 set (CMAKE_COMMAND "cmake")
@@ -80,13 +89,9 @@ ctest_build(BUILD "${CTEST_BINARY_DIRECTORY}"
             )
 
 if ( ( NOT "${_build_nb_err}" EQUAL 0 ) OR ( "${_build_error}" EQUAL -1 ))
-  #~ ctest_submit()
+  # TODO: , just inspect failed projects and dump the out/err logs here
   message( FATAL_ERROR "An error occurs during ctest_build.")
 endif()
 
+# Maybe no need for a submit
 #~ ctest_submit()
-
-# Save logs
-get_filename_component(_bdir "${CTEST_BINARY_DIRECTORY}" NAME)
-file(INSTALL "${CTEST_BINARY_DIRECTORY}/" DESTINATION "${CI_BASE_DIR}/logs" FILES_MATCHING PATTERN "${_bdir}/*/*/*.log")
-file(INSTALL "${CTEST_BINARY_DIRECTORY}/" DESTINATION "${CI_BASE_DIR}/logs" FILES_MATCHING PATTERN "${_bdir}/*/*/*/*.log")

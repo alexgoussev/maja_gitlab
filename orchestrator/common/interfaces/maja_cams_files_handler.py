@@ -1,4 +1,20 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 """
 ###################################################################################################
 
@@ -17,11 +33,6 @@ orchestrator.common.interfaces.maja_xml_input -- shortdesc
 orchestrator.common.interfaces.maja_xml_input is a description
 
 It defines classes_and_methods
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -61,6 +72,8 @@ class CAMSFileHandler(object):
         self.out_rh_sampling = 0
         self.out_sum_of_aot = None
         self.__camsapp = None
+        # 2019/07/10 00:00:00 in JD:
+        self._cams_46r1_switch = 2458674.5
 
     def set_rh_tab(self, levels):
         self._rhtab = levels
@@ -180,6 +193,14 @@ class CAMSFileHandler(object):
         if not self.searchvalidcamsfilenames(p_imageproductaquisitiontimejd):
             LOGGER.info("No CAM found for JD Date " + str(p_imageproductaquisitiontimejd))
             return
+        
+        if p_imageproductaquisitiontimejd < self._cams_46r1_switch:
+            try:
+                self._models.remove("AMMONIUM")
+                self._models.remove("NITRATE")
+                LOGGER.debug("Removed 46r1 models.")
+            except ValueError:
+                LOGGER.warning("Cannot remove 46r1 models. CAMS models present: %s" % self._models)
 
         cams_app_param = {"models": self._models,
                           "rhsampling": self._rhsampling,

@@ -1,4 +1,20 @@
-cmake_minimum_required(VERSION 2.8)
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+cmake_minimum_required(VERSION 3.10.2)
 PROJECT(MAJA)
 ############################################################################################################
 #                                                                                                          #
@@ -71,6 +87,10 @@ endif()
 if(POLICY CMP0050)
   cmake_policy(SET CMP0050 OLD)
 endif()
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 #SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/CMakeConfig)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeConfig)
@@ -212,7 +232,6 @@ INCLUDE_DIRECTORIES(
 # MAJA_INSTALL_BIN_DIR          - binary dir (executables)
 # MAJA_INSTALL_LIB_DIR          - library dir (libs)
 # MAJA_INSTALL_CONF_DIR         - conf dir (config files, dictionary, ICD, etc)
-# MAJA_INSTALL_EXAMPLES_DIR         - share dir (say, examples, data, etc)
 # MAJA_INSTALL_INCLUDE_DIR      - include dir (headers)
 # MAJA_INSTALL_PACKAGE_DIR      - package/export configuration files
 # MAJA_INSTALL_NO_DEVELOPMENT   - do not install development files
@@ -251,11 +270,6 @@ endif()
 SET(MAJA_INSTALL_CMAKEMODULE_DIR ${MAJA_INSTALL_PACKAGE_DIR}/cmakemodules)
 
 # /share 
-
-# Examples (Gipps)
-IF(NOT MAJA_INSTALL_EXAMPLES_DIR)
-  SET(MAJA_INSTALL_EXAMPLES_DIR "share/examples")
-ENDIF(NOT MAJA_INSTALL_EXAMPLES_DIR)
 
 IF(NOT MAJA_INSTALL_SCHEMAS_DIR)
   SET(MAJA_INSTALL_SCHEMAS_DIR "share/schemas")
@@ -368,6 +382,10 @@ ADD_SUBDIRECTORY(Code)
 ADD_SUBDIRECTORY(Plugins)
 
 #-----------------------------------------------------------------------------
+# Plugins location
+ADD_SUBDIRECTORY(StartMaja)
+
+#-----------------------------------------------------------------------------
 # DDC location
 IF(NOT MAJA_INSTALL_NO_LIBRARIES)
     # INSTALL ddc
@@ -473,7 +491,11 @@ file(COPY ${PROJECT_SOURCE_DIR}/orchestrator  DESTINATION ${MAJA_BINARY_DIR}/lib
 CONFIGURE_FILE(${MAJA_BINARY_DIR}/lib/python/orchestrator/common/version.py
                ${MAJA_BINARY_DIR}/lib/python/orchestrator/common/version.py)
 install(DIRECTORY ${MAJA_BINARY_DIR}/lib/python/orchestrator DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python/)
-#add_subdirectory(tv_tva_tests)
+
+
+file(COPY ${PROJECT_SOURCE_DIR}/StartMaja  DESTINATION ${MAJA_BINARY_DIR}/lib/python/)
+install(DIRECTORY ${MAJA_BINARY_DIR}/lib/python/StartMaja DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python/)
+
 
 #if(ENABLE_TV)
 #  message(STATUS "ENABLE_TV=${ENABLE_TV}.We will configure TVs.")

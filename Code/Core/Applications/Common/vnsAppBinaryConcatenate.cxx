@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -81,7 +97,6 @@ private:
 		SetDescription("BinaryConcatenate algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("BinaryToImage");
 		SetDocLongDescription("This application concatenate each image of a vector image into one");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -92,7 +107,7 @@ private:
 		AddParameter(ParameterType_InputImage,  "im",   "vectorimage");
 		AddParameter(ParameterType_OutputImage, "out", "image");
 		SetParameterDescription("out","output image");
-		SetParameterOutputImagePixelType("out", ImagePixelType_int16);
+		SetParameterOutputImagePixelType("out", ImagePixelType_uint16);
 
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram",2048);

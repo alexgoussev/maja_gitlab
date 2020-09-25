@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -61,7 +77,6 @@ namespace vns
             m_CLDLabelsCount = static_cast<LabelImagePixelType>(0);
 
             m_NoData = static_cast<RealNoDataType>(0);
-            m_L2CoarseResolution = 1;
 
             m_DeltaHMax = 0;
             m_DeltaHMin = 0;
@@ -173,7 +188,6 @@ namespace vns
                     l_ShadowProjectionFilter->SetDTMInput(this->GetDTMInput());
                     l_ShadowProjectionFilter->SetIPVIEInput(this->GetIPVIEInput());
                     l_ShadowProjectionFilter->SetDeltaH(static_cast<double>(l_DeltaH));
-                    l_ShadowProjectionFilter->SetL2CoarseResolution(m_L2CoarseResolution);
 
                     l_ShadowProjectionFilter->SetI3D(&m_I3D);
 
@@ -264,7 +278,6 @@ namespace vns
 
             os << "m_VIEHRef:    " << m_VIEHRef << std::endl;
 
-            os << "m_L2CoarseResolution:    " << m_L2CoarseResolution << std::endl;
         }
 
 } // End namespace vns

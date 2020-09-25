@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -57,7 +73,7 @@ namespace vns
     template<class TInputImage, class TInputMask, class TLabelImage, class TGRIDImage, class TCLAImage, class TDTMImage, class TOutputImage>
         ShadowMaskDeterminationUnknownCloudsAltitudeImageFilter<TInputImage, TInputMask, TLabelImage, TGRIDImage, TCLAImage, TDTMImage,
                 TOutputImage>::ShadowMaskDeterminationUnknownCloudsAltitudeImageFilter() :
-                m_ShadowBandTOCR(100), m_ShadowBandRCR(100), m_NoData(0.), m_L2CoarseResolution(1), m_DeltaHMax(0), m_DeltaHMin(0), m_DeltaHStep(
+                m_ShadowBandTOCR(100), m_ShadowBandRCR(100), m_NoData(0.), m_DeltaHMax(0), m_DeltaHMin(0), m_DeltaHStep(
                         0), m_SOLH1(0.), m_SOLHRef(0.), m_VIEHRef(0.), m_CloudCoverMultFactor(0.), m_ShadowCloudRatioMax(0.), m_ShadowCloudRatioMin(
                         0.), m_ShadowCloudRatioPixNb(0), m_ProjShadDarkeningMax(0.), m_DarkeningMinPercentile(0.)
         {
@@ -221,7 +237,6 @@ namespace vns
                 // Projection
                 m_ComputesProjectionsMasksLabelsFilter->SetCLDLabelsCount(m_DilatedCloudMaskAllLabelFilter->GetObjectCount());
                 m_ComputesProjectionsMasksLabelsFilter->SetNoData(m_NoData);
-                m_ComputesProjectionsMasksLabelsFilter->SetL2CoarseResolution(m_L2CoarseResolution);
                 m_ComputesProjectionsMasksLabelsFilter->SetDeltaHMax(m_DeltaHMax);
                 m_ComputesProjectionsMasksLabelsFilter->SetDeltaHMin(m_DeltaHMin);
                 m_ComputesProjectionsMasksLabelsFilter->SetDeltaHStep(m_DeltaHStep);
@@ -411,7 +426,6 @@ namespace vns
             os << "m_ShadowBandTOCR    " << m_ShadowBandTOCR << std::endl;
             os << "m_ShadowBandRCR    " << m_ShadowBandRCR << std::endl;
             os << "m_NoData:    " << m_NoData << std::endl;
-            os << "m_L2CoarseResolution:    " << m_L2CoarseResolution << std::endl;
             // Parameter used for the altitude refinement
             os << "m_DeltaHMax:    " << m_DeltaHMax << std::endl;
             os << "m_DeltaHMin:    " << m_DeltaHMin << std::endl;

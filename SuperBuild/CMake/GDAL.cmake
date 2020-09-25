@@ -1,3 +1,19 @@
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -17,8 +33,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(GDAL_URL "http://download.osgeo.org/gdal/2.2.1/gdal-2.2.1.tar.gz")
-set(GDAL_URL_MD5 785acf2b0cbf9d56d37c9044d0ee2505)
+set(GDAL_URL "http://download.osgeo.org/gdal/2.4.1/gdal-2.4.1.tar.gz")
+set(GDAL_URL_MD5 8bc93c7ae4d3a46916918a52c7f5f10f)
 set(GDAL_DEPENDS ZLIB EXPAT PNG PROJ JPEG TIFF GEOTIFF SQLITE OPENJPEG GEOS HDF4 NETCDF PYTHON SWIG)
 
 set(GDAL_AUTOCONF_BUILD 1)
@@ -42,7 +58,7 @@ set(GDAL_CONFIG_ARGS
   --with-ingres=no
   --with-jp2mrsid=no
   --with-kakadu=no
-  --with-jasper=no
+  --with-jasper=yes
   --with-libgrass=no
   --with-mrsid=no
   --with-msg=no
@@ -50,7 +66,8 @@ set(GDAL_CONFIG_ARGS
   --with-oci=no
   --with-odbc=no
   --with-ogdi=no
-  --with-pam=no
+  --with-pam=yes
+  --with-openjpeg=yes
   --with-pcidsk=yes
   --with-pcraster=no
   --with-pcre=no
@@ -71,7 +88,7 @@ add_configure_option(GDAL TIFF      --with-libtiff)
 add_configure_option(GDAL GEOTIFF   --with-geotiff)
 add_configure_option(GDAL PNG       --with-png)
 add_configure_option(GDAL JPEG      --with-jpeg)
-add_configure_option(GDAL OPENJPEG  --with-openjpeg)
+#add_configure_option(GDAL OPENJPEG  --with-openjpeg)
 add_configure_option(GDAL SQLITE    --with-sqlite3)
 add_configure_option(GDAL ZLIB      --with-libz)
 add_configure_option(GDAL EXPAT     --with-expat)
@@ -102,7 +119,13 @@ ExternalProject_Add(GDAL
   LOG_CONFIGURE ${WRITE_LOG}
   LOG_INSTALL ${WRITE_LOG}
   )
- 
 
+
+ExternalProject_Add_Step(GDAL update_deprecated_shebang
+  COMMAND /bin/sh -x
+  ${CMAKE_SOURCE_DIR}/patches/GDAL/update_deprecated_shebang.sh
+  ${SB_INSTALL_PREFIX}/bin
+  DEPENDEES install
+  )
 
 SUPERBUILD_PATCH_SOURCE(GDAL)

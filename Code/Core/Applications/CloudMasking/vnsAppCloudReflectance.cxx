@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -127,7 +143,6 @@ private:
 		SetDescription("Cloud Reflectance algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("CloudReflectance");
 		SetDocLongDescription("This application computes the cloud reflectance mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -163,7 +178,7 @@ private:
 
 		//Set parameters
 		// Init mode parameter accessors
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		// cirrus flag parameter accessors
 		AddParameter(ParameterType_Int,  "foregroundvalue","ForegroundValue");
 		AddParameter(ParameterType_Int,  "bluebandtocr","BlueBandTOCR");
@@ -268,8 +283,7 @@ private:
 		InputMaskPointer l_IPSNW = ITK_NULLPTR;
 
 		//Get parameters
-		const bool l_InitMode = IsParameterEnabled("initmode");
-		vnsLogInfoMacro("InitMode: "<<GetParameterEmpty("initmode"));
+		const bool l_InitMode = GetParameterInt("initmode");
 		vnsLogInfoMacro("InitMode: "<<Utilities::BoolToLowerString(l_InitMode));
 		const unsigned int m_ForegroundValue = GetParameterInt("foregroundvalue");
 		const unsigned int m_BlueBandTOCR = GetParameterInt("bluebandtocr");
@@ -502,10 +516,8 @@ private:
 		} else
 		{
 			SetParameterOutputImage<InputMaskType>("refl", m_ReflectanceThresholdFilter->GetOutput());
-			if (HasValue("reflvar"))
-				SetParameterOutputImage<InputMaskType>("reflvar", m_ReflectanceThresholdFilter->GetOutput());
-			if (HasValue("reflext"))
-				SetParameterOutputImage<InputMaskType>("reflext", m_ReflectanceThresholdFilter->GetOutput());
+			SetParameterOutputImage<InputMaskType>("reflvar", m_ReflectanceThresholdFilter->GetOutput());
+			SetParameterOutputImage<InputMaskType>("reflext", m_ReflectanceThresholdFilter->GetOutput());
 		}
 	}
 

@@ -1,3 +1,22 @@
+#
+# Copyright (C) 2005-2017 Centre National d'Etudes Spatiales (CNES)
+#
+# This file is part of Orfeo Toolbox
+#
+#     https://www.orfeo-toolbox.org/
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 ############################################################################################################
 #                                                                                                          #
 #                                        __  __    __     ____   __                                        #
@@ -18,27 +37,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-#
-# Copyright (C) 2005-2017 Centre National d'Etudes Spatiales (CNES)
-#
-# This file is part of Orfeo Toolbox
-#
-#     https://www.orfeo-toolbox.org/
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 
-cmake_minimum_required(VERSION 3.9.0)
+cmake_minimum_required(VERSION 3.10.2)
 
 project(MAJA-SuperBuild)
 
@@ -113,8 +113,11 @@ list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_PREFIX_PATH:PATH=${SB_CMAKE_PREFIX_PATH
 list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_SKIP_BUILD_RPATH:BOOL=${CMAKE_SKIP_BUILD_RPATH}")
 list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_BUILD_WITH_INSTALL_RPATH:BOOL=${CMAKE_BUILD_WITH_INSTALL_RPATH}")
 list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_INSTALL_RPATH_USE_LINK_PATH:BOOL=${CMAKE_INSTALL_RPATH_USE_LINK_PATH}")
-list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_INSTALL_RPATH:PATH=${CMAKE_INSTALL_RPATH}")
 list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_PREFIX_PATH:STRING=${SB_CMAKE_PREFIX_PATH}")
+foreach(prefix_path ${SB_CMAKE_PREFIX_PATH})
+list(APPEND SB_CMAKE_CACHE_ARGS "-DCMAKE_INSTALL_RPATH:PATH=${prefix_path}/lib")
+endforeach()
+
 #message("SB_CMAKE_CACHE_ARGS=${SB_CMAKE_CACHE_ARGS}")
 
 foreach(cmake_var
@@ -174,6 +177,8 @@ endif()
 #~ list(APPEND SB_ENV_CONFIGURE_CMD "LDFLAGS=-L${SB_INSTALL_PREFIX}/lib")
 #~ list(APPEND SB_ENV_CONFIGURE_CMD "CPPFLAGS=-I${SB_INSTALL_PREFIX}/include")
 list(APPEND SB_ENV_CONFIGURE_CMD "LD_LIBRARY_PATH=${SB_INSTALL_PREFIX}/lib:$ENV{LD_LIBRARY_PATH}")
+list(APPEND SB_ENV_CONFIGURE_CMD "PKG_CONFIG_PATH=${SB_INSTALL_PREFIX}/lib/pkgconfig")
+
 
 list(REMOVE_DUPLICATES SB_ENV_CONFIGURE_CMD)
 

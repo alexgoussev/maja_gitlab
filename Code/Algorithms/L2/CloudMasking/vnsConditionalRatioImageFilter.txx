@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -134,7 +150,7 @@ namespace vns
                 // Test if the pixel is not cloudy for the date D, edges for the date D and D-1
                 // or water for the date D-1
                 if ((l_L2CLDSubValue == 0) && (l_IPEDGValue == 0) && (l_L2inWASValue == 0)
-                        /* && (l_L2inNDTValue == 0) */ && (l_L2inRCRValue != 0) && (l_L2inRCRValue != m_NoData))
+                        /* && (l_L2inNDTValue == 0) */ && !vnsEqualsDoubleMacro(l_L2inRCRValue, 0) && !vnsEqualsDoubleMacro(l_L2inRCRValue,m_NoData))
                 {
                     // Compute difference between the current image of reflectance and
                     // the composite image

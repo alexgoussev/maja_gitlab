@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -122,7 +138,6 @@ private:
 		SetDescription("WaterMask algo.");
 		Loggers::GetInstance()->Initialize(GetName());
 		// Documentation
-		SetDocName("WaterMask");
 		SetDocLongDescription("This application computes the Water mask");
 		SetDocLimitations("None");
 		SetDocAuthors("MAJA-Team");
@@ -154,9 +169,9 @@ private:
 
 		//Set parameters
 		// Init mode parameter accessors
-		AddParameter(ParameterType_Empty,  "initmode","InitMode");
+		AddParameter(ParameterType_Bool,  "initmode","InitMode");
 		// Sunglint flag parameter accessors
-		AddParameter(ParameterType_Empty,  "sunglintflag","SunglintFlag");
+		AddParameter(ParameterType_Bool,  "sunglintflag","SunglintFlag");
 		// Red band index accessors for the TOCR
 		AddParameter(ParameterType_Int, "redbandtocr", "Red Band Index in RCR");
 		// NIR band index accessors for TOCR
@@ -290,7 +305,7 @@ private:
 		m_SRTMGaussianFilter->SetVariance(l_SRTMGaussianSigma * l_SRTMGaussianSigma);
 		m_SRTMGaussianFilter->SetUseImageSpacingOff();
 		m_SRTMGaussianFilter->SetMaximumError(CONST_EPSILON_20);
-		m_SRTMGaussianFilter->SetMaximumKernelWidth(static_cast<unsigned int>(10 * l_SRTMGaussianSigma));
+		m_SRTMGaussianFilter->SetMaximumKernelWidth(static_cast<unsigned int>(40 * l_SRTMGaussianSigma));
 		m_SRTMMultiplyFilter->SetInput1(m_SRTMGaussianFilter->GetOutput());
 		m_SRTMMultiplyFilter->SetInput2(l_SRTMWATPtr);
 

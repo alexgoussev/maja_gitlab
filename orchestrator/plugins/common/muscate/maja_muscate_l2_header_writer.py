@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -17,11 +32,6 @@ orchestrator.plugins.maja_dataset -- shortdesc
 orchestrator.plugins.maja_dataset is a description
 
 It defines classes_and_methods
-
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -688,14 +698,20 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
                     l_XPathRootDetFoot = "//Mask_List/Mask[Mask_Properties/NATURE='Detector_Footprint']/Mask_File_List"
                     xnode = xml_tools.get_only_value(output_handler.root, l_XPathRootDetFoot)
                     main_node = xnode
-                    for bd in l_ListOfBand:
-                        l_MapBandDetFnames = l_Muscate["ZoneMaskFileNames"][bd]
+
+                    for bd in range(l_NumberOfBands):                        
+
+                        l1BandId = l_BandsDefinitions.get_band_id_in_l1(l_ListOfBand[bd])
+                        l_MapBandDetFnames = l_Muscate["ZoneMaskFileNames"][l1BandId]
                         for it in list(l_MapBandDetFnames.values()):
                             # Write inthe XML file
-                            node = main_node.append_child("MASK_FILE")
-                            node.set("band_id", bd)
-                            node.set("detector_id", it)
-                            node.text = ""
+                            elt = ET.Element("MASK_FILE")
+                            elt.set("band_id", l_ListOfBand[bd])
+                            elt.set("detector_id", it)
+                            elt.text = ""
+                            main_node.append(elt)
+
+
                 # Fin si manage Detfoo
 
         if self.adjacencyeffectsandslopecorrection:
@@ -1214,8 +1230,8 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
         l_JpiXMLFileHandler.set_string_value("//Min", int(self.dem.ALT_Min))
         l_JpiXMLFileHandler.set_string_value("//Max", int(self.dem.ALT_Max))
         # ---------------------------------------------------------------------------------------------
-        l_JpiXMLFileHandler.set_string_value("//Average", f"{self.dem.ALT_Mean:.6}")
-        l_JpiXMLFileHandler.set_string_value("//Standard_Deviation", f"{self.dem.ALT_Stdv:.6}")
+        l_JpiXMLFileHandler.set_string_value("//Average", f"{self.dem.ALT_Mean:.2f}")
+        l_JpiXMLFileHandler.set_string_value("//Standard_Deviation", f"{self.dem.ALT_Stdv:.2f}")
         # Write the cirrus correction flag if plugin has it
         if self.l1_plugin.CirrusMasking:
             l_JpiXMLFileHandler.set_value_of("ProcessingFlagsAndModesCirrusCorrection", self.cirruscorrection)

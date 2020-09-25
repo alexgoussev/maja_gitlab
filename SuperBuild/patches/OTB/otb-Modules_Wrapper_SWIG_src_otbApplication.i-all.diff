@@ -1,42 +1,32 @@
---- OTB-6.0.1.orig/Modules/Wrappers/SWIG/src/otbApplication.i	2019-05-03 15:53:12.555009245 +0200
-+++ OTB-6.0.1/Modules/Wrappers/SWIG/src/otbApplication.i	2019-05-03 15:53:38.610009216 +0200
-@@ -592,7 +592,7 @@
- 			return s
- 
- 		def SetParameters(self, dict_params):
--			for param_key, param_value in dict_params.iteritems():
-+			for param_key, param_value in dict_params.items():
- 				self.SetParameterValue(param_key, param_value)
- 
- 		def SetParameterValue(self, paramKey, value):
-@@ -601,13 +601,26 @@
- 											 ParameterType_String, ParameterType_InputFilename,
- 											 ParameterType_OutputImage, ParameterType_OutputVectorData,
- 											 ParameterType_OutputProcessXML, ParameterType_OutputFilename,
--											 ParameterType_Directory, ParameterType_InputImage,
-+											 ParameterType_Directory,
- 											 ParameterType_ComplexInputImage, ParameterType_InputVectorData]:
- 			  return self.SetParameterString(paramKey, value)
--			elif paramType in [ParameterType_InputImageList, ParameterType_InputVectorDataList,
--												 ParameterType_InputFilenameList, ParameterType_StringList,
--												 ParameterType_ListView]:
-+			elif paramType in [ParameterType_InputImage]:
-+				if isinstance(value, str):
-+					return self.SetParameterString(paramKey, value)
-+				elif type(value).__name__ == "SwigPyObject":
-+					return self.SetParameterInputImage(paramKey, value)
-+			elif paramType in [ParameterType_InputVectorDataList,
-+								ParameterType_InputFilenameList, ParameterType_StringList,
-+								ParameterType_ListView]:
- 			  return self.SetParameterStringList(paramKey, value)
-+			elif paramType in [ParameterType_InputImageList]:
-+				for item in value:
-+					if type(item).__name__ == "SwigPyObject":
-+						self.AddImageToParameterInputImageList("il", item)
-+					elif isinstance(item, str):
-+						self.AddParameterStringList("il", item)
-+					else:
-+						self.AddParameterStringList("il", item)
- 			elif paramType in [ParameterType_Int, ParameterType_Radius]:
- 			  return self.SetParameterInt(paramKey, value)
- 			elif paramType in [ParameterType_Float]:
+diff -burN OTB-7.0.0.orig/Modules/Wrappers/SWIG/src/otbApplication.i OTB-7.0.0/Modules/Wrappers/SWIG/src/otbApplication.i
+--- OTB-7.0.0.orig/Modules/Wrappers/SWIG/src/otbApplication.i	2020-03-10 11:26:16.121865197 +0100
++++ OTB-7.0.0/Modules/Wrappers/SWIG/src/otbApplication.i	2020-03-10 15:01:12.090184960 +0100
+@@ -647,13 +647,26 @@
+                        ParameterType_String, ParameterType_InputFilename,
+                        ParameterType_OutputImage, ParameterType_OutputVectorData,
+                        ParameterType_OutputFilename,
+-                       ParameterType_Directory, ParameterType_InputImage,
++                       ParameterType_Directory, 
+                        ParameterType_InputVectorData]:
+         return self.SetParameterString(paramKey, value)
+-      elif paramType in [ParameterType_InputImageList, ParameterType_InputVectorDataList,
++      elif paramType in [ParameterType_InputImage]:
++        if isinstance(value, str):
++          return self.SetParameterString(paramKey, value)
++        elif type(value).__name__ == "SwigPyObject":
++          return self.SetParameterInputImage(paramKey, value)
++      elif paramType in [ParameterType_InputVectorDataList,
+                          ParameterType_InputFilenameList, ParameterType_StringList,
+                          ParameterType_ListView]:
+         return self.SetParameterStringList(paramKey, value)
++      elif paramType in [ParameterType_InputImageList]:
++        for item in value:
++          if type(item).__name__ == "SwigPyObject":
++            self.AddImageToParameterInputImageList("il", item)
++          elif isinstance(item, str):
++            self.AddParameterStringList("il", item)
++          else:
++            self.AddParameterStringList("il", item)
+       elif paramType in [ParameterType_Int, ParameterType_Radius]:
+         return self.SetParameterInt(paramKey, value)
+       elif paramType in [ParameterType_Float]:

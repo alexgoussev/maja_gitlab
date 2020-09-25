@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.processor.base_processor is the base of all processors
 
 It defines method mandatory for a processor
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 
 ###################################################################################################
 """
@@ -29,6 +40,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
+from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.maja_exceptions import *
 from orchestrator.modules.maja_module import MajaModule
@@ -72,8 +84,8 @@ class MajaCloudMaskComputation(MajaModule):
         param_dilate = {"in": input,
                         "out": temp + ":uint8",
                         "structype": "ball",
-                        "structype.ball.xradius": radius,
-                        "structype.ball.yradius": radius,
+                        "xradius": radius,
+                        "yradius": radius,
                         "filter": "dilate"
                         }
         dilate_app = OtbAppHandler("BinaryMorphologicalOperation", param_dilate, write_output=caching)
@@ -196,7 +208,7 @@ class MajaCloudMaskComputation(MajaModule):
                                          "nominal.minpixelcorrelation": dict_of_input.get("L2COMM").get_value_f(
                                              "MinPixelCorrel"),
                                          "nominal.correlthreshold": float(
-                                             dict_of_input.get("L2COMM").get_value_f("MinPixelCorrel")) / 100.0,
+                                             dict_of_input.get("L2COMM").get_value_f("CorrelThreshold")) / 100.0,
                                          "nominal.ncorrel": dict_of_input.get("L2COMM").get_value_f("NCorrel"),
                                          "nominal.stolistofdates": dict_of_input.get("Params").get("StoListOfDates"),
                                          "reflvar": cloud_reflvar_filename + ":uint8",
@@ -307,6 +319,10 @@ class MajaCloudMaskComputation(MajaModule):
 
         # ---------------------------------------------------------------
         # ------------------- Cld shadow ------------------------
+        #caching of ShadowVIE that is know for causing troubles
+        shadowvie_filename = os.path.join(cloud_working, "shadow_vie.tif")
+        otb_copy_image_to_file(dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),shadowvie_filename)
+
         cloud_shadow_filename = os.path.join(cloud_working, "cloud_shadow.tif")
         cloud_cla_filename = os.path.join(cloud_working, "cloud_cla.tif")
         grid_ref_alt = dict_of_input.get("Plugin").ConfigUserCamera.get_Algorithms().get_GRID_Reference_Altitudes()
@@ -314,15 +330,12 @@ class MajaCloudMaskComputation(MajaModule):
                         "edg": dict_of_input.get("L1Reader").get_value("IPEDGSubOutput"),
                         "cldall": cloud_allnoext_image,
                         "cla": dict_of_output.get("CLA_Sub"),
-                        "vie": dict_of_input.get("L1Reader").get_value("ShadowVIEImage"),
+                        "vie": shadowvie_filename,
                         "dtm": dict_of_input.get("DEM").ALC,
-                        "initmode": init_Mode,
                         "sol1.in": dict_of_input.get("L1Reader").get_value("SOL1Image"),
                         "sol1.h": grid_ref_alt.get_SOLH1(),
                         "solhref": grid_ref_alt.get_SOLHRef(),
                         "defaultalt": dict_of_input.get("L2COMM").get_value_i("DefaultAltitude"),
-                        "l2coarseres": dict_of_input.get(
-                            "Plugin").ConfigUserCamera.get_Business().get_L2CoarseResolution(),
                         "deltahmax": dict_of_input.get("L2COMM").get_value_i("DeltaHMax"),
                         "deltahmin": dict_of_input.get("L2COMM").get_value_i("DeltaHMin"),
                         "deltahstep": dict_of_input.get("L2COMM").get_value_i("DeltaHStep"),
@@ -333,11 +346,15 @@ class MajaCloudMaskComputation(MajaModule):
                         "nodata": dict_of_input.get("Params").get("RealL2NoData"),
                         "shadow": cloud_shadow_filename + ":uint8"
                         }
+
+        if dict_of_input.get("Params").get("InitMode"):
+            param_shadow["initmode"] = dict_of_input.get("Params").get("InitMode")
+
         # With alt shadows
         if dict_of_input.get("Params").get("CloudMaskingKnownCloudsAltitude"):
             param_shadow["algo"] = "withalt"
             param_shadow["ksigma"] = int(dict_of_input.get("L2COMM").get_value("KsigmaAltitude"))
-            param_shadow["l2cla"] = cloud_cla_filename
+            param_shadow["l2cla"] = cloud_cla_filename + ":int16"
             param_shadow["algo.withalt.absnbpixthresh"] = dict_of_input.get("L2COMM").get_value_f("AbsNbpixThreshold")
             param_shadow["algo.withalt.refinement"] = dict_of_input.get("L2COMM").get_value("RefinementOption")
             param_shadow["algo.withalt.threshdiffim"] = dict_of_input.get("L2COMM").get_value_f("ThresholdDiffImage")
@@ -401,9 +418,6 @@ class MajaCloudMaskComputation(MajaModule):
                                  "l2shadvar": dict_of_input.get("L2Reader").get_value("VectorizedCLDSubOutput")[
                                      constants.CLOUD_MASK_SHADVAR],
                                  "l2sto": dict_of_input.get("L2Reader").get_value("STOImage"),
-                                 "initmode": init_Mode,
-                                 "l2coarseres": dict_of_input.get(
-                                     "Plugin").ConfigUserCamera.get_Business().get_L2CoarseResolution(),
                                  "shadbandtocr": shadowbandtocr_idx,
                                  "shadbandrcr": shadowbandrcr_idx,
                                  "viehref": grid_ref_alt.get_VIEHRef(),
@@ -423,6 +437,8 @@ class MajaCloudMaskComputation(MajaModule):
                                  "jday": dict_of_input.get("Params").get("JDay"),
                                  "shadvar": cloud_shadvar_filename + ":uint8"
                                  }
+
+
                 shadvar_app = OtbAppHandler("CloudShadVar", param_shadvar, write_output=caching)
                 self._apps.add_otb_app(shadvar_app)
                 cloud_shadvar_image = shadvar_app.getoutput()["shadvar"]
@@ -582,9 +598,9 @@ class MajaCloudMaskComputation(MajaModule):
         #                    Bit 8 - Vide pour les autres
         cld_list = []
 
-        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_all_dilated_masked_image
+        dict_of_output[constants.CLOUD_MASK_ALL] = cloud_sum_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL])
-        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_sum_dilated_masked_image
+        dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS] = cloud_all_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_ALL_CLOUDS])
         dict_of_output[constants.CLOUD_MASK_SHADOWS] = cloud_shadow_dilated_masked_image
         cld_list.append(dict_of_output[constants.CLOUD_MASK_SHADOWS])
@@ -611,4 +627,7 @@ class MajaCloudMaskComputation(MajaModule):
         cld_list.append(dict_of_output[constants.CLOUD_MASK_CIRRUS])
 
         dict_of_output["CLDList"] = cld_list
+
+
+        LOGGER.debug(cld_list)
 

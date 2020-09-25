@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 """
 ###################################################################################################
 #
@@ -18,10 +33,6 @@ orchestrator.plugins.maja_dataset is a description
 
 It defines classes_and_methods
 
-###################################################################################################
-
-:copyright: 2019 CNES. All rights reserved.
-:license: license
 ###################################################################################################
 """
 from orchestrator.plugins.common.base.maja_l1_image_info_base import L1ImageInformationsBase
@@ -89,6 +100,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
 
         l_DatePDV = lASCIIHandler.get_date_pdv()
         self.ProductDate = date_utils.get_datetime_from_utc(l_DatePDV)
+        self.ProductDateStr = self.ProductDate.strftime('%Y%m%d')
+        LOGGER.debug("Product Date: " + self.ProductDateStr)
         self.ReferenceSiteDefinitionId = "UNKNOWN"
         self.ProductId = lASCIIHandler.get_product_id()
         LOGGER.debug("ProductID: "+self.ProductId)
@@ -201,8 +214,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
         # Set the real value of the L1 NoData
         self.RealL1NoData = -10
 
-        #Set the Reflectance to 1.0
-        self.ReflectanceQuantification = 1.0
+        #Set the Reflectance
+        self.ReflectanceQuantification = 0.02
 
         # # Get the projection ref
         # self.ProjectionRef = lASCIIHandler.get_toa_image_filename_from_band_code("B1")
@@ -212,19 +225,11 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
     def is_a_landsat8_l1product_by_checking_the_filename(p_filename):
         #p_filename: ex: < ... > _MTL.txt
         l_ShortFilename = os.path.basename(p_filename)
-        LOGGER.debug(
-            "Landsat8L1ImageInformationsProvider::IsALandsat8L1ProductByCheckingTheFilename l_ShortFilename: " +
-            l_ShortFilename)
         l_ShortDirectory = os.path.basename(os.path.dirname(p_filename))
-        LOGGER.debug(
-            "Landsat8L1ImageInformationsProvider::IsALandsat8L1ProductByCheckingTheFilename l_ShortDirectory: " +
-            l_ShortDirectory)
-
         #Filename evolution
         #Before Landsat Collection 1: LC8...
         #After Landsat Collection 1: LC08...
         if "LC8" or "LC08" in l_ShortDirectory:
-            LOGGER.debug("Check directory OK")
             if "_MTL" in l_ShortFilename and os.path.splitext(l_ShortFilename)[1] == ".txt":
                 LOGGER.debug("Check filename OK: " + l_ShortFilename)
                 return True
@@ -232,17 +237,8 @@ class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):
 
 
     def is_a_landsat8_l1product_by_checking_the_satellite(p_filename, plugin_base):
-        LOGGER.debug("File detected with the filenaming <" + p_filename +
-                     ">. Check with the field 'Platform' in the xml file...")
         lASCIIHandler = Landsat8ASCIIFileHandler(p_filename)
         lplatform = lASCIIHandler.get_platform()
-        LOGGER.debug(
-            "Is the filename " +
-            p_filename + " (platform=" + lplatform +
-            ") a Landsat8 L1 product compatible with the plugin '" +
-            plugin_base.PluginName +
-            "' ??")
-
         if plugin_base.is_valid_with_satellite(lplatform):
             LOGGER.debug(
                 "The filename " +

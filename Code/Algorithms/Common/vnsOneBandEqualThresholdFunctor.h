@@ -1,3 +1,19 @@
+/*
+* Copyright (C) 2020 Centre National d'Etudes Spatiales (CNES)
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
 /************************************************************************************************************ 
  *                                                                                                          *
  *                                ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo         *
@@ -150,7 +166,7 @@ namespace vns
                 OutputPixelType m_OutsideValue;
                 /** Output image dimension declaration 
                  * Fixed at one. No set accessor. Keep this Get to be able to call it with an
-                 * otbUnaryFunctorImageFilter and thus generate a VectorImage with only  band.
+                 * otbFunctorImageFilter and thus generate a VectorImage with only  band.
                  */
                 unsigned int m_OutputSize;
 
