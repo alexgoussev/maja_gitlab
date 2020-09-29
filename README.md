@@ -9,9 +9,9 @@
 
 1. [Installing Maja](#Requirements)
 2. [MAJA output format](#format)
-3. [Running Maja](#run)
+3. [Running Maja as standalone](#run)
 4. [Running Maja with Start_maja](#run_startmaja)
-5. [Generation the documentation](#doc)
+5. [Generate the documentation](#doc)
 6. [Running the tests](#tests)
 7. [FAQ](#faq)
 8. [Contributors](#contrib)
@@ -36,6 +36,12 @@ Check the chapters ['Running Maja'](#run) and ['Generating the documentation'](#
 ## 1 - Installing Maja
 
 The following instructions will set you up to get a working copy on your system.
+
+### Precompiled binaries
+
+Maja is available as a self-extracting archive via the following link:
+
+[**Download Maja**](https://logiciels.cnes.fr/en/content/maja)
 
 ### Requirements
 
@@ -99,7 +105,7 @@ Maja currently supports 3 different platforms with 2 format types (called plugin
 | Landsat8-Muscate   | [Format description](https://labo.obs-mip.fr/multitemp/landsat/theias-landsat-8-l2a-product-format/)  |
 
 <a name="run"></a>
-## 3 - Running Maja
+## 3 - Running Maja as standalone
 
 After compiling, you will be able to run maja in the following path: `<path/to/maja-install>/maja/4.x/bin/maja`.
 Run `maja --help` to see a full list of parameters.
@@ -216,7 +222,7 @@ The tool needs a lot of configuration files which are provided in three director
 
 **GIPP**
 
-We provide two sets of parameters, one to work without CAMS data, and one to work with CAMS data. The latter needs a lot of disk space (~1.5 GB), as the LUT are provided not only for one aerosol type, but for for 5 aerosol types, and 6 water vapour contents. As Github limits the repository size to 1 GB, we are using a gitlab repository to distribute the parameters (GIPP):  
+We provide two sets of parameters, one to work without CAMS data, and one to work with CAMS data. The latter needs a lot of disk space (~1.5 GB), as the LUT are provided not only for one aerosol type, but for for 5 aerosol types, and 6 water vapour contents. As Github limits the repository size to 1 GB, we are using a gitlab repository to distribute the parameters (GIPP). The following links allow you to access the GIPP archives for Sentinel-2:
 - Parameters without CAMS : http://tully.ups-tlse.fr/olivier/gipp_maja/tree/master/SENTINEL2_TM_CAMS
 - Parameters with CAMS: http://tully.ups-tlse.fr/olivier/gipp_maja/tree/master/SENTINEL2_TM
 
@@ -270,27 +276,22 @@ Description of command line options :
 * -e (aaaammdd) is the last date to process within the time serie-s
 * -z directly uses zipped L1C files
 
-Caution, *when a product has more than 90% of clouds, the L2A is not issued*. However, a folder with _NOTVALD_ in the filename is created.
+Caution, *when a product has more than 90% of clouds, the L2A is not issued* - This results in the output folders to contain only a metadata (MTD*xml) file but no rasters/images.
 
 ### Known Errors
 
-Some Sentinel-2 L1C products lack the angle information which is required by MAJA. In this case, MAJA stops processing with an error message. This causes issues particularly in the backward mode. These products were acquired in February and March 2016 and have not been reprocessed by ESA (despite repeated asks from my side). You should remove them from the folder which contains the list of L1C products to process. 
-
-We still have some difficulties with detecting the edges of the swath, which results in false detections of clouds or shadows on the edges. We hope to solve this shortly.
-
-
-
+Some Sentinel-2 L1C products lack the angle information which is required by MAJA. In this case, MAJA stops processing with an error message. This causes issues particularly in the backward mode. These products were acquired in February and March 2016 and have not been reprocessed by ESA (despite repeated requests). You should remove them from the folder which contains the list of L1C products to process. 
 
 <a name="doc"></a>
 ## GIPPs files
 
-MAJA uses GIPPs files to configure the different algorithms of the chain. You can find some sets here : 
+MAJA uses GIPP-files (Ground Image Processing Parameters) to configure the different algorithms of the chain. You can find some sets here : 
 
 http://tully.ups-tlse.fr/olivier/gipp_maja/tree/master/
 
 
 <a name="doc"></a>
-## 5 - Generation the documentation
+## 5 - Generate the documentation
 
 The documentation can be compiled by setting the cmake flag `BUILD_DOCS=ON`.
 It is deactivated by default.
@@ -336,7 +337,9 @@ It will serve as a forum.
 <a name="contrib"></a>
 ## 8 - Contributors
 
-TBD
+* **Centre National d'Etudes Spatiales (CNES)** 
+* **Centre d'Etudes Spatiales de la Biosphère (CESBIO)**
+* **CS-SI France**
 
 <a name="references"></a>
 ## 9 - References :
