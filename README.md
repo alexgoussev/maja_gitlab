@@ -43,6 +43,11 @@ Maja is available as a self-extracting archive via the following link:
 
 [**Download Maja**](https://logiciels.cnes.fr/en/content/maja)
 
+You just have to unzip the provided package and use the following command :
+```
+./MAJA-4-x.run --target /path/to/install
+```
+
 ### Requirements
 
 In order to compile Maja, you will need the following prerequisites:
@@ -77,11 +82,7 @@ If you wish to install maja on another system without re-compiling, you can gene
 cd Maja-4-x-archive/build
 make binpkg
 ```
-This will create the file `binpkg.dir/MAJA-4-x.run` inside your build/ folder. You just have to unzip the provided package and use
-the following command :
-```
-bash binpkg.dir/MAJA-4-x.run --target /path/to/install
-```
+This will create the file `binpkg.dir/MAJA-4-x.run` inside your build folder.
 
 ### Setting additional environment variables for Maja
 
