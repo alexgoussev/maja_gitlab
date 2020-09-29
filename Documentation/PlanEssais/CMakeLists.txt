@@ -90,7 +90,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Art DESTINATION  ${RST_BINARY_DIR})
 
 set(SPHINX_CONF_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-set(MAJA_COPYRIGHT_TEXT "2019 CNES. The MAJA Software is licensed under a Creative Commons Attribution-ShareAlike 4.0 International license (CC-BY-SA).")
+set(MAJA_COPYRIGHT_TEXT "2019-2020 CNES. The documentation of the MAJA software is lincensed under the Creative Commons Attribution 4.0 international license (CC BY 4.0)"
 
 configure_file(${RST_SOURCE_DIR}/conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY)
 message(${SPHINX_CONF_DIR}/conf.py)
