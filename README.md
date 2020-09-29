@@ -23,14 +23,14 @@ MAJA (for Maccs-Atcor Joint Algorithm), is an atmospheric correction and cloud s
 In 2017, thanks to an agreement between CNES and DLR and to some funding from ESA, we started adding methods from DLR 's atmospheric correction software ATCOR into MACCS.
 MACCS then became MAJA. 
 
-Currently, Maja is allows the following processing steps:
+Currently, Maja allows the following processing steps:
 * Atmospheric correction
 * Cloud detection
 * Estimation of the Aerosol-Optical-Depth (AOT)
 * Correction of environmental- and slope-effects
 
 Maja is based on a **multi-temporal** method - allowing to refine the outputs using the previous inputs.
-Check the chapters ['Running Maja'](#run) and ['Generating the documentation'](#doc) in order to get more information about the method.
+Check the chapters ['Running Maja'](#run) and ['Generating the documentation'](#doc) in order to get more information about this.
 
 <a name="Requirements"></a>
 ## 1 - Installing Maja
