@@ -139,18 +139,19 @@ repRAW=./dtm/raw
 repGSW=./dtm/gsw 
 ```
 * repWork is a directory to store the temporary files
+* repGipp is the folder where Start_maja automatically downloads the GIPP-set for each plugin.
+* repMNT stores the DTM (MNT in french) in Maja format
 * repL1 is where to find the L1C data (without the site name which is added aferward optionally)
 * repL2 is for the L2A data (without the site name which is added aferwards, optionally again)
-* repGIPP is the folder where Start_maja automatically downloads the GIPP-set for each plugin.
-* repMNT stores the DTM (MNT in french) in Maja format
-* exeMaja is where the Maja binary code is
-* repCAMS is where CAMS data are stored. You do not need to specify this directory if you decide to not process with CAMS option.
+* exeMaja is where the Maja binary exe is located
+* repCAMS is where CAMS data is stored. You do not need to specify this directory if you decide to not process with CAMS option.
 * repRAW stores the raw DTM archives (such as the ones for SRTM, which have the name `srtm_37_04.zip`)
 * repGSW stores the raw Water-Mask files (such as the one for GSW, which have the name `occurrence_0E_50N*.tif`)
 
 To run MAJA, Start_maja copies all the necessary data in a temporary input folder. Here is an example of its content in nominal mode.
 <details><summary>Click to expand folder structure. </summary>
 <p>
+
 ```
 S2A_MSIL1C_20200313T095031_N0209_R079_T33UYQ_20200313T102505.SAFE
 S2A_TEST_GIP_CKEXTL_S_ALLSITES_00001_20190626_21000101.EEF
@@ -211,11 +212,8 @@ The use of peps_download.py to download Sentinel-2 L1C products is recommended :
 
 - Some users tend to store the data per site. A given site can contain several S2-tiles. All the L1C tiles corresponding to a site are stored in a directory named /path/to/L1C_DATA/Site
 
-- Unzip the LIC files in /path/to/L1C_DATA/Avignon
 
 <a name="parameters"></a>
-
-
 ### Create DTM
 A DTM folder is needed to process data with MAJA which needs to have the same geographical extent as the L1C input product - It depends on the tile you want to process. A tool exists to create this DTM, [it is available in the "prepare_mnt" folder](StartMaja/prepare_mnt/Readme.md).
 When using Start_maja the creation of the folder in Maja-format is automatically attempted. For this the `repRAW` and `repGSW` directories in your `folders.txt` file need to be set.
