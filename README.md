@@ -1,5 +1,5 @@
 # MAJA
-<img  title="Ambaro Bay, Madagascar" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2017/05/20160406.png" width="300" height="300" align="right"  /> <img  title="logo MAJA" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/11/logo_maja.png" alt="" width="80"  />  <img  title="logo CNES" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/03/Logo-CNES-horizontal-bleu-300-e1425986175723.png" alt="" width="130"  /> <img  title="logo CESBIO" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2012/12/logo_cesbio.png" alt="" width="110"  /> <img  title="logo CSSI" src="https://www.embedded-france.org/wp-content/uploads/2018/06/cs_2008_fr-1.jpg" alt="" width="150"  />  <img  title="logo DLR" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/11/logo_DLR.jpg" alt="" width="90"  />
+<img  title="Ambaro Bay, Madagascar" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2017/05/20160406.png" width="300" height="300" align="right"  /> <img  title="logo MAJA" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/11/logo_maja.png" alt="" width="80"  />  <img  title="logo CNES" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/03/Logo-CNES-horizontal-bleu-300-e1425986175723.png" alt="" width="130"  /> <img  title="logo CESBIO" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2012/12/logo_cesbio.png" alt="" width="110"  /> <img  title="logo CS GROUP - France" src="https://www.2isd.com/wp-content/uploads/2020/01/cs-group-squarelogo-1570645224076.png" alt="" width="150"  />  <img  title="logo DLR" src="https://labo.obs-mip.fr/wp-content-labo/uploads/sites/19/2015/11/logo_DLR.jpg" alt="" width="90"  />
 
 
 1. [Installing Maja](#Requirements)
@@ -14,7 +14,7 @@
 
 
 
-MAJA (for Maccs-Atcor Joint Algorithm), is an atmospheric correction and cloud screening software based on [the MACCS processor](https://labo.obs-mip.fr/multitemp/maccs-how-it-works/), developped for CNES by CS-SI, from a method and a prototype developped at CESBIO, <sup>[1](#ref1)</sup> <sup>[2](#ref2)</sup> <sup>[3](#ref3)</sup>.
+MAJA (for Maccs-Atcor Joint Algorithm), is an atmospheric correction and cloud screening software based on [the MACCS processor](https://labo.obs-mip.fr/multitemp/maccs-how-it-works/), developped for CNES by CS GROUP - France, from a method and a prototype developped at CESBIO, <sup>[1](#ref1)</sup> <sup>[2](#ref2)</sup> <sup>[3](#ref3)</sup>.
 In 2017, thanks to an agreement between CNES and DLR and to some funding from ESA, we started adding methods from DLR 's atmospheric correction software ATCOR into MACCS.
 MACCS then became MAJA. 
 
@@ -306,7 +306,7 @@ It will serve as a forum.
 
 * **Centre National d'Etudes Spatiales (CNES)** 
 * **Centre d'Etudes Spatiales de la Biosphère (CESBIO)**
-* **CS-SI France**
+* **CS GROUP - France**
 
 <a name="references"></a>
 ## 9 - References :
