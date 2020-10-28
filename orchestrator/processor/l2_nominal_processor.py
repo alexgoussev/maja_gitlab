@@ -176,7 +176,7 @@ class L2NominalProcessor(L2Processor):
         LOGGER.debug(
             "Starting L2NominalProcessor::ScientificProcessing(): get the L2 product filename in the input directory...")
         l2_image_reader = product_utils.get_input_l2_image_product(
-            self._apphandler.get_input_directory(), self._apphandler, False)
+            self._apphandler.get_input_directory(), self._apphandler, False, self.DataDEMMap.get(l_UniqueSatelliteD))
         LOGGER.info("The L2 product found is <" + l2_image_reader.ProductFilename + ">.")
 
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **

@@ -211,6 +211,7 @@ class MuscateL2ImageFileReader(L2ImageReaderBase):
         if p_EnableReadingPublicData:
             self.muscate_read_public_images(l_L2XMLHandler, p_PluginBase, working_dir)
         # ****  PRIVATE  DATA     *************************************************************************************
+
         self.read_private_images(
             self.L2PrivateImageFilenamesProvider,
             l_ReflectanceQuantificationValue,

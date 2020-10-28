@@ -71,22 +71,22 @@ def get_list_of_input_l1_image_product_sorted(dir,tile_id=None):
     return list_of_product_sorted
 
 
-def get_input_l2_image_product(dir, app_handler, enable_public_data):
+def get_input_l2_image_product(dir, app_handler, enable_public_data, dem):
     LOGGER.info("Searching for L2 product in " + dir)
-    list_of_product = get_list_of_input_l2_image_product_sorted(dir, app_handler, enable_public_data)
+    list_of_product = get_list_of_input_l2_image_product_sorted(dir, app_handler, enable_public_data, dem)
     if len(list_of_product) > 1:
         raise MajaDataException("There is more than one L2 image product in the input data.")
     return list_of_product[0]
 
 
-def get_list_of_input_l2_image_product_sorted(dir, app_handler, enable_public_data):
+def get_list_of_input_l2_image_product_sorted(dir, app_handler, enable_public_data, dem):
     list_of_product = L2ImageReaderProvider.get_list_of_l2_products(dir)
     LOGGER.info("Nb L2 product found : " + str(list_of_product.__len__()))
     if list_of_product.__len__() == 0:
         raise MajaDataException("No L2 product found")
     dictofproduct = {}
     for pr in list_of_product:
-        l2product = L2ImageReaderProvider.create(pr, app_handler, enable_public_data)
+        l2product = L2ImageReaderProvider.create(pr, app_handler, enable_public_data, dem)
         l2jdate = get_julianday_as_double(l2product.Date)
         dictofproduct[l2jdate] = l2product
 

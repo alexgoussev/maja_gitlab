@@ -313,7 +313,7 @@ class L2BackwardProcessor(L2Processor):
                 # *************************************************************************************************************
                 LOGGER.debug(
                     "Starting L2NominalProcessor::ScientificProcessing(): get the L2 product filename in the input directory...")
-                l2_image_reader = L2ImageReaderProvider.create(l_InputL2ImageFilename, self._apphandler, False)
+                l2_image_reader = L2ImageReaderProvider.create(l_InputL2ImageFilename, self._apphandler, False, self.DataDEMMap.get(l_UniqueSatelliteD))
                 LOGGER.info("The L2 product found is <" + l2_image_reader.ProductFilename + ">.")
 
                 # *************************************************************************************************************
@@ -412,7 +412,7 @@ class L2BackwardProcessor(L2Processor):
             # *************************************************************************************************************
             LOGGER.debug(
                 "Starting L2NominalProcessor::ScientificProcessing(): get the L2 product filename in the input directory...")
-            l2_image_reader = L2ImageReaderProvider.create(l_InputL2ImageFilename, self._apphandler, False)
+            l2_image_reader = L2ImageReaderProvider.create(l_InputL2ImageFilename, self._apphandler, False, self.DataDEMMap.get(l_UniqueSatelliteD))
             LOGGER.info("The L2 product found is <" + l2_image_reader.ProductFilename + ">.")
 
             # *************************************************************************************************************

@@ -50,6 +50,7 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.common.interfaces.maja_xml_app_lutmap import *
 import orchestrator.common.date_utils as date_utils
+from orchestrator.cots.otb.algorithms.otb_resample import resample, OtbResampleType
 import os
 import io
 
@@ -94,6 +95,7 @@ class L2ImageReaderBase(object):
         self.L2PrivateImageFilenamesProvider = None
         self.dict_of_vals = {}
         self._coarse_pipeline = OtbPipelineManager()
+        self._dem = None
 
     def read_info(self, product_filename, enable_public_data):
         raise MajaNotYetImplemented("Could not instanciate base class")
@@ -142,46 +144,74 @@ class L2ImageReaderBase(object):
         # #* RTA Reader connection */
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - RTA image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_rta_image_filename() + ".")
+
+        tmp_rta_resample = os.path.join(working_dir, "tmp_rta_resample.tif")
+        app_rta_resample = resample(p_L2PrivateImageFilenamesProvider.get_rta_image_filename(),
+                                      self._dem.ALC,
+                                      tmp_rta_resample,
+                                      OtbResampleType.BCO, padradius=4.0, write_output=False)
         tmp_rta_scale = os.path.join(working_dir, "tmp_rta_scale.tif")
-        param_scaled_rta = {"im": p_L2PrivateImageFilenamesProvider.get_rta_image_filename(),
+        param_scaled_rta = {"im": app_rta_resample.getoutput().get("out"),
                             "coef": l_ReflectanceQuantificationValue,
                             "out": tmp_rta_scale
                             }
         rta_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rta, write_output=True)
         self._coarse_pipeline.add_otb_app(rta_scal_app)
+        self._coarse_pipeline.add_otb_app(app_rta_resample)
         self.dict_of_vals["RTAImage"] = rta_scal_app.getoutput()["out"]
         # ********************************************************************************************************/
         # * RTC Reader connection */
         # ********************************************************************************************************/
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - RTC image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_rtc_image_filename() + ".")
+
+        tmp_rtc_resample = os.path.join(working_dir, "tmp_rtc_resample.tif")
+        app_rtc_resample = resample(p_L2PrivateImageFilenamesProvider.get_rtc_image_filename(),
+                                    self._dem.ALC,
+                                    tmp_rtc_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=False)
+
         tmp_rtc_scale = os.path.join(working_dir, "tmp_rtc_scale.tif")
-        param_scaled_rtc = {"im": p_L2PrivateImageFilenamesProvider.get_rtc_image_filename(),
+        param_scaled_rtc = {"im": app_rtc_resample.getoutput().get("out"),
                             "coef": l_ReflectanceQuantificationValue,
                             "out": tmp_rtc_scale
                             }
         rtc_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rtc, write_output=True)
         self._coarse_pipeline.add_otb_app(rtc_scal_app)
+        self._coarse_pipeline.add_otb_app(app_rtc_resample)
         self.dict_of_vals["RTCImage"] = rtc_scal_app.getoutput()["out"]
         # ********************************************************************************************************/
         # * RCR Reader connection */
         # ********************************************************************************************************/
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - RCR image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_rcr_image_filename() + ".")
+        tmp_rcr_resample = os.path.join(working_dir, "tmp_rcr_resample.tif")
+        app_rcr_resample = resample(p_L2PrivateImageFilenamesProvider.get_rcr_image_filename(),
+                                    self._dem.ALC,
+                                    tmp_rcr_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=False)
         tmp_rcr_scale = os.path.join(working_dir, "tmp_rcr_scale.tif")
-        param_scaled_rcr = {"im": p_L2PrivateImageFilenamesProvider.get_rcr_image_filename(),
+        param_scaled_rcr = {"im": app_rcr_resample.getoutput().get("out"),
                             "coef": l_ReflectanceQuantificationValue,
                             "out": tmp_rcr_scale
                             }
         rcr_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_rcr, write_output=True)
         self._coarse_pipeline.add_otb_app(rcr_scal_app)
+        self._coarse_pipeline.add_otb_app(app_rcr_resample)
+
         self.dict_of_vals["RCRImage"] = rcr_scal_app.getoutput()["out"]
         # ********************************************************************************************************/
         # * PXD Reader connection */
         # ********************************************************************************************************/
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - PXD image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_pxd_image_filename() + ".")
-        self.dict_of_vals["PXDImage"] = p_L2PrivateImageFilenamesProvider.get_pxd_image_filename()
+        tmp_pxd_resample = os.path.join(working_dir, "tmp_pxd_resample.tif")
+        app_pxd_resample = resample(p_L2PrivateImageFilenamesProvider.get_pxd_image_filename(),
+                                    self._dem.ALC,
+                                    tmp_pxd_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=True)
+        self._coarse_pipeline.add_otb_app(app_pxd_resample)
+        self.dict_of_vals["PXDImage"] = app_pxd_resample.getoutput().get("out")
 
         # ********************************************************************************************************/
         # * WAS Reader connection (WAM product) */
@@ -191,9 +221,16 @@ class L2ImageReaderBase(object):
             p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
             [0],
             tmp_was,
-            write_output=True)
+            write_output=False)
+
+        tmp_was_resample = os.path.join(working_dir, "tmp_was_resample.tif")
+        app_was_resample = resample(was_extr_app.getoutput().get("out"),
+                                    self._dem.ALC,
+                                    tmp_was_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=True)
         self._coarse_pipeline.add_otb_app(was_extr_app)
-        self.dict_of_vals["WASImage"] = was_extr_app.getoutput()["out"]
+        self._coarse_pipeline.add_otb_app(app_was_resample)
+        self.dict_of_vals["WASImage"] = app_was_resample.getoutput()["out"]
         # ********************************************************************************************************/
         # * PWA Reader connection (WAM product) */
         # ********************************************************************************************************/
@@ -201,8 +238,16 @@ class L2ImageReaderBase(object):
         pwa_image_app = extract_roi(p_L2PrivateImageFilenamesProvider.get_wam_image_filename(),
                                     [1], tmp_pwa + ":uint8", write_output=False)
         self._coarse_pipeline.add_otb_app(pwa_image_app)
+
+        tmp_pwa_resample = os.path.join(working_dir, "tmp_pwa_resample.tif")
+        app_pwa_resample = resample(pwa_image_app.getoutput().get("out"),
+                                    self._dem.ALC,
+                                    tmp_pwa_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=False)
+        self._coarse_pipeline.add_otb_app(app_pwa_resample)
+
         tmp_vecpwa = os.path.join(working_dir, "tmp_pwa_vec.tif")
-        param_binpwa = {"im": pwa_image_app.getoutput()["out"],
+        param_binpwa = {"im": app_pwa_resample.getoutput()["out"],
                         "out": tmp_vecpwa,
                         "nbcomp": l_NumberOfComponentsPerPixelForPWAAndTWA}
         binpwa_app = OtbAppHandler("BinaryToVector", param_binpwa, write_output=True)
@@ -218,8 +263,16 @@ class L2ImageReaderBase(object):
             [2],
             tmp_twa + ":uint8",
             write_output=False)
+
+        tmp_twa_resample = os.path.join(working_dir, "tmp_twa_resample.tif")
+        app_twa_resample = resample(twa_image.getoutput().get("out"),
+                                    self._dem.ALC,
+                                    tmp_twa_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=False)
+        self._coarse_pipeline.add_otb_app(app_twa_resample)
+
         tmp_vectwa = os.path.join(working_dir, "tmp_twa_vec.tif")
-        param_bintwa = {"im": twa_image.getoutput().get("out"),
+        param_bintwa = {"im": app_twa_resample.getoutput().get("out"),
                         "out": tmp_vectwa,
                         "nbcomp": l_NumberOfComponentsPerPixelForPWAAndTWA}
         bintwa_app = OtbAppHandler("BinaryToVector", param_bintwa, write_output=True)
@@ -243,8 +296,16 @@ class L2ImageReaderBase(object):
 
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - STO image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_sto_image_filename() + ".")
+
+        tmp_sto_resample = os.path.join(working_dir, "tmp_sto_resample.tif")
+        app_sto_resample = resample(p_L2PrivateImageFilenamesProvider.get_sto_image_filename(),
+                                    self._dem.ALC,
+                                    tmp_sto_resample,
+                                    OtbResampleType.BCO, padradius=4.0, write_output=False)
+        self._coarse_pipeline.add_otb_app(app_sto_resample)
+
         tmp_sto_scale = os.path.join(working_dir, "tmp_sto_scale.tif")
-        param_scaled_sto = {"im": p_L2PrivateImageFilenamesProvider.get_sto_image_filename(),
+        param_scaled_sto = {"im": app_sto_resample.getoutput().get("out"),
                             "coef": l_ReflectanceQuantificationValue,
                             "out": tmp_sto_scale
                             }
@@ -256,7 +317,14 @@ class L2ImageReaderBase(object):
         # ********************************************************************************************************/
         LOGGER.debug("L2ImageFileReaderBase::ReadPrivateImages - NDT image filename: " +
                      p_L2PrivateImageFilenamesProvider.get_ndt_image_filename() + ".")
-        self.dict_of_vals["NDTImage"] = p_L2PrivateImageFilenamesProvider.get_ndt_image_filename()
+
+        tmp_ndt_resample = os.path.join(working_dir, "tmp_ndt_resample.tif")
+        app_ndt_resample = resample(p_L2PrivateImageFilenamesProvider.get_ndt_image_filename(),
+                                    self._dem.ALC,
+                                    tmp_ndt_resample,
+                                    OtbResampleType.BCO, padradius=4.0, threshold=0.25, write_output=True)
+        self._coarse_pipeline.add_otb_app(app_ndt_resample)
+        self.dict_of_vals["NDTImage"] = app_ndt_resample.getoutput().get("out")
 
         # Initialize the date. In plugin sub classes.
         # m_Date = ....
@@ -297,9 +365,24 @@ class L2ImageReaderBase(object):
                 chan = p_PluginBase.CLDDataBandsSelected.index(b)
                 app_extract_cld = extract_roi(cld_vec_image, [chan], tmp_cld_chan, write_output=False)
                 self._coarse_pipeline.add_otb_app(app_extract_cld)
-                self.dict_of_vals["VectorizedCLDSubOutput"][b] = app_extract_cld.getoutput()["out"]
+
+                tmp_cld_resample = os.path.join(working_dir, "tmp_cld_resample.tif")
+                app_cld_resample = resample(app_extract_cld.getoutput().get("out"),
+                                            self._dem.ALC,
+                                            tmp_cld_resample,
+                                            OtbResampleType.BCO, padradius=4.0, threshold=0.25, write_output=True)
+                self._coarse_pipeline.add_otb_app(app_cld_resample)
+
+                self.dict_of_vals["VectorizedCLDSubOutput"][b] = app_cld_resample.getoutput()["out"]
             else:
-                self.dict_of_vals["VectorizedCLDSubOutput"][b] = cld_const_zero_app.getoutput()["out"]
+                tmp_cld_resample = os.path.join(working_dir, "tmp_cld_resample.tif")
+                app_cld_resample = resample(cld_const_zero_app.getoutput()["out"],
+                                            self._dem.ALC,
+                                            tmp_cld_resample,
+                                            OtbResampleType.BCO, padradius=4.0, threshold=0.25, write_output=True)
+                self._coarse_pipeline.add_otb_app(app_cld_resample)
+
+                self.dict_of_vals["VectorizedCLDSubOutput"][b] = app_cld_resample.getoutput()["out"]
 
         # *************************************************************************************************************
         #  Generate a map of LUT containing all TOCR miniLUTs of the L2 product at D-1 (L2inTOCR)

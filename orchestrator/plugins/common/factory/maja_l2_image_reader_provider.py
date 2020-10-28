@@ -46,14 +46,14 @@ LOGGER = configure_logger(__name__)
 class L2ImageReaderProvider(object):
 
     @staticmethod
-    def create(product_filename, app_handler, enable_reading_public):
+    def create(product_filename, app_handler, enable_reading_public, dem):
         creators = FactoryBase.get_registered("L2ImageReaderBase")
         for crea in creators:
             LOGGER.info("Trying : " + crea.__name__)
             if crea().can_read(product_filename):
                 l2reader = crea()
                 l2reader.read_info(product_filename, enable_reading_public)
-                l2reader.read(product_filename, app_handler, enable_reading_public)
+                l2reader.read(product_filename, app_handler, enable_reading_public, dem)
                 return l2reader
         raise MajaBusinessException("No factory to handle " + product_filename)
 
