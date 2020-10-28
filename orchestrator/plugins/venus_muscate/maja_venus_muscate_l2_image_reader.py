@@ -51,7 +51,8 @@ class MajaVenusMuscateL2ImageReader(MuscateL2ImageFileReader):
     def can_read(self, product_filename):
         return self.can_read_with_plugin_base(product_filename, self.plugin)
 
-    def read(self, product_filename, app_handler, enable_public_data):
+    def read(self, product_filename, app_handler, enable_public_data, dem):
+        self._dem = dem
         self.read_with_plugin_base(product_filename, enable_public_data, app_handler, self.plugin)
 
     def read_info(self, product_filename, enable_public_data):
