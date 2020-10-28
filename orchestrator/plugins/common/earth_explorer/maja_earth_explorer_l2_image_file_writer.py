@@ -245,31 +245,34 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 LOGGER.debug("L2ImageFileReader::Gen Public image file for the resolution " + l_StrResolution + ".")
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-                # Read the Coef apply for SRE and FRE images
-                LOGGER.info(
-                    "SRE and FRE values multiply by the reflectance quantification value " +
-                    str(p_ReflectanceQuantificationValue) +
-                    ".")
-                # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # ** ** PUBLIC  DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 #Store image pointer and filename
                 tmp_l2_filename_list = []
                 tmp_l2_image_list = []
                 tmp_l2_pipe = OtbPipelineManager()
-                # START WRITING SRE Image file DATA
-                # Caching the SRE image, before computing the QuickLook.
-                # Create the scalar image filter
-                sre_filename = p_L2ImageFilenamesProvider.get_sre_filenames()[
-                                   resol] + file_utils.get_extended_filename_write_image_file_standard()
-                param_scaled_sre = {
-                    "im": self._sre_list[resol],
-                    "coef": p_ReflectanceQuantificationValue,
-                    "out": sre_filename+":int16"}
-                sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre,
-                                             write_output=is_croco_on("earthexplorer.l2writer.sre"))
-                tmp_l2_image_list.append(sre_scal_app.getoutput().get("out"))
-                tmp_l2_filename_list.append(sre_filename)
-                tmp_l2_pipe.add_otb_app(sre_scal_app)
+
+                if not p_EnvCorOption or (
+                        p_EnvCorOption and self.plugin.ConfigUserCamera.get_Business().get_WriteSRE()):
+                    # Read the Coef apply for SRE images
+                    LOGGER.info(
+                        "SRE values multiply by the reflectance quantification value " +
+                        str(p_ReflectanceQuantificationValue) +
+                        ".")
+                    # START WRITING SRE Image file DATA
+                    # Caching the SRE image, before computing the QuickLook.
+                    # Create the scalar image filter
+                    sre_filename = p_L2ImageFilenamesProvider.get_sre_filenames()[
+                                       resol] + file_utils.get_extended_filename_write_image_file_standard()
+                    param_scaled_sre = {
+                        "im": self._sre_list[resol],
+                        "coef": p_ReflectanceQuantificationValue,
+                        "out": sre_filename+":int16"}
+                    sre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_sre,
+                                                 write_output=is_croco_on("earthexplorer.l2writer.sre"))
+                    tmp_l2_image_list.append(sre_scal_app.getoutput().get("out"))
+                    tmp_l2_filename_list.append(sre_filename)
+                    tmp_l2_pipe.add_otb_app(sre_scal_app)
+
                 #QuickLook stuff
                 if resol == resol_QLK :
                     tmp_sre_roi_red = os.path.join(working_dir, "tmp_sre_roi_red.tif")
@@ -298,6 +301,11 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 # START WRITING FRE Image file DATA
                 fre_scal_app = None
                 if p_EnvCorOption:
+                    # Read the Coef apply for SRE images
+                    LOGGER.info(
+                        "FRE values multiply by the reflectance quantification value " +
+                        str(p_ReflectanceQuantificationValue) +
+                        ".")
                     fre_filename = p_L2ImageFilenamesProvider.get_fre_filenames()[
                                        resol] + file_utils.get_extended_filename_write_image_file_standard()
                     param_scaled_fre = {

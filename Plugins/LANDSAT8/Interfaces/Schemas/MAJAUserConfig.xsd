@@ -56,6 +56,7 @@
                         <xs:sequence>
                             <xs:element name="ImageDivision" type="maja:ImageDivision_Type"/>
                             <xs:element name="L2CoarseResolution" type="maja:NonNegativeInteger_Type"/>
+                            <xs:element name="WriteSRE" type="maja:Bool_Type"/>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>

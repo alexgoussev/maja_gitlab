@@ -118,6 +118,8 @@ def test(argv):
     l2_image_writer = L2ImageWriterProvider.create(l1product.PluginName)
     l2_image_writer.set_dtm(dem)
     l2_image_writer.set_current_plugin_base(l_CurrentPluginBase)
+    l2_image_writer.plugin.initialize(app_handler)
+
     l2_image_writer.set_copy_private_from_l2_input_to_l2_output(False)
     l2_image_writer.set_write_l2_products(True)
     l2_image_writer.set_output_directory(app_handler._workingDirectory)
