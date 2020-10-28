@@ -1038,14 +1038,19 @@ class BusinessType(GeneratedsSuper):
     member_data_items_ = {
         'ImageDivision': MemberSpec_(
             'ImageDivision', 'ImageDivision_Type', 0, 0, {
-                'type': 'ImageDivision_Type', 'name': 'ImageDivision'}, None) }
+                'type': 'ImageDivision_Type', 'name': 'ImageDivision'}, None),
+        'WriteSRE' : MemberSpec_(
+            'WriteSRE', 'xs:boolean', 0, 0, {
+                'type': 'xs:boolean', 'name': 'WriteSRE'}, None)
+    }
     subclass = None
     superclass = None
 
-    def __init__(self, ImageDivision=None):
+    def __init__(self, ImageDivision=None, WriteSRE=False):
         self.original_tagname_ = None
         self.ImageDivision = ImageDivision
         self.validate_NonNegativeInteger_Type(self.ImageDivision)
+        self.write_sre = WriteSRE
 
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
@@ -1063,6 +1068,10 @@ class BusinessType(GeneratedsSuper):
     def get_ImageDivision(self): return self.ImageDivision
 
     def set_ImageDivision(self, ImageDivision): self.ImageDivision = ImageDivision
+
+    def get_WriteSRE(self): return self.WriteSRE
+
+    def set_WriteSRE(self, WriteSRE): self.WriteSRE = WriteSRE
 
     def validate_NonNegativeInteger_Type(self, value):
         # Validate type NonNegativeInteger_Type, a restriction on xs:nonNegativeInteger.
@@ -1123,6 +1132,10 @@ class BusinessType(GeneratedsSuper):
             eol_ = ''
         if self.ImageDivision is not None:
             self.ImageDivision.export(outfile, level, namespace_, name_='ImageDivision', pretty_print=pretty_print)
+        if self.WriteSRE is not None:
+            showIndent(outfile, level, pretty_print)
+            outfile.write('<maja:WriteSRE>%s</maja:WriteSRE>%s' %
+                          (self.gds_format_boolean(self.WriteSRE, input_name='WriteSRE'), eol_))
 
     def build(self, node):
         already_processed = set()
@@ -1141,6 +1154,16 @@ class BusinessType(GeneratedsSuper):
             obj_.build(child_)
             self.ImageDivision = obj_
             obj_.original_tagname_ = 'ImageDivision'
+        elif nodeName_ == 'WriteSRE':
+            sval_ = child_.text
+            if sval_ in ('true', '1'):
+                ival_ = True
+            elif sval_ in ('false', '0'):
+                ival_ = False
+            else:
+                ival_ = raise_parse_error(child_, 'requires boolean')
+            ival_ = self.gds_validate_boolean(ival_, node, 'WriteSRE')
+            self.WriteSRE = ival_
 # end class BusinessType
 
 

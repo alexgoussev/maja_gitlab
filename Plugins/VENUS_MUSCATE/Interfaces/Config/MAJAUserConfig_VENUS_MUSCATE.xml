@@ -48,6 +48,8 @@
 	    </ImageDivision>
 	    <!-- L2 coarse resolution in meter -->
 	    <L2CoarseResolution>100</L2CoarseResolution>
+        <!-- Option to write or not write SRE images in the L2 product-->
+        <WriteSRE>true</WriteSRE>
    </Business>
     <Algorithms>
       <GRID_Reference_Altitudes>

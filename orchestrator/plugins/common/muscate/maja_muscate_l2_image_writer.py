@@ -83,6 +83,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
     # Generate data method
     def write(self, working_dir):
         LOGGER.debug("Start MuscateL2ImageFileWriter::Write() ...")
+
         l_L1XMLFilename = self._l1_image_info.HeaderFilename
         LOGGER.debug("Start writing the L2 product for this L1 header filename <" + l_L1XMLFilename +
                      "> in the output directory <" + self._l2_output_directory + ">.")
@@ -189,6 +190,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
             working_dir):
 
         # IF PUBLIC PART OF L2 PRODUCT IS WRITTEN
+
         if p_WritePublicProduct:
             l_BandsDefinitions = self._plugin.BandsDefinitions
 
@@ -226,11 +228,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                     l_grpSuffix = l_ListOfL2Res[resol]
                 l_StrResolution = l_BandsDefinitions.ListOfL2Resolution[resol]
 
-                # Read the Coef apply for SRE and FRE images
-                LOGGER.info(
-                    "SRE and FRE values multiply by the reflectance quantification value " +
-                    str(p_ReflectanceQuantificationValue) +
-                    ".")
+
                 # *************************************************************************************************************
                 # ****  PUBLIC  DATA      ************************************************
                 # *************************************************************************************************************
@@ -242,13 +240,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 #Extract each channel for each file
                 tmp_l2_filename_list = []
                 tmp_l2_image_list = []
-                tmp_sre_scaled = os.path.join(working_dir, "tmp_sre_multi_round_" + l_StrResolution + ".tif")
-                param_scaled_sre = {"im": self._sre_list[resol],
-                                    "coef": p_ReflectanceQuantificationValue,
-                                    "out": tmp_sre_scaled
-                                    }
-                scaled_sre_app = OtbAppHandler("RoundImage", param_scaled_sre, write_output=False)
-                sre_pipeline.add_otb_app(scaled_sre_app)
+
                 for i in range(l_NumberOfBands):
                     if resol == resol_QLK and (l_RedBandId == i or l_GreenBandId == i or l_BlueBandId == i):
                         tmp_sre_roi = os.path.join(working_dir, "tmp_sre_roi_" + l_ListOfBand[i] + ".tif")
@@ -263,13 +255,30 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                         elif l_BlueBandId == i:
                             self._qckl_blue_image = tmp_sre_roi
                         sre_pipeline.add_otb_app(tmp_sre_roi_app)
-                    tmp_sre_scaled_roi = os.path.join(working_dir, "tmp_sre_scaled_roi_" + l_ListOfBand[i] + ".tif")
-                    tmp_sre_scaled_roi_app = extract_roi(scaled_sre_app.getoutput().get("out"), [i],
-                                                         tmp_sre_scaled_roi + ":int16", write_output=False)
-                    tmp_l2_image_list.append(tmp_sre_scaled_roi_app.getoutput().get("out"))
-                    sre_pipeline.add_otb_app(tmp_sre_scaled_roi_app)
-                    tmp_l2_filename_list.append(l_BaseL2FullFilename + "_SRE_" + l_ListOfBand[i] + ".tif" +
-                                                file_utils.get_extended_filename_write_image_file_standard())
+
+                    if not p_EnvCorOption or (p_EnvCorOption and self.plugin.ConfigUserCamera.get_Business().get_WriteSRE()):
+                        # Read the Coef apply for SRE and FRE images
+                        LOGGER.info(
+                            "SRE values multiply by the reflectance quantification value " +
+                            str(p_ReflectanceQuantificationValue) +
+                            ".")
+
+                        tmp_sre_scaled = os.path.join(working_dir, "tmp_sre_multi_round_" + l_StrResolution + ".tif")
+                        param_scaled_sre = {"im": self._sre_list[resol],
+                                            "coef": p_ReflectanceQuantificationValue,
+                                            "out": tmp_sre_scaled
+                                            }
+                        scaled_sre_app = OtbAppHandler("RoundImage", param_scaled_sre, write_output=False)
+                        sre_pipeline.add_otb_app(scaled_sre_app)
+
+                        tmp_sre_scaled_roi = os.path.join(working_dir, "tmp_sre_scaled_roi_" + l_ListOfBand[i] + ".tif")
+                        tmp_sre_scaled_roi_app = extract_roi(scaled_sre_app.getoutput().get("out"), [i],
+                                                             tmp_sre_scaled_roi + ":int16", write_output=False)
+                        tmp_l2_image_list.append(tmp_sre_scaled_roi_app.getoutput().get("out"))
+                        sre_pipeline.add_otb_app(tmp_sre_scaled_roi_app)
+                        tmp_l2_filename_list.append(l_BaseL2FullFilename + "_SRE_" + l_ListOfBand[i] + ".tif" +
+                                                    file_utils.get_extended_filename_write_image_file_standard())
+
 
 
                 # START WRITING FRE Image file DATA
@@ -277,6 +286,11 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                 tmp_stl_filename = os.path.join(working_dir, "tmp_stl_" + l_StrResolution + ".tif")
                 fre_pipeline = OtbPipelineManager()
                 if p_EnvCorOption:
+                    # Read the Coef apply for SRE and FRE images
+                    LOGGER.info(
+                        "FRE values multiply by the reflectance quantification value " +
+                        str(p_ReflectanceQuantificationValue) +
+                        ".")
                     # Initialize the Scalar filter
                     tmp_fre_scaled = os.path.join(working_dir, "tmp_fre_multi_round_" + l_StrResolution + ".tif")
                     param_scaled_fre = {"im": self._fre_list[resol],
@@ -476,7 +490,7 @@ class MajaMuscateL2ImageWriter(L2ImageWriterBase):
                                        }
                 sat_binconcat_app = OtbAppHandler("BinaryConcatenate", param_sat_binconcat, write_output=True)
 
-                # START WRITING PIX Image file DATA
+                # STfART WRITING PIX Image file DATA
                 if "PIXImages" in self._l1_image_info.MuscateData:
                     LOGGER.debug("The L1 product have 'Aberrant_Pixels' masks. There are writed in the L2 out product...")
                     otb_file_utils.otb_copy_image_to_file(self._l2piximagelist[resol],
