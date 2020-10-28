@@ -114,9 +114,24 @@ num  Val  Id                                                                  Co
 16    OK  pyTv-S2-L2BACKWARD-011-F-N-SENTINEL2_MUSCATE-GENERAL_CHAIN          Validation fonctionnelle et numérique avec un produit SENTINEL2 Muscate en mode BACKWARD.
 17    OK  pyTv-S2-L2BACKWARD-011-F-N-SENTINEL2_MUSCATE-GENERAL_COMP_IMAGE     Non regression Images du test CHAIN correspondant
 18    OK  pyTv-S2-L2BACKWARD-011-F-N-SENTINEL2_MUSCATE-GENERAL_COMP_ASCII     Non regression Texte du test CHAIN correspondant
-19    OK  pyTv-S2-L2INIT-CROSSWRITING-SENTINEL2-SENTINEL2MUSCATE              Validation fonctionnelle et numérique avec un produit SENTINEL2 Natif vers Muscate en mode INIT .
-20    OK  pyTv-S2-L2INIT-CROSSWRITING-LANDSAT8-LANDSAT8MUSCATE                Validation fonctionnelle et numérique avec un produit LANDSAT8 Natif vers Muscate en mode INIT .
-21    OK  pyTv-S2-L2INIT-CROSSWRITING-VENUS-VENUSMUSCATE                      Validation fonctionnelle et numérique avec un produit VENUS Natif vers Muscate en mode INIT.
+==== ==== =================================================================== ============================================================================================================
+
+
+
+==== ==== =================================================================== ============================================================================================================
+num  Val  Id                                                                  Commentaire
+==== ==== =================================================================== ============================================================================================================
+19    OK  pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-MIXRES_CHAIN            Validation fonctionnelle et numérique avec un produit SENTINEL2 Muscate en mode NOMINAL.
+20    OK  pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-MIXRES_COMP_IMAGE       Non regression Images du test CHAIN correspondant
+21    OK  pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-MIXRES_COMP_ASCII       Non regression Texte du test CHAIN correspondant
+22    OK  pyTv-S2-L2INIT-CROSSWRITING-SENTINEL2-SENTINEL2MUSCATE              Validation fonctionnelle et numérique avec un produit SENTINEL2 Natif vers Muscate en mode INIT .
+23    OK  pyTv-S2-L2INIT-CROSSWRITING-LANDSAT8-LANDSAT8MUSCATE                Validation fonctionnelle et numérique avec un produit LANDSAT8 Natif vers Muscate en mode INIT .
+24    OK  pyTv-S2-L2INIT-CROSSWRITING-VENUS-VENUSMUSCATE                      Validation fonctionnelle et numérique avec un produit VENUS Natif vers Muscate en mode INIT.
+25    OK  pyTv-VE-L2INIT-VENUS-MUSCATE_CHAIN                                  Validation fonctionnelle et numérique avec un produit VENUS Muscate en mode INIT.
+26    OK  pyTv-VE-L2INIT-VENUS-MUSCATE_COMP_IMAGE                             Non regression Images du test CHAIN correspondant
+27    OK  pyTv-VE-L2INIT-VENUS-MUSCATE_COMP_ASCII                             Non regression Texte du test CHAIN correspondant
+28    OK  pyTv_START_MAJA                                                     Validaton fonctionnelle et numérique de la chaîne StartMaja avec un produit Sentinel en mode INIT et NOMINAL
+29    OK  pyTv_START_MAJA_COMP_IMAGE                                          Non regression Images du test CHAIN correspondant
 ==== ==== =================================================================== ============================================================================================================
 
 
@@ -158,6 +173,13 @@ num  Val  Id                                                                  Co
 
 	Valids/pyTv-S2-L2BACKWARD-011-F-N-SENTINEL2_MUSCATE-GENERAL_CHAIN
 
+
+.. toctree::
+	:maxdepth: 5
+	:caption: pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-MIXRES_CHAIN
+
+	Valids/pyTv-S2-L2NOMINAL-011-F-N-SENTINEL2_MUSCATE-MIXRES_CHAIN
+
 .. toctree::
 	:maxdepth: 5
 	:caption: pyTv-S2-L2INIT-CROSSWRITING-SENTINEL2-SENTINEL2MUSCATE
@@ -176,3 +198,18 @@ num  Val  Id                                                                  Co
 	:caption: pyTv-S2-L2INIT-CROSSWRITING-VENUS-VENUSMUSCATE
 
 	Valids/pyTv-S2-L2INIT-CROSSWRITING-VENUS-VENUSMUSCATE
+
+.. toctree::
+	:maxdepth: 5
+	:caption: pyTv-VE-L2INIT-VENUS-MUSCATE_CHAIN
+
+	Valids/pyTv-VE-L2INIT-VENUS-MUSCATE_CHAIN
+
+
+.. toctree::
+	:maxdepth: 5
+	:caption: pyTv_START_MAJA
+
+	Valids/pyTv_START_MAJA
+
+
