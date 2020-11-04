@@ -34,12 +34,12 @@
 ############################################################################################################
 
 # The MAJA core version
-set(MAJA_CORE_VERSION "4.2.1")
+set(MAJA_CORE_VERSION "4.2.2")
 
 # The MAJA algorithms version (3 digits)
-set(MAJA_ALGORITHMS_VERSION "4.2.1")
+set(MAJA_ALGORITHMS_VERSION "4.2.2")
 
-set(MAJA_VERSION "4.2.1")
+set(MAJA_VERSION "4.2.2")
 set(MAJA_VERSION_CHAIN "4.2")
 
 # List of the spectral camera available
