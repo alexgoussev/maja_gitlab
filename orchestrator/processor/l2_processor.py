@@ -487,7 +487,7 @@ class L2Processor(BaseProcessor):
         l_IsCirrusCorrected = False
         l_DFPMaskAvailable = l_CurrentPluginBase.DFPMasking
         l_StopLevel2Processing = False
-        l_WriteL2Products = True
+        l_WriteL2Products = False
         # New in 4-1 : Re init the validity of the product
         self._productIsValid = True
         # Get the caching option
