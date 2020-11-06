@@ -31,12 +31,12 @@ Rappel de la fonction       : MAJA constitue la chaîne de niveaux 2 multi-missi
 
 IDENTIFICATION DE LA VERSION
 ----------------------------
-Date version                : 29/09/2020
-Numero version              : 4.2.1
+Date version                : 04/11/2020
+Numero version              : 4.2.2
 Numero version Superbuild-Archive : 4.2.0
 Numero version reference    : 4.2.0
 Etat version                : Teste, opérationnel.
-Justification               : Livraison MAJA V4.2.1
+Justification               : Livraison MAJA V4.2.2
 Type de livraison           : Complete
 
 
@@ -185,10 +185,8 @@ Liste des FA corrigees
 
       FA tracees dans le code source
       ------------------------------
-      161 ::               Landsat8 debug message format error 			|   #CS 
-      163 ::               Venus CAMS not subscriptable (1) 			|   #CS
-      165 ::               Not all CAMS models present       			|   #CS
-      170 ::               Wrong folder.txt.in			                |   #CS
+      185 ::       Maja 4.2.1 No quicklook written for non-valid L2         			|   #CS
+      182 ::       --version is no longer available                               |   #CS
            
 
       FA non tracees dans le code source
@@ -197,9 +195,7 @@ Liste des FA corrigees
 
       FA incluant une nouvelle bibliotheque
       --------------------------------------
-
-      166 ::               Maja 4.2 Performance difference RH6 <-> RH7 			|   #CS
-
+      Néant
 
       FA sur documentation
       --------------------
@@ -215,7 +211,6 @@ Liste des FA non reproductbiles ou annulees
 
       FA annulees
       -----------
-      164 ::               Venus CAMS not subscriptable (2) 			|   #CS
       
 
 Liste des DM prises en compte
