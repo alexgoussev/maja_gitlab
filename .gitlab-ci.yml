@@ -141,7 +141,7 @@ tv-centos7:
     - time rclone copy s3_otb:maja-data/TV/SENTINEL2 data/TV/SENTINEL2
     - time rclone copy s3_otb:maja-data/TV/LANDSAT8 data/TV/LANDSAT8
     - time rclone copy s3_otb:maja-data/TV/VENUS data/TV/VENUS
-    - time rclone copy s3_otb:maja-data/TV/VENUS data/TV/VENUS_MUSCATE
+    - time rclone copy s3_otb:maja-data/TV/VENUS_MUSCATE data/TV/VENUS_MUSCATE
     - CI/run_tv.sh tv_content.txt
   artifacts:
     expire_in: 20 days
