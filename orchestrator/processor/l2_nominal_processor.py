@@ -207,13 +207,13 @@ class L2NominalProcessor(L2Processor):
         LOGGER.info(self._apphandler.get_system_infos())
 
         # check conditional clouds ?
-        checking_conditional_clouds = [True]
+        self._checking_conditional_clouds = True
         LOGGER.info("Starting from L2InitProcessor, the main ScientificSingleProductProcessing() method...")
         l_enableL2resolution = self._apphandler.get_user_conf().get_Computing().get_EnableL2ResolutionProcessing()
         super(L2NominalProcessor, self).process_one_product(l_InitMode, l_BackwardMode, l_enableL2resolution,
                                                             False, True, True, self._l1product, l1_image_reader,
                                                             l_OzoneAmountValue, self._cams_status, l2_image_reader,
-                                                            l2_image_file_writer, checking_conditional_clouds)
+                                                            l2_image_file_writer)
         LOGGER.info("Ending ScientifiqProcessing")
         # Log system infos
         LOGGER.info(self._apphandler.get_system_infos())

@@ -1046,11 +1046,11 @@ class BusinessType(GeneratedsSuper):
     subclass = None
     superclass = None
 
-    def __init__(self, ImageDivision=None, WriteSRE=False):
+    def __init__(self, ImageDivision=None, WriteSRE=True):
         self.original_tagname_ = None
         self.ImageDivision = ImageDivision
         self.validate_NonNegativeInteger_Type(self.ImageDivision)
-        self.write_sre = WriteSRE
+        self.WriteSRE = WriteSRE
 
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:

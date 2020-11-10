@@ -117,7 +117,7 @@ class L2BackwardProcessor(L2Processor):
         # ----------------------------------------------------------------
         # Initialize the flag to validate the clouds probably
         # ----------------------------------------------------------------
-        l_checking_conditional_clouds = [False]
+        self._checking_conditional_clouds = False
         l_conditional_loop = False
         l_write_earthexplorer_headers = False
         l_write_temporary_l2_product = True
@@ -216,12 +216,11 @@ class L2BackwardProcessor(L2Processor):
                 l_write_temporary_l2_product,
                 l_write_l2_product_to_l2resolution,
                 None,
-                l_checking_conditional_clouds,
                 l2_image_file_writer,
                 l_GIPPL2COMMHandler)
             LOGGER.debug("  ->  self._productIsValid                     = " + str(self._productIsValid))
-            LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(l_checking_conditional_clouds[0]))
-            if (l_checking_conditional_clouds[0] is True) and (self._productIsValid is True):
+            LOGGER.debug("  ->  p_checking_conditional_clouds        = " + str(self._checking_conditional_clouds))
+            if (self._checking_conditional_clouds is True) and (self._productIsValid is True):
                 l_conditional_loop = True
             elif l_IndexOfL1Product == 1:
                 l_conditional_loop = True
@@ -243,7 +242,7 @@ class L2BackwardProcessor(L2Processor):
 
         # LAIG-DM-MAC-143599-CS
         # LAIG-FA-MAC-1658-CNES
-        if (l_checking_conditional_clouds[0] == False) or (self._productIsValid == False):
+        if (self._checking_conditional_clouds == False) or (self._productIsValid == False):
             LOGGER.warn(
                 "The INIT mode in Backward processing fail: all L1 products are not valid (too cloudy or too cirrus)"
                 " or the output L2 product generated contains too NoData values! "
@@ -341,7 +340,6 @@ class L2BackwardProcessor(L2Processor):
                     l_write_temporary_l2_product,
                     l_write_l2_product_to_l2resolution,
                     l2_image_reader,
-                    l_checking_conditional_clouds,
                     l2_image_file_writer,
                     l_GIPPL2COMMHandler)
 
@@ -439,7 +437,6 @@ class L2BackwardProcessor(L2Processor):
                 l_write_temporary_l2_product,
                 l_write_l2_product_to_l2resolution,
                 l2_image_reader,
-                l_checking_conditional_clouds,
                 l2_image_file_writer,
                 l_GIPPL2COMMHandler)
 
@@ -454,8 +451,7 @@ class L2BackwardProcessor(L2Processor):
 
     def single_product_processing(self, initmode, backwardmode, p_finalize_backward, p_L1ImageInformationsProvider,
                                 p_InputL1ImageFileReader, p_write_earthexplorer_headers, p_write_temporary_l2_product,
-                                p_write_l2_product_to_l2resolution, p_InputL2ImageFileReader,
-                                checking_conditional_clouds, p_OutputL2ImageFileWriter, p_GIPPL2COMMHandler):
+                                p_write_l2_product_to_l2resolution, p_InputL2ImageFileReader, p_OutputL2ImageFileWriter, p_GIPPL2COMMHandler):
 
         l_Sat = p_L1ImageInformationsProvider.Satellite
         # ---------------------------------------------------------------------------------------------
@@ -535,8 +531,7 @@ class L2BackwardProcessor(L2Processor):
             l_OzoneAmountValue,
             self._cams_status,
             p_InputL2ImageFileReader,
-            p_OutputL2ImageFileWriter,
-            checking_conditional_clouds)
+            p_OutputL2ImageFileWriter)
 
     def post_processing(self):
         LOGGER.info("Starting Postprocessing")

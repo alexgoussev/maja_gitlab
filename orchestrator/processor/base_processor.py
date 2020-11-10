@@ -46,6 +46,7 @@ class BaseProcessor(object):
     def __init__(self, apphandler):
         self._name = "BASE"
         self._productIsValid = True
+        self._checking_conditional_clouds = False
         self._apphandler = apphandler
         self._listofenabledsat = list()
         self._cams_status = CAMSStatus.DEACTIVATED
