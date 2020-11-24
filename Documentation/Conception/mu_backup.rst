@@ -1370,6 +1370,10 @@ Note:
 
    </ImageDivision>
 
+   <!-- Option to write or not write SRE images in the L2 product-->
+
+   <WriteSRE>true</WriteSRE>
+
    </Business>
 
    <Algorithms>
