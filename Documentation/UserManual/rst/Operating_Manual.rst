@@ -91,6 +91,10 @@ Note:
      ozone amount is available in the GIPP L2COMM. If the “ozone” option
      is set to false, the ozone content will be read in the meteo data.
 
+   | The field “WriteSRE” is used to enable or disable
+     the generation of the SRE images at L2 resolution (the default
+     value is true)
+
    In “MAJAUserConfig_<MISSION>.xml”, only the two previous options in
    Atmospheric_Absorption_Correction tag can be modified according to
    the availability of meteo data (for ozone amount) and the values of
@@ -145,6 +149,10 @@ Note:
    </NbStrips>
 
    </ImageDivision>
+
+   <!-- Option to write or not write SRE images in the L2 product-->
+
+   <WriteSRE>true</WriteSRE>
 
    </Business>
 
