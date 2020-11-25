@@ -1314,6 +1314,10 @@ Note:
 
 -  L2 coarse resolution set in the “L2CoarseResolution” field
 
+-  The field “WriteSRE” is used to enable or disable
+   the generation of the SRE images at L2 resolution (the default
+   value is true)
+
 -  | The option parameter that defines if a default constant value is
      used to set the ozone content
      (“Use_Default_Constant_Ozone_Amount”).
@@ -1372,9 +1376,9 @@ Note:
 
    </ImageDivision>
 
-   <!-- L2 coarse resolution in meter -->
+   <!-- Option to write or not write SRE images in the L2 product-->
 
-   <L2CoarseResolution>240</L2CoarseResolution>
+   <WriteSRE>true</WriteSRE>
 
    </Business>
 
