@@ -251,7 +251,7 @@ class AppHandler:
                 'L2BACKWARD'
                 ],
             default='L2INIT',
-            required=True)
+            required=False)
         parser.add_argument(
             "-t",
             "--enableTest",
@@ -277,11 +277,12 @@ class AppHandler:
             "-o",
             "--output",
             help="Output data directory (product directory). Default value: '.'",
-            required=True)
+            required=False)
         parser.add_argument(
             "-w",
             "--workingdir",
-            help="Working directory (working 'temporary' directory). Default value: the '--output parameter value'")
+            help="Working directory (working 'temporary' directory). Default value: the '--output parameter value'",
+            required=False)
 
         plugin_choices = "Available plugins : "
         creators = FactoryBase.get_registered("PluginBase")
