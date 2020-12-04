@@ -260,7 +260,7 @@ class CAMSFileHandler(object):
             cams_app_param["after.mrfile"] = self._afterFile["mr_file"]
             cams_app_param["after.rhfile"] = self._afterFile["rh_file"]
             cams_app_param["after.modellevels"] = self._afterFile["model_levels"]
-            if "NbNonInterpolate" in  self._beforeFile.keys():
+            if "NbNonInterpolate" in  self._afterFile.keys():
                 cams_app_param["after.nbnointerpol"] = self._afterFile["NbNonInterpolate"]
 
         self.__camsapp = OtbAppHandler("CAMSComputation", cams_app_param, write_output=True)
