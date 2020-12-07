@@ -128,7 +128,7 @@ tv-centos7:
     OTB_MAX_RAM_HINT: 40000
     ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: 16
   script:
-    - 'curl --location --output artifacts.zip --header "PRIVATE-TOKEN: $MAJA_ARTIFACTS" "https://gitlab.orfeo-toolbox.org/api/v4/projects/$CI_PROJECT_ID/jobs/artifacts/$CI_COMMIT_REF_NAME/download?job=build-centos7"'
+    - CI/get_ci_pkg.py
     - file artifacts.zip
     - unzip artifacts.zip
     - mkdir test_output
