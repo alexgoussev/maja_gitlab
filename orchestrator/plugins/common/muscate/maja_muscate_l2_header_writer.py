@@ -725,10 +725,11 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
             xml_tools.remove_node(output_handler.root, "//Product_Organisation/Muscate_Product/Image_List/" +
                                    "Image_MACC_template_temporary_node_Flat_Reflectance")
 
+
         if not self.writel2products:
             # DM2706
-            xml_tools.remove_child(output_handler.root, "//Product_Organisation/Muscate_Product/Image_List")
-            xml_tools.remove_child(output_handler.root, "//Product_Organisation/Muscate_Product/Mask_List")
+            xml_tools.remove_node(output_handler.root, "//Product_Organisation/Muscate_Product/Image_List")
+            xml_tools.remove_node(output_handler.root, "//Product_Organisation/Muscate_Product/Mask_List")
 
         # Write Private_Directory
         output_handler.set_value_of("JobProcessingInformationsFileFilename", "DATA/" + os.path.basename(pJpiFilename))
