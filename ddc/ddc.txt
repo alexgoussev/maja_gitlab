@@ -11,7 +11,7 @@
 
 MAJA
 Auteur : Equipe CS System d'Information
-Date   : 29/09/2020
+Date   : 17/12/2020
 
 Ce fichier contient la description complete de la configuration de l'article decrit ci-apres.
 
@@ -31,12 +31,12 @@ Rappel de la fonction       : MAJA constitue la chaîne de niveaux 2 multi-missi
 
 IDENTIFICATION DE LA VERSION
 ----------------------------
-Date version                : 04/11/2020
-Numero version              : 4.2.2
+Date version                : 07/12/2020
+Numero version              : 4.2.3
 Numero version Superbuild-Archive : 4.2.0
 Numero version reference    : 4.2.0
 Etat version                : Teste, opérationnel.
-Justification               : Livraison MAJA V4.2.2
+Justification               : Livraison MAJA V4.2.3
 Type de livraison           : Complete
 
 
@@ -185,8 +185,8 @@ Liste des FA corrigees
 
       FA tracees dans le code source
       ------------------------------
-      185 ::       Maja 4.2.1 No quicklook written for non-valid L2         			|   #CS
-      182 ::       --version is no longer available                               |   #CS
+      195 ::       Error QKL xsd validation         			                    |   #CS
+      193 ::       "AttributeError: 'NoneType' object has no attribute 'keys'"      |   #CS
            
 
       FA non tracees dans le code source
