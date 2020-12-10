@@ -185,7 +185,7 @@ maja_test_application(NAME apTvNewCamsMixedCompute
 
 
 
-maja_test_application(NAME apTvDirectionalCorrection
+maja_test_application(NAME apTvDirectionalCorrectionROY
                      APP  DirectionnalCorrection
                      OPTIONS    -solar.azimuth 143.195
                                 -solar.zenith 24.0717 
@@ -193,16 +193,37 @@ maja_test_application(NAME apTvDirectionalCorrection
                                 -viewing.azimuth 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105
                                 -refzenith 0
                                 -refazimuth 0
-                                -coeffsr 0 0.480620155 0.4441041348 0.3396449704 0.3396449704 0.4179634487 0.4962819269 0.4962819269 0.4962819269 0 0 0.3364431487 0.240406320
-                                -coeffsv 0 0.1020671835 0.1362940276 0.1343195266 0.1343195266 0.1205060291 0.1066925315 0.1066925315 0.1066925315 0 0 0.1320699708 0.1455981941
+                                -model roy
+                                -roy.coeffsr 0 0.480620155 0.4441041348 0.3396449704 0.3396449704 0.4179634487 0.4962819269 0.4962819269 0.4962819269 0 0 0.3364431487 0.240406320
+                                -roy.coeffsv 0 0.1020671835 0.1362940276 0.1343195266 0.1343195266 0.1205060291 0.1066925315 0.1066925315 0.1066925315 0 0 0.1320699708 0.1455981941
                      
-                     TESTENVOPTIONS ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrection.txt
+                     TESTENVOPTIONS ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrectionROY.txt
 
                      VALID   --compare-ascii ${EPSILON_4}
-                             ${MAJADATA_TVA_BASELINE}/apTvDirectionalCorrection.txt
-                             ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrection.txt
+                             ${MAJADATA_TVA_BASELINE}/apTvDirectionalCorrectionROY.txt
+                             ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrectionROY.txt
                     )
-                    
+
+
+maja_test_application(NAME apTvDirectionalCorrectionLUT
+                     APP  DirectionnalCorrection
+                     OPTIONS    -solar.azimuth 143.195
+                                -solar.zenith 24.0717
+                                -viewing.zenith 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321 6.08321
+                                -viewing.azimuth 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105
+                                -refzenith 0
+                                -refazimuth 0
+                                -model lut
+                                -lut.filename ${MAJADATA_TVA_INPUT}/ReduceLutComputationTest/giplut_dircor.xml
+
+                     TESTENVOPTIONS ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrectionLUT.txt
+
+                     VALID   --compare-ascii ${EPSILON_4}
+                             ${MAJADATA_TVA_BASELINE}/apTvDirectionalCorrectionLUT.txt
+                             ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvDirectionalCorrectionLUT.txt
+                    )
+
+
 maja_test_application(NAME apTvReduceLut
                      APP  ReduceLut
                      OPTIONS    -solar.azimuth 143.195
@@ -224,11 +245,7 @@ maja_test_application(NAME apTvReduceLutDirCorr
                                 -viewing.azimuth 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105 104.105
                                 -reducelut ${MAJA_TEST_OUTPUT_ROOT}/TVA/apTvReduceLutDirCorr.mhd
                                 -lut ${MAJADATA_TVA_INPUT}/ReduceLutComputationTest/giplut_cams.xml
-                                -refzenith 0
-                                -refazimuth 0
-                                -dircorr true
-                                -coeffsr 0 0.480620155 0.4441041348 0.3396449704 0.3396449704 0.4179634487 0.4962819269 0.4962819269 0.4962819269 0 0 0.3364431487 0.240406320
-                                -coeffsv 0 0.1020671835 0.1362940276 0.1343195266 0.1343195266 0.1205060291 0.1066925315 0.1066925315 0.1066925315 0 0 0.1320699708 0.1455981941
+                                -dircoefs 1 0.986902735905 0.98497933524 0.98646764014 0.98646764014 0.986423846844 0.986380472665 0.986380472665 0.986380472665 1 1 0.98666698674 0.986963
                                 
                      VALID   --compare-binary 
                              ${MAJADATA_TVA_BASELINE}/apTvReduceLutDirCorr.raw

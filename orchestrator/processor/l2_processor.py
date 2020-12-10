@@ -49,7 +49,7 @@ import orchestrator.processor.l2_processor_image_writer_setup as l2_processor_im
 import orchestrator.processor.l2_processor_header_writer_setup as l2_processor_header_writer_setup
 from orchestrator.common.dem.dem_base import DEMBase
 from orchestrator.common.maja_exceptions import *
-from orchestrator.common.constants import AOTEstimation
+from orchestrator.common.constants import AOTEstimation, DirectionalCorrection
 from orchestrator.common.interfaces.maja_lut_converter import LutConverter
 from orchestrator.common.interfaces.maja_smac_converter import SmacConverter
 import orchestrator.common.gipp_utils as gipp_utils
@@ -78,6 +78,7 @@ class L2Processor(BaseProcessor):
         self._name = "L2PROCESSOR"
         self.DataDEMMap = {}
         self._GIP_L2WATV_LookUpTableConverterMap = {}
+        self._GIP_DIRCOR_LookUpTableConverterMap = {}
         self._GIP_L2SMAC_ListOfCoeffsConverterMap = {}
         self._AthmosphericLutHandlerMap = {}
         self._CAMS_Files_HandlersMAP = {}
@@ -169,6 +170,7 @@ class L2Processor(BaseProcessor):
         l_constant_model_lut_map = {}
         for satkey in self._listofenabledsat:
             l_sat = self.get_associated_sat(satkey)
+            l_unique_sat = self.get_associated_unique_sat(satkey)
             l_plugin = MAJAPluginProvider.create(self.get_associated_plugin(satkey), self._apphandler)
             l_plugin_schema_dir = os.path.join(self._apphandler.get_schemas_root_install_dir(),
                                                l_plugin.MAJA_INSTALL_SCHEMAS_DIR)
@@ -212,6 +214,25 @@ class L2Processor(BaseProcessor):
                         validate_schema=self._validate_schemas,
                         schema_path=l_plugin_schema_dir)
                     self._GIP_L2WATV_LookUpTableConverterMap[l_sat] = watv_converter
+
+
+            if l_plugin.DirectionalCorrection and l_gippl2commhandler.has_value("DirCorrOption"):
+                dircor_model_str = l_gippl2commhandler.get_value("DirCorrOption")
+                dircormodel = DirectionalCorrection.get_dircorr_method(dircor_model_str)
+                if dircormodel == DirectionalCorrection.LUT :
+                    # Reader DIRCOR
+                    gip_dircor_filename = gipp_utils.get_gipp_filename_with_mission(
+                        self._apphandler.get_input_directory(), "GIP_DIRCOR", l_unique_sat)
+                    LOGGER.debug("DIRCOR filename : " + gip_dircor_filename)
+                    dircor_dbl = os.path.splitext(gip_dircor_filename)[0] + ".DBL"
+                    gipp_utils.uncompress_dbl_product(dircor_dbl)
+                    dircor_converter = LutConverter(
+                        self._apphandler.get_working_directory(),
+                        gip_dircor_filename,
+                        validate_schema=True,
+                        schema_path=l_plugin_schema_dir)
+                    self._GIP_DIRCOR_LookUpTableConverterMap[l_unique_sat] = dircor_converter
+
 
             # Athmospheric luts reader
             self._AthmosphericLutHandlerMap[l_sat] = AthmosphericLutHandler()
@@ -465,6 +486,17 @@ class L2Processor(BaseProcessor):
             l_WaterVapourDetermination) + ", GIP_L2COMM_UseDefaultConstantWaterAmount: "
             + str(l_GIP_L2COMM_UseDefaultConstantWaterAmount))
 
+        l_DirectionalCorrection = l_CurrentPluginBase.DirectionalCorrection
+        l_DIRCORModel = DirectionalCorrection.DEACTIVATED
+        if (l_DirectionalCorrection):
+            l_GIP_L2COMM_DirectionalCorrection = l_GIPPL2COMMHandler.has_value("DirCorrOption")
+            LOGGER.debug("Apply Directional Correction : " + str(l_GIP_L2COMM_DirectionalCorrection))
+            if l_GIP_L2COMM_DirectionalCorrection is True:
+                l_DIRCORModel_String = l_GIPPL2COMMHandler.get_value("DirCorrOption")
+                l_DIRCORModel = DirectionalCorrection.get_dircorr_method(l_DIRCORModel_String)
+                LOGGER.info("DIRCOR Model - l2 processor : " + l_DIRCORModel_String)
+
+
         # = == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == == ==
         #  Check the look up table
         if l_WaterVapourDetermination and l_GIP_L2COMM_UseDefaultConstantWaterAmount == False:
@@ -472,6 +504,13 @@ class L2Processor(BaseProcessor):
             if l_SatelliteD not in self._GIP_L2WATV_LookUpTableConverterMap:
                 raise MajaDataException(
                     "The input GIP_L2WATV file for the satellite '" + l_SatelliteD + "' is not present WATV Map.")
+
+        if l_DirectionalCorrection and l_DIRCORModel == DirectionalCorrection.LUT:
+            LOGGER.debug(self._GIP_DIRCOR_LookUpTableConverterMap)
+            if l_UniqueSatelliteD not in self._GIP_DIRCOR_LookUpTableConverterMap:
+                raise MajaDataException(
+                    "The input GIP_DIRCOR file for the satellite '" + l_UniqueSatelliteD + "' is not present DIRCOR Map.")
+
 
         if l_SatelliteD not in self._AthmosphericLutHandlerMap:
             raise MajaDataException(
@@ -508,6 +547,7 @@ class L2Processor(BaseProcessor):
         l_global_params_dict["CloudMaskingKnownCloudsAltitude"] = l_CurrentPluginBase.CloudMaskingKnownCloudsAltitude
         l_global_params_dict["SWIRBandAvailable"] = l_SwirBandAvailable
         l_global_params_dict["AOTMethod"] = l_AOTMethod
+        l_global_params_dict["DIRCORModel"] = l_DIRCORModel
         l_global_params_dict["WriteL2ProductToL2Resolution"] = m_WriteL2ProductToL2Resolution
         l_global_params_dict["WriteHeaders"] = p_WriteHeaders
         l_global_params_dict["L2OutputDirectory"] = l_L2OutputDirectory
@@ -532,6 +572,13 @@ class L2Processor(BaseProcessor):
                              "L2SMAC": self._GIP_L2SMAC_ListOfCoeffsConverterMap.get(l_SatelliteD),
                              "Params": l_global_params_dict
                              }
+
+        if (l_DirectionalCorrection and l_DIRCORModel == DirectionalCorrection.LUT):
+            global_input_dict["DIRCOR"] = self._GIP_DIRCOR_LookUpTableConverterMap.get(l_UniqueSatelliteD)
+        else:
+            global_input_dict["DIRCOR"] = None
+
+
         if l_UseCamsData:
             global_input_dict["L2TOCR"] = self._AthmosphericLutHandlerMap.get(l_SatelliteD).get_synth_tocr()
             global_input_dict["L2DIFT"] = self._AthmosphericLutHandlerMap.get(l_SatelliteD).get_synth_dift()

@@ -1,4 +1,4 @@
-pyTv_START_MAJA
+pyTv-STARTMAJA_CHAIN
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Titre
@@ -69,7 +69,7 @@ Mise en oeuvre du test
 **********************
 
 Ce test est exécuté en lançant la commande :
-ctest -R pyTv_START_MAJA
+ctest -R pyTv-STARTMAJA_MAJA
 
 
 Exigences

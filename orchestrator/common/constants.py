@@ -65,6 +65,25 @@ class AOTEstimation:
         return method
 
 
+class DirectionalCorrection:
+    ROY = 0
+    LUT = 1
+    DEACTIVATED = 2
+
+
+    @staticmethod
+    def get_dircorr_method(str_name):
+        if str_name == "Roy":
+            method = DirectionalCorrection.ROY
+        elif str_name == "None":
+            method = DirectionalCorrection.DEACTIVATED
+        elif str_name == "Lut":
+            method = DirectionalCorrection.LUT
+        else:
+            raise MajaBusinessException("Utilities:GetDirCorrMethod: The Directional Correction model " + str_name + "does not exist.")
+        return method
+
+
 class CAMSStatus:
     ACTIVATED_OK = 0
     ACTIVATED_NOAVAILABLEDATA = 1
