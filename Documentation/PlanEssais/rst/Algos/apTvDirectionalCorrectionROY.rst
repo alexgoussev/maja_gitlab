@@ -1,14 +1,14 @@
-apTvDirectionalCorrection
+apTvDirectionalCorrectionROY
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Objectif
 ********
-Validation de l'application "DirectionalCorrection"
+Validation de l'application "DirectionalCorrection" avec le modèle ROY.
 
 Description
 ***********
 
-Le module "DirectionalCorrection" calcul les coefficients de correction directionnelle.
+Le module "DirectionalCorrection" calcule les coefficients de correction directionnelle (modèle ROY).
 
 
 Liste des données d’entrées
@@ -43,7 +43,7 @@ Mise en oeuvre du test
 **********************
 
 Ce test est exécuté en lançant la commande :
-ctest -R apTvDirectionalCorrection
+ctest -R apTvDirectionalCorrectionROY
 
 Journal d’essai de la recette
 *****************************

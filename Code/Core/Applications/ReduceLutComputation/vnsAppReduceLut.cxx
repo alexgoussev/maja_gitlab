@@ -59,7 +59,6 @@
 #include "otbWrapperApplicationFactory.h"
 #include "vnsSimpleLutXMLFileHandler.h"
 #include "vnsVectorLookUpTableExtractor.h"
-#include "vnsDirectionalCorrectionCompute.h"
 #include "vnsMultiplyByVectorFunctor.h"
 #include "itkUnaryFunctorImageFilter.h"
 #include "vnsLookUpTableFileReader.h"
@@ -110,8 +109,6 @@ public:
 	typedef MultiplyByVectorFilterType::Pointer MultiplyByVectorFilterPointerType;
 	//Extract LUT filter
 	typedef VectorLookUpTableExtractor<LutType,ReducedLutType> VectorLookUpTableExtractorType;
-    //Directional correction compute
-    typedef DirectionalCorrectionCompute DirectionalCorrectionComputeType;
 	/**LutXml handler typedef */
 	typedef SimpleLutXMLFileHandler LutXMLHandlerType;
 	typedef LutXMLHandlerType::Pointer LutXMLHandlerPointer;
@@ -140,16 +137,8 @@ private:
 		AddParameter(ParameterType_Group, "viewing","Mean Viewing angles");
 		AddParameter(ParameterType_StringList, "viewing.zenith","Viewing zenith");
 		AddParameter(ParameterType_StringList, "viewing.azimuth","Viewing azimuth");
-		AddParameter(ParameterType_Bool, "dircorr", "dircorr");
-		MandatoryOff("dircorr");
-		AddParameter(ParameterType_Float,  "refzenith","refzenith");
-		MandatoryOff("refzenith");
-		AddParameter(ParameterType_Float,  "refazimuth","refazimuth");
-		MandatoryOff("refazimuth");
-		AddParameter(ParameterType_StringList, "coeffsr", "CoeffsR");
-		MandatoryOff("coeffsr");
-		AddParameter(ParameterType_StringList, "coeffsv", "CoeffsV");
-		MandatoryOff("coeffsv");
+		AddParameter(ParameterType_StringList, "dircoefs", "directional correction coefs");
+		MandatoryOff("dircoefs");
 
 		AddRAMParameter("ram");
 		SetDefaultParameterInt("ram",2048);
@@ -158,7 +147,6 @@ private:
 
 	void DoUpdateParameters()
 	{
-
 	}
 
 
@@ -169,43 +157,7 @@ private:
 
 		// Init filters
 		LookUpTableReaderPointer l_lookUpTableReader = LookUpTableReaderType::New();
-		//GetParams
-		//Correction coeff
-		Utilities::ListOfDoubles l_dircorrcoefs;
-		const bool l_hasDirCorr = IsParameterEnabled("dircorr");
-		vnsLogInfoMacro("Directional correction status : "<<l_hasDirCorr);
-		if (l_hasDirCorr)
-		{
-			Utilities::ListOfDoubles m_CoefsR = Utilities::StringListAsDouble(
-					this->GetParameterStringList("coeffsr"));
-			Utilities::ListOfDoubles m_CoefsV= Utilities::StringListAsDouble(
-					this->GetParameterStringList("coeffsv"));
-			double m_SolarZenith = GetParameterFloat("solar.zenith");
-			double m_SolarAzimuth = GetParameterFloat("solar.azimuth");
-			Utilities::ListOfDoubles m_MeanViewingZenithAngles = Utilities::StringListAsDouble(
-					this->GetParameterStringList("viewing.zenith"));
-			Utilities::ListOfDoubles m_MeanViewingAzimuthAngles = Utilities::StringListAsDouble(
-					this->GetParameterStringList("viewing.azimuth"));
-			double m_RefZenith = GetParameterFloat("refzenith");
-			double m_RefAzimuth = GetParameterFloat("refazimuth");
-			const unsigned int nb_MeanViewingAngles = m_MeanViewingZenithAngles.size();
-			//Verify consitency of input
-			if (m_CoefsR.size() != m_MeanViewingZenithAngles.size()){
-				vnsExceptionAlgorithmsProcessingMacro("Internal error: the number of CoefR '"<<m_CoefsR.size()<<
-						"' is different than the ViewingAnglesZenithPerBand'"<<m_MeanViewingZenithAngles.size()<<"'!")
-			}
-			if (m_CoefsV.size() != m_MeanViewingZenithAngles.size()){
-				vnsExceptionAlgorithmsProcessingMacro("Internal error: the number of CoefV '"<<m_CoefsV.size()<<
-						"' is different than the ViewingAnglesZenithPerBand'"<<m_MeanViewingZenithAngles.size()<<"'!")
-			}
-			//Compute the directional correction coeffs
-			l_dircorrcoefs = DirectionalCorrectionComputeType::ComputeCorrectionCoeffs(m_SolarZenith,m_SolarAzimuth,
-					m_RefZenith,m_RefAzimuth,m_MeanViewingZenithAngles, m_MeanViewingAzimuthAngles, m_CoefsR,m_CoefsV);
-			for (unsigned int bandNum = 0; bandNum < nb_MeanViewingAngles; bandNum++)
-			{
-				vnsLogDebugMacro("Direction Correction Coeff band "<<bandNum<<" = "<<std::setprecision(20)<<l_dircorrcoefs.at(bandNum));
-			}
-		}
+
 
 		//Solar Angles
 		double m_SolarZenith = GetParameterFloat("solar.zenith");
@@ -245,7 +197,6 @@ private:
 			l_lookUpTableReader->AddBandFilename(l_GIP_L2TOCR_ListOfFilenames[file]);
 			vnsLogDebugMacro("BandFilename : " <<l_GIP_L2TOCR_ListOfFilenames[file]);
 		}
-
 
 
 		// Read informations from the GIPP file
@@ -294,22 +245,18 @@ private:
 		l_TOCRParam6.ParameterValues = l_GIP_L2TOCR_TOAReflectanceIndexes;
 		l_lookUpTableReader->AddParameterValues(l_TOCRParam6);
 
-
+		vnsLogDebugMacro(
+				" Mean solar angles [Z;A] => ["<<m_SolarZenith<<";"<<m_SolarAzimuth<<"]")
 
 		//Gen Lut
 		l_lookUpTableReader->GenerateLUT();
-
 		//Point to interpolate
 		VectorLookUpTableExtractorType::VectorExtractPointType vectorPoint;
-
 		// Get the number of band
 		const unsigned int numberOfBand(m_MeanViewingZenithAngles.size());
 
-		vnsLogDebugMacro(
-				" Mean solar angles [Z;A] => ["<<m_SolarZenith<<";"<<m_SolarAzimuth<<"]")
-		const unsigned int nb_MeanViewingAngles = m_MeanViewingZenithAngles.size();
-		vnsLogDebugMacro(" Mean viewing angles (one per band) => nb bands = ["<<nb_MeanViewingAngles<<"]")
-		for (unsigned int bandNum = 0; bandNum < nb_MeanViewingAngles; bandNum++)
+		vnsLogDebugMacro(" Mean viewing angles (one per band) => nb bands = ["<<numberOfBand<<"]")
+		for (unsigned int bandNum = 0; bandNum < numberOfBand; bandNum++)
 		{
 			vnsLogDebugMacro(
 					"        [Z;A] => ["<<m_MeanViewingZenithAngles.at(bandNum)<<";"<<m_MeanViewingAzimuthAngles.at(bandNum)<<"] (p_InputL1ImageInformationsProvider->GetListOfViewingAngles Zenith/Azimuth PerBandAtL2CoarseResolution().at(bandNum).")
@@ -345,9 +292,15 @@ private:
 		//Extract the lut for the point
 		m_CRLutNotCorrected = VectorLookUpTableExtractorType::ExtractLUT(l_LutInPtr, vectorPoint);
 
+
+		const bool l_hasDirCorr = IsParameterEnabled("dircoefs");
         //Is the directional correction enabled ?
         if(l_hasDirCorr){
-        	vnsLogDebugMacro("Directional correction requested");
+        	vnsLogDebugMacro("Applying directional correction coefficients");
+
+			Utilities::ListOfDoubles l_dircorrcoefs = Utilities::StringListAsDouble(
+					this->GetParameterStringList("dircoefs"));
+
             // Set the size of the output image ( because the Unary Functor calls GetOutputSize() )
         	m_MultiplyFilter = MultiplyByVectorFilterType::New();
             m_MultiplyFilter->GetFunctor().SetOutputSize(numberOfBand);

@@ -45,6 +45,7 @@ from orchestrator.common.interfaces.maja_xml_app_lutmap import *
 import orchestrator.common.interfaces.maja_xml_app_lut as maja_xml_app_lut
 import os
 import io
+from orchestrator.common.constants import DirectionalCorrection
 LOGGER = configure_logger(__name__)
 
 
@@ -60,8 +61,8 @@ class MajaReduceLutComputation(MajaModule):
         Constructor
         """
         super(MajaReduceLutComputation, self).__init__()
-        self.in_keys_to_check = ["Params.Caching", "AppHandler", "Plugin", "L1Reader","L2COMM",
-                                 "L1Info","L2TOCR", ]
+        self.in_keys_to_check = ["Params.Caching", "Params.DIRCORModel", "AppHandler", "Plugin", "L1Reader","L2COMM",
+                                 "L1Info","L2TOCR", "DIRCOR"]
         self.out_keys_to_check = []
         self.out_keys_provided = ["cr_lut"]
 
@@ -70,9 +71,36 @@ class MajaReduceLutComputation(MajaModule):
         l_writeL2 = dict_of_input.get("Params").get("WriteL2ProductToL2Resolution")
         viewing_zenith = dict_of_input.get("L1Info").ListOfViewingZenithAnglesPerBandAtL2CoarseResolution
         viewing_azimuth = dict_of_input.get("L1Info").ListOfViewingAzimuthAnglesPerBandAtL2CoarseResolution
+
+        l_dircormodel = dict_of_input.get("Params").get("DIRCORModel")
+
         # CR Lut generation
         rlc_working = dict_of_input.get("AppHandler").get_directory_manager().get_temporary_directory("ReduceLutProc_",
                                             do_always_remove=True)
+
+
+        if l_dircormodel != DirectionalCorrection.DEACTIVATED:
+            # Directional Correction
+            param_dircorr = {"solar.zenith": float(dict_of_input.get("L1Info").SolarAngle["sun_zenith_angle"]),
+                             "solar.azimuth": float(dict_of_input.get("L1Info").SolarAngle["sun_azimuth_angle"]),
+                             "viewing.zenith": viewing_zenith,
+                             "viewing.azimuth": viewing_azimuth,
+                             "refzenith": float(dict_of_input.get("L2COMM").get_value("ZenithRef")),
+                             "refazimuth": float(dict_of_input.get("L2COMM").get_value("AzimuthRef"))
+                             }
+
+            if l_dircormodel == DirectionalCorrection.ROY:
+                LOGGER.debug("Directional Correction Model: ROY ")
+                param_dircorr["model"] = "roy"
+                param_dircorr["roy.coeffsr"] = xml_tools.as_string_list(dict_of_input.get("L2COMM").get_value("CoefsR"))
+                param_dircorr["roy.coeffsv"] = xml_tools.as_string_list(dict_of_input.get("L2COMM").get_value("CoefsV"))
+            elif l_dircormodel == DirectionalCorrection.LUT:
+                LOGGER.debug("Directional Correction Model: LUT ")
+                param_dircorr["model"] = "lut"
+                param_dircorr["lut.filename"] = dict_of_input.get("DIRCOR").new_gipp_filename
+
+            dircorr_app = OtbAppHandler("DirectionnalCorrection", param_dircorr)
+
         cr_lut_file = os.path.join(rlc_working, "CR_Lut.mha")
         param_cr_lut = {"lut": dict_of_input.get("L2TOCR"),
                         "solar.zenith": float(dict_of_input.get("L1Info").SolarAngle["sun_zenith_angle"]),
@@ -81,13 +109,9 @@ class MajaReduceLutComputation(MajaModule):
                         "viewing.azimuth": viewing_azimuth,
                         "reducelut": cr_lut_file
                         }
-        if dict_of_input.get("Plugin").DirectionalCorrection and dict_of_input.get("L2COMM").get_value(
-                "DirCorrOption"):
-            param_cr_lut["coeffsr"] = xml_tools.as_string_list(dict_of_input.get("L2COMM").get_value("CoefsR"))
-            param_cr_lut["coeffsv"] = xml_tools.as_string_list(dict_of_input.get("L2COMM").get_value("CoefsV"))
-            param_cr_lut["refzenith"] = float(dict_of_input.get("L2COMM").get_value("ZenithRef"))
-            param_cr_lut["refazimuth"] = float(dict_of_input.get("L2COMM").get_value("AzimuthRef"))
-            param_cr_lut["dircorr"] = True
+        if l_dircormodel != DirectionalCorrection.DEACTIVATED:
+            param_cr_lut["dircoefs"] = xml_tools.as_string_list(dircorr_app.getoutput()["coeffs"])
+
 
         OtbAppHandler("ReduceLut", param_cr_lut)
         dict_of_output["cr_lut"] = cr_lut_file

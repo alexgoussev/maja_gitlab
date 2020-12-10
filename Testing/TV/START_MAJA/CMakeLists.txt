@@ -75,15 +75,15 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/folders.txt.in
   ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt @ONLY)
 
 
-add_test(NAME pyTv_START_MAJA
+add_test(NAME pyTv-STARTMAJA_CHAIN
          COMMAND ${TEST_DRIVER}
          Execute
 	     ${PYTHON_EXECUTABLE} ${MAJA_SOURCE_DIR}/StartMaja/Start_maja.py -f ${MAJA_BINARY_DIR}/Testing/TV/START_MAJA/folders.txt -t 31UDQ --nbackward 2 -y -v)
 
-set_tests_properties(pyTv_START_MAJA PROPERTIES TIMEOUT 300000)
+set_tests_properties(pyTv-STARTMAJA_CHAIN PROPERTIES TIMEOUT 300000)
 
 
-add_test(NAME pyTv_START_MAJA_COMP_IMAGE
+add_test(NAME pyTv-STARTMAJA_COMP_IMAGE
         COMMAND ${TEST_DRIVER_MAJA}
         ${MAJA_BINARY_DIR}/bin/vnsTestMainLauncher.sh
         "--from-directory-compare-all-images" ${EPSILON_3}
