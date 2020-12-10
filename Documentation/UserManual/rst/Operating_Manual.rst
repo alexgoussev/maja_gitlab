@@ -16,10 +16,10 @@ execution by changing this RAM parameter that can be found in the MAJAUserConfig
 
 
 Configuration and setting files
--------------------------------
+###############################
 
 User configuration files
-~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 The user parameters required by MAJA are gathered in the following
 configuration files:
@@ -190,7 +190,7 @@ Note:
 =========================================================================================================
 
 Administration configuration files
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------
 
 The following files are necessary to configure MAJA:
 
@@ -266,7 +266,7 @@ directory contains INTER**\ **NAL data used by the chain that should NOT
 be modified by users**.
 
 GIPP configuration file (GIP_L2COMM)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 The GIP_L2COMM is used to configure the different algorithms of the
 chain. One instance of this file is defined for each mission. Different
@@ -382,8 +382,9 @@ This file contains also general parameters as:
    parameters. Those values are also indicated in the header of the ATB
    file.
 
+   
 Log messages
-------------
+#############
 
 The log messages raised by MAJA are compliant (in terms of format) with
 the nomenclature described in the section 4.2 of the [AD01].
@@ -423,44 +424,51 @@ The default log level is [I] ; in this case, all Info, Progress, Warning
 and Errors messages are displayed.
 
 Errors management
------------------
+#################
 
-Error messages are sorted in 7 categories and each category has its
+Error messages are sorted in vaiours categories and each category has its
 specific code error.
+
+
+Here is the structure of the Maja exceptions:
+
+.. image:: ./Art/Exceptions.png
 
 The following table gathered the errors that can occur according to each
 possible process.
 
-.. tabularcolumns:: |p{1in}|p{1in}|p{3.25in}|p{0,75in}|
-		    
-====================================== ================ ====================================================================================================================================================================================================================================================================================================================================================================================================================================== ===============
-**Process**                            **Category**     **General description and comment**                                                                                                                                                                                                                                                                                                                                                                                                    **Return code**
-**L2Init, L2Nominal, L2Backward**      **« Chain »**    The error is raised at a high execution level, in the “ScientificProcessing” process (algorithmic chain processing). The error can be due to an incorrect input data (missing file in a input product for example, invalid JobOrder, etc.). Generally, this error is an user error.                                                                                                                                                    135
-**(Scientific**                        **(maja)**                                                                                                                                                                                                                                                                                                                                                                                                                                             
-**Processing)**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-\                                      **« Business »** The raised error comes from the algorithmic chain. If such an error occurs, it is highly probable that this error is an internal one (software anomaly). In this case, the operator has to refer to the project manager.                                                                                                                                                                                                               134
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-                                       **(maja)**                                                                                                                                                                                                                                                                                                                                                                                                                                             
-\                                      **« Data »**     The raised error comes from the data access chain layer (read/write). Such an error occurs when an input data (or a data generated during the chain processing) doesn’t comply its contents (missing or incomplete file, wrong format, etc.). In this case, the operator has to control that the data specified in the JobOrder are valid (see the product interfaces). In any case, the operator has to refer to the project manager. 133
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
-                                       **(maja)**                                                                                                                                                                                                                                                                                                                                                                                                                                             
-\                                      **« OTB »        Low layer error raised by the OTB/ITK library. In any case, the operator has to refer to the project manager to report the bug.                                                                                                                                                                                                                                                                                                        131
-                                       (cots)**                                                                                                                                                                                                                                                                                                                                                                                                                                               
-\                                      **« alloc »      Memory allocation error (such as *bad_alloc*). It occurs when the system failed to reserve the memory needed by the chain processing. This low layer error is raised by the stlc++ base library.                                                                                                                                                                                                                                       130
-                                       (cots)**                                                                                                                                                                                                                                                                                                                                                                                                                                               
-                                                        In this case, the operator has to refer to the project manager to report the bug.                                                                                                                                                                                                                                                                                                                                                     
-\                                      **« std »        Low layer error (other than **bad_alloc**) raised by the stlc++ base library.                                                                                                                                                                                                                                                                                                                                                          129
-                                       (cots)**                                                                                                                                                                                                                                                                                                                                                                                                                                               
-                                                        In this case, the operator has to refer to the project manager to report the bug.                                                                                                                                                                                                                                                                                                                                                     
-\                                      **« Unknown »    Non identified error (unlikely case). In this case, the operator has to refer to the project manager to report the bug.                                                                                                                                                                                                                                                                                                                128
-                                       (cots)**                                                                                                                                                                                                                                                                                                                                                                                                                                               
-====================================== ================ ====================================================================================================================================================================================================================================================================================================================================================================================================================================== ===============
+====================================== ================================================================================================ ===============
+**Name**                               **General description and comment**                                                              **Return code**
+MAJABaseException                      This error is the base of all exceptions. It should not be raised unless no cause is detected    136
+MAJAProcessingException                General processing exception                                                                     135
+MAJADataException                      Error generated when a data is missing or corrupted                                              134
+MAJADataMissingAngle                   Error generated when a product has missing angles for some detectors (S2 for example)            133
+MAJAIOException                        Error generated when an I/O error occured on data                                                124
+MAJACotsException                      Error generated in case of error in a COTS sub code                                              132
+MAJAOTBCotsException                   Error generated in case of error in a OTB Cots sub code                                          131
+MAJAOGRCotsException                   Error generated in case of error in a OGR Cots sub code                                          130
+MAJAAlgorithmException                 Error generated in case of error in a Python maja algorithm                                      129
+MAJAChainException                     Error generated if an error occurs in a general chain code                                       128
+MAJAFactoryException                   Error generated if any of the factory fails to provide elements                                  128
+MAJAModuleException                    Error generated in case of error in a module                                                     127
+MAJAPluginBaseException                Error generated in the PluginBase code                                                           126
+MAJAPluginMuscateException             Error generated in the PluginMuscate code                                                        126
+MAJAPluginEarthExplorerException       Error generated in the EarthExplorer plugin code                                                 126
+MAJAPluginVenusMuscateException        Error generated in the VenusMuscate plugin                                                       126
+MAJAPluginSentinel2MuscateException    Error generated in the Sentinel2Muscate plugin                                                   126
+MAJAPluginLandsat8Exception            Error generated in the Landsat8 plugin                                                           126
+MAJAPluginSentinel2Exception           Error generated in the Sentinel2 Natif plugin                                                    126
+MAJAPluginVenusException               Error generated in the Venus plugin code                                                         126
+MAJANotImplementedException            Error when a function is not implemented                                                         125
+====================================== ================================================================================================ ===============
 
-The error messages are compliant with the nomenclature described in the
-section [AD01].
 
-: Example of the command line help of the maja
-==============================================
+
+
+
+Example of the command line help of the maja
+############################################
+
 
 For the version 4.0 of MAJA, the maja –help produces the following
 helper lines
