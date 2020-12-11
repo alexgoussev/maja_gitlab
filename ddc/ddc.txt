@@ -11,7 +11,7 @@
 
 MAJA
 Auteur : Equipe CS System d'Information
-Date   : 17/12/2020
+Date   : 11/12/2020
 
 Ce fichier contient la description complete de la configuration de l'article decrit ci-apres.
 
@@ -31,12 +31,12 @@ Rappel de la fonction       : MAJA constitue la chaîne de niveaux 2 multi-missi
 
 IDENTIFICATION DE LA VERSION
 ----------------------------
-Date version                : 07/12/2020
-Numero version              : 4.2.3
+Date version                : 11/12/2020
+Numero version              : 4.3.0
 Numero version Superbuild-Archive : 4.2.0
-Numero version reference    : 4.2.0
+Numero version reference    : 4.3.0
 Etat version                : Teste, opérationnel.
-Justification               : Livraison MAJA V4.2.3
+Justification               : Livraison MAJA V4.3.0
 Type de livraison           : Complete
 
 
@@ -185,8 +185,10 @@ Liste des FA corrigees
 
       FA tracees dans le code source
       ------------------------------
-      195 ::       Error QKL xsd validation         			                    |   #CS
-      193 ::       "AttributeError: 'NoneType' object has no attribute 'keys'"      |   #CS
+      182 ::       --version is no longer available         	|   #CS
+      186 ::       Bool not subscriptable (2)                   |   #CS
+
+
            
 
       FA non tracees dans le code source
@@ -211,6 +213,8 @@ Liste des FA non reproductbiles ou annulees
 
       FA annulees
       -----------
+      187 ::       Maja does not use Ozone values stored in METEO-data                   |   #CS
+
       
 
 Liste des DM prises en compte
@@ -218,7 +222,11 @@ Liste des DM prises en compte
 
       DM tracees dans le code source
       ------------------------------
-      Néant
+      173 ::       Mixing time series with diferent resolutions         	|   #CS
+      178 ::       Add custom return code mecanism                          |   #CS
+      179 ::       Disable SRE image write option         	                |   #CS
+      191 ::       Add LUT directional correction for S2                    |   #CS
+
     
       DM incluant une nouvelle bibliotheque
       --------------------------------------
@@ -244,7 +252,8 @@ Liste des DR/DV n'ayant plus cours
 
 Liste des FA ouvertes
 ---------------------
-      162 ::               Venus backward products not valid 			|   #CS 	
+      162 ::               Venus backward products not valid 			|   #CS
+      184 ::               Update Contributing.md 			            |   #CS
 
 
 Liste des DM ouvertes

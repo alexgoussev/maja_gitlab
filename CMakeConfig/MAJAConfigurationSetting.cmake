@@ -34,13 +34,13 @@
 ############################################################################################################
 
 # The MAJA core version
-set(MAJA_CORE_VERSION "4.2.3")
+set(MAJA_CORE_VERSION "4.3.0")
 
 # The MAJA algorithms version (3 digits)
-set(MAJA_ALGORITHMS_VERSION "4.2.3")
+set(MAJA_ALGORITHMS_VERSION "4.3.0")
 
-set(MAJA_VERSION "4.2.3")
-set(MAJA_VERSION_CHAIN "4.2")
+set(MAJA_VERSION "4.3.0")
+set(MAJA_VERSION_CHAIN "4.3")
 
 # List of the spectral camera available
 SET(MAJA_LIST_OF_SPECTRAL_CAMERA_AVAILABLE "VENUS;VENUS_MUSCATE;SENTINEL2;SENTINEL2_MUSCATE;SENTINEL2_TM;LANDSAT_MUSCATE;LANDSAT8_MUSCATE;LANDSAT8")
