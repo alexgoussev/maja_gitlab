@@ -658,6 +658,36 @@ namespace vns
         return aotMethod;
     }
 
+
+    Utilities::DirCorrModelEnumType
+    Utilities::GetDirCorrModel(const std::string & model)
+    {
+        // ---------------------------------------------------------------------------------------------
+        Utilities::DirCorrModelEnumType dirCorrModel(ROY);
+
+        // ---------------------------------------------------------------------------------------------
+        // Convert the AOT estimation metho "string value" in the enumerate value
+        // ---------------------------------------------------------------------------------------------
+        // Multi T user case
+        if (model == "ROY")
+        {
+            dirCorrModel = ROY;
+        }
+        // ---------------------------------------------------------------------------------------------
+        // Multi S user case
+        else if (model == "LUT")
+        {
+            dirCorrModel = LUT;
+        }
+        // ---------------------------------------------------------------------------------------------
+        // Error
+        else
+        {
+            vnsStaticExceptionDataMacro("Utilities:GetDirCorrModel: The Directional Correction model " << model << "does not exist.")
+        }
+        return dirCorrModel;
+    }
+
     std::string
     Utilities::GetEnv(const std::string& envVarStr)
     {

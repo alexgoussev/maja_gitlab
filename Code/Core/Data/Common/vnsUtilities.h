@@ -142,6 +142,12 @@ namespace vns
             MULTITEMPORAL = 0, MULTISPECTRAL = 1, SPECTROTEMPORAL = 2, AOT_NOT_INITIALIZED = 3
         } AOTMethodEnumType;
 
+        /** Directional correction model */
+        typedef enum
+        {
+            ROY = 0, LUT = 1
+        } DirCorrModelEnumType;
+
         // Plugin information : GIPPFileType
         typedef class GIPPFile
         {
@@ -250,6 +256,9 @@ namespace vns
 
         static AOTMethodEnumType
         GetAOTMethod(const std::string & method);
+
+        static DirCorrModelEnumType
+        GetDirCorrModel(const std::string & model) ;
 
         static std::string
         GetEnv(const std::string& envVarStr);

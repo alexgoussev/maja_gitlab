@@ -298,7 +298,7 @@
 			<xs:element name="Reduced_LUT_Computation">
 			  <xs:complexType>
 			    <xs:sequence>
-                              <xs:element name="Directional_Correction_Option" type="ee:Bool_Type"/>
+                              <xs:element name="Directional_Correction_Option" type="ee:DIRCOR_Model_Type"/>
                               <xs:element name="Roughness_Coefficients">
 				<xs:simpleType>
                                   <xs:list itemType="xs:double"/>

@@ -323,6 +323,12 @@ class GippL2COMMEarthExplorerXMLFileHandler(object):
     def get_value_b(self, key, check=False):
         return xml_tools.as_bool(self.get_value(key, check))
 
+    def has_value(self, key):
+        if key in self.l2_comm_values:
+            return True
+        else:
+            return False
+
 
 if __name__ == '__main__':
     pass

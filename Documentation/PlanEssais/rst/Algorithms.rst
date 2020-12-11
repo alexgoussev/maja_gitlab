@@ -81,23 +81,24 @@ algorithmiques.
 47      apTvCamsCompute                                         Extraction des données CAMS (ancien format)
 48      apTvNewCamsCompute                                      Extraction des données CAMS (nouveau format)
 49      apTvNewCamsMixedCompute                                 Extraction des données CAMS (ancien et nouveau format)
-50      apTvDirectionalCorrection                               Calcul des coefficients de correction directionelle
-51      apTvReduceLut                                           Extraction de MiniLut
-52      apTvReduceLutDirCorr                                    Extraction de minilut avec correction directionnelle
-53      apTvExtractLutChannel                                   Extraction d'une bande d'une LUT
-54      apTvScatteringCorrection                                Correction du scattering
-55      apTvSlopeCorrection                                     Correction des effets de pentes
-56      apTvComputeTransmission                                 Calcul de la transmission athmosphérique
-57      apTvSnowMask                                            Calcul du masque de neige
-58      apTvSnowMaskVenus                                       Calcul du masque de neige (cas VENUS)
-59      apTvWaterMask                                           Calcul du masque d'eau
-60      apTvWaterVaporPostPro                                   Post processing du masque d'eau
-61      apTvBandMath                                            Outil générique d'algorithmie sur image (OTB)
-62      apTvExtractROI                                          Extraction de zone/bande (OTB)
-63      apTvManageNoData                                        Application/Extraction de masques de NoData
-64      apTvBinaryMorphologicalOperation                        Opérateurs Morphologiques
-65      apTvConvertCartoToGeoPoint                              Conversion de coordonnées cartographiques
-66      apTvConcatenateImages                                   Concaténation d'image en une seule
+50      apTvDirectionalCorrectionROY                            Calcul des coefficients de correction directionelle (modèle ROY)
+51      apTvDirectionalCorrectionLUT                            Calcul des coefficients de correction directionelle (modèle LUT)
+52      apTvReduceLut                                           Extraction de MiniLut
+53      apTvReduceLutDirCorr                                    Extraction de minilut avec correction directionnelle
+54      apTvExtractLutChannel                                   Extraction d'une bande d'une LUT
+55      apTvScatteringCorrection                                Correction du scattering
+56      apTvSlopeCorrection                                     Correction des effets de pentes
+57      apTvComputeTransmission                                 Calcul de la transmission athmosphérique
+58      apTvSnowMask                                            Calcul du masque de neige
+59      apTvSnowMaskVenus                                       Calcul du masque de neige (cas VENUS)
+60      apTvWaterMask                                           Calcul du masque d'eau
+61      apTvWaterVaporPostPro                                   Post processing du masque d'eau
+62      apTvBandMath                                            Outil générique d'algorithmie sur image (OTB)
+63      apTvExtractROI                                          Extraction de zone/bande (OTB)
+64      apTvManageNoData                                        Application/Extraction de masques de NoData
+65      apTvBinaryMorphologicalOperation                        Opérateurs Morphologiques
+66      apTvConvertCartoToGeoPoint                              Conversion de coordonnées cartographiques
+67      apTvConcatenateImages                                   Concaténation d'image en une seule
 ======= ======================================================= =============================================================================
 
 DESCRIPTION DÉTAILLÉE DES TESTS DE VALIDATION ALGORITHMIQUE
@@ -255,9 +256,15 @@ DESCRIPTION DÉTAILLÉE DES TESTS DE VALIDATION ALGORITHMIQUE
 
 .. toctree::
 	:maxdepth: 5
-	:caption: apTvDirectionalCorrection
+	:caption: apTvDirectionalCorrectionROY
 	
-	Algos/apTvDirectionalCorrection
+	Algos/apTvDirectionalCorrectionROY
+
+.. toctree::
+	:maxdepth: 5
+	:caption: apTvDirectionalCorrectionLUT
+
+	Algos/apTvDirectionalCorrectionLUT
 
 .. toctree::
 	:maxdepth: 5

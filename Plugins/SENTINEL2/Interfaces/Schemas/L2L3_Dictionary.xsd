@@ -2,12 +2,13 @@
 <!-- edited with XMLSpy v2008 rel. 2 sp2 (http://www.altova.com) by USER USER (CS SYSTEMES D INFORMATION) -->
 <!DOCTYPE xs:schema [
 	<!-- File_Name element patterns -->
-    <!ENTITY SatelliteClass "(S2A|S2B|S2C)">
+    <!ENTITY SatelliteClass "(S2_|S2A|S2B|S2C)">
     <!ENTITY SatelliteClassGeneric "(S2_)">
     <!-- MACCS new -->
     <!ENTITY SpectralCameraClass "(SSC)">
     <!ENTITY FileClass "(OPER|TEST|SVT[0-9A-Z_]|TD[0-9A-Z_]{2}|GSOV|IOTE)">
     <!ENTITY AOTMethod "(MULTITEMPORAL|MULTISPECTRAL|SPECTROTEMPORAL)">
+	<!ENTITY DIRCORModel "(Roy|Lut|None)">
 	<!ENTITY NickNameElt "([0-9A-Za-z_]*|THE_MOON|ONEORBIT)">
 	<!ENTITY NickNameTypeElt "(S|L)">
 	<!ENTITY ListNickNameElt "(&NickNameElt;|NOTNAMED|ALLSITES)">
@@ -216,7 +217,18 @@
         </xs:restriction>
     </xs:simpleType>
 
-
+    <xs:simpleType name="DIRCOR_Model_Type">
+        <xs:annotation>
+            <xs:documentation>DIRCOR Models :
+- Roy,
+- Lut,
+- None
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="ee:String_Type">
+            <xs:pattern value="&DIRCORModel;"/>
+        </xs:restriction>
+    </xs:simpleType>
 	<!-- ================= -->
 	<!-- L3 FileTypes   -->
 	<!-- ================= -->

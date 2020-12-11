@@ -282,6 +282,9 @@ of the chain:
    the <AOT_Method> parameter. Values are: MULTITEMPORAL, MULTISPECTRAL
    or SPECTROTEMPORAL
 
+-  The model used to calculate the directional correction coefficients is set in
+   the <DIRCOR_Model> parameter. Values are: Roy, Lut or None
+
 -  The implementation of environment correction is triggered via the
    <Env_Corr_Option> parameter
 
