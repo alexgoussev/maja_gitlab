@@ -41,7 +41,7 @@ import operator
 
 from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException
+from orchestrator.common.maja_exceptions import MajaPluginSentinel2Exception
 from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
@@ -142,7 +142,7 @@ class Sentinel2L1ImageFileReaderBase(L1ImageReaderBase):
         :return:
         """
         if len(reflectanceMultiplicationValues) != len(listOfTOAImageFileNames):
-            raise MajaDataException("Not the same number of band images and coefficients")
+            raise MajaPluginSentinel2Exception("Not the same number of band images and coefficients")
 
         # ---------------------------------------------------------------
         # Get the number of band with the number of TOA image files set in the input product directory

@@ -38,7 +38,7 @@ It defines classes_and_methods
 
 import os
 from orchestrator.plugins.common.base.maja_l2_image_reader_base import L2ImageReaderBase
-from orchestrator.common.maja_exceptions import MajaDataException
+from orchestrator.common.maja_exceptions import MajaPluginMuscateException
 from orchestrator.plugins.common.base.maja_l2_private_image_filenames_provider import L2PrivateImageFilenamesProvider
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
@@ -357,7 +357,7 @@ class MuscateL2ImageFileReader(L2ImageReaderBase):
                 sat_mask_app = OtbAppHandler("BinaryToVector", param_bintovec_sat, write_output=True)
                 l_SATList.append(sat_mask_app.getoutput().get("out"))
             else:
-                raise MajaDataException(
+                raise MajaPluginMuscateException(
                     "Product format not supported : not the same file for band on SAT in L2 product")
 
             # Read EDG

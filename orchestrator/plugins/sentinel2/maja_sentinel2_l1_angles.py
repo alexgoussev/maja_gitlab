@@ -35,11 +35,8 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-
-
 from orchestrator.common.xml_tools import get_only_value
 from .maja_sentinel2_angles import MajaSunAngles, MajaViewingIncidenceAngles
-
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
 

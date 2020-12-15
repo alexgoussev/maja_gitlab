@@ -36,7 +36,7 @@ It defines method mandatory for a processor
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaAlgorithmException
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -69,7 +69,7 @@ def compute_origin(in_origin, in_spacing, out_spacing, mode):
     # Check the sign of the input and output spacing
     if ((in_spacing[0] > 0) and (out_spacing[0] < 0)) or ((in_spacing[0] < 0) and (out_spacing[0] > 0)) \
             or ((in_spacing[1] > 0) and (out_spacing[1] < 0)) or ((in_spacing[1] < 0) and (out_spacing[1] > 0)):
-        raise MajaBusinessException(
+        raise MajaAlgorithmException(
             "For resampling, input and output spacing must have the same sign for each dimension!")
 
     # --------------------------------------------------------------------------------------
@@ -89,6 +89,6 @@ def compute_origin(in_origin, in_spacing, out_spacing, mode):
         # --------------------------------------------------------------------------------------
         pass
     else:
-        raise MajaBusinessException("Unknown ResamplerHelper mode.")
+        raise MajaAlgorithmException("Unknown ResamplerHelper mode.")
     LOGGER.debug("                          - Output image origin:    [%s;%s]", outOrigin[0], outOrigin[1])
     return outOrigin

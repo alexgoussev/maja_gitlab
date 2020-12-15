@@ -35,7 +35,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
-from orchestrator.common.maja_exceptions import MajaProcessingError
+from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.maja_utils import get_test_mode
 from orchestrator.common.system_utils import launch_command
 import glob
@@ -44,7 +44,7 @@ import errno
 import shutil
 
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException
+from orchestrator.common.maja_exceptions import MajaProcessingException
 
 LOGGER = configure_logger(__name__)
 
@@ -89,7 +89,7 @@ def maja_get_subdirectories(search_directory):
 def fully_resolve(a_path, check_existence=False):
     resolved = os.path.expanduser(os.path.expandvars(os.path.normpath(a_path)))
     if "$" in resolved:
-        raise MajaProcessingError("Environment variable not resolved in %s" % resolved)
+        raise MajaProcessingException("Environment variable not resolved in %s" % resolved)
     if check_existence:
         if not os.path.exists(resolved):
             raise MajaDataException("File not found %s" % resolved)
@@ -161,7 +161,7 @@ def uncompress_file(src, dst):
     # TODO: TBC MOve status to post ?
     # TODO: see status management by system command executor
     if status != 0:
-        raise MajaDataException("Error running {}. Exit code {}".format(command_line, status))
+        raise MajaProcessingException("Error running {}. Exit code {}".format(command_line, status))
 
 
 def create_directory(dir_name):
@@ -170,7 +170,7 @@ def create_directory(dir_name):
         os.makedirs(dir_name)
     except OSError as e:
         if e.errno != errno.EEXIST:
-            raise MajaProcessingError("Error while creatind directory : "+dir_name)
+            raise MajaProcessingException("Error while creatind directory : "+dir_name)
 
 
 def provide_filename(directory, basefilename, extentionfilename):

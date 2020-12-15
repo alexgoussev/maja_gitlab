@@ -38,8 +38,8 @@ It defines classes_and_methods
 
 from orchestrator.plugins.common.base.bands_definition import BandsDefinitions
 from orchestrator.common.conf.maja_camera_admin_config import ConfigAdminCamera
+from orchestrator.common.maja_exceptions import MajaPluginBaseException
 from orchestrator.common.constants import *
-from orchestrator.common.maja_exceptions import MajaDataException
 import orchestrator.common.conf.maja_xml_camera_user_config as camera_user_conf
 
 
@@ -132,8 +132,15 @@ class PluginBase(object):
         self.TEMPLATE_L3_GLOBAL_HDR = ""
 
     def initialize(self, app_handler):
-        self.ConfigUserCamera = camera_user_conf.parse(app_handler.get_user_conf_camera_filename(self.PluginName), True)
-        self.ConfigAdminCamera = ConfigAdminCamera(app_handler.get_admin_conf_camera_filename(self.PluginName))
+        try:
+            self.ConfigUserCamera = camera_user_conf.parse(app_handler.get_user_conf_camera_filename(self.PluginName), True)
+        except Exception as err:
+            raise MajaPluginBaseException("Could not read user conf file "+app_handler.get_user_conf_camera_filename(self.PluginName) + " : "+str(err))
+        try:
+            self.ConfigAdminCamera = ConfigAdminCamera(app_handler.get_admin_conf_camera_filename(self.PluginName))
+        except Exception as err:
+            raise MajaPluginBaseException("Could not read admin conf file "+app_handler.get_admin_conf_camera_filename(self.PluginName) + " : "+str(err))
+
 
     def is_valid(self, plugin_name):
         return self.PluginName == plugin_name

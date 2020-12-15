@@ -41,9 +41,8 @@ import os
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.earth_explorer.header_image_earth_explorer_xml_file_handler import HeaderImageEarthExplorerXMLFileHandler
 from orchestrator.common.xml_tools import get_xml_float_value, get_xml_int_value
-from orchestrator.common.maja_exceptions import MajaDriverException
-
 LOGGER = configure_logger(__name__)
+
 
 class VenusL1HeaderImageEarthExplorerXMLFileHandler(HeaderImageEarthExplorerXMLFileHandler):
 

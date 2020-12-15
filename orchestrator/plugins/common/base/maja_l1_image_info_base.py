@@ -35,7 +35,7 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
+from orchestrator.common.maja_exceptions import MajaNotYetImplementedException
 from orchestrator.common.maja_common import Corner
 import orchestrator.common.date_utils as date_utils
 import re
@@ -90,10 +90,10 @@ class L1ImageInformationsBase(object):
         self.MuscateData = {}
 
     def initialize(self, product_filename):
-        raise MajaNotYetImplemented("Initialize : Could not instanciate base class")
+        raise MajaNotYetImplementedException("Initialize : Could not instanciate base class")
 
     def detect_l1_products(self, dir_name, product_list):
-        raise MajaNotYetImplemented("DetectL1Products : Could not instanciate base class")
+        raise MajaNotYetImplementedException("DetectL1Products : Could not instanciate base class")
 
     def get_l2_identifier(self):
         l_identifier = self.SatelliteID

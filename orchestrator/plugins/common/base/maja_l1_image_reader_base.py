@@ -36,8 +36,8 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaPluginBaseException
+from orchestrator.common.maja_exceptions import MajaNotYetImplementedException
 
 L1_READER_KEYS = ["L1TOAImageList", "L1TOACirrusImage", "L2TOAImageList", "IPTOASubOutput",
                   "L2EDGOutputList", "IPEDGSubOutput", "IPSATSubOutput", "L2SATImageList",
@@ -66,16 +66,16 @@ class L1ImageReaderBase(object):
         filter """
 
     def can_read(self, plugin_name):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def read(self, product_info, app_handler, l2comm, dem, pReadL1Mode):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def get_value(self, key):
         if key in self.dict_of_vals:
             return self.dict_of_vals.get(key)
         else:
-            raise MajaDriverException("No " + key + " available in the reader.")
+            raise MajaPluginBaseException("No " + key + " available in the reader.")
 
     def has_value(self, key):
         return key in self.dict_of_vals

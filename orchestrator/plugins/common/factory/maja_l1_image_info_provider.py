@@ -38,7 +38,7 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaFactoryException
 
 LOGGER = configure_logger(__name__)
 
@@ -59,9 +59,9 @@ class L1ImageInformationsProvider(object):
                     if creator.initialize(product_filename):
                         return creator
             except Exception as e:
-                LOGGER.info(e)
+                LOGGER.debug(e)
                 pass
-        raise MajaBusinessException("No factory to handle " + product_filename)
+        raise MajaFactoryException("No factory to handle " + product_filename)
 
     @staticmethod
     def get_list_of_l1products(directory, tile_id=None):
@@ -74,5 +74,5 @@ class L1ImageInformationsProvider(object):
             else:
                 crea().detect_l1_products(directory, product_list)
         if product_list.__len__() == 0:
-            raise MajaBusinessException("No input L1 product available")
+            raise MajaFactoryException("No input L1 product available")
         return product_list

@@ -36,8 +36,6 @@ It defines method mandatory for a processor
 
 ###################################################################################################
 """
-
-from orchestrator.common.maja_exceptions import *
 from orchestrator.common.constants import AOTEstimation
 from orchestrator.common.gipp_utils import *
 LOGGER = configure_logger(__name__)

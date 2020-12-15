@@ -41,21 +41,19 @@ from orchestrator.processor.l2_processor import L2Processor
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.interfaces.maja_ozone_extract import get_ozone_amount
 from orchestrator.plugins.common.factory.maja_l1_image_reader_provider import L1ImageReaderProvider
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaChainException
 from orchestrator.plugins.common.factory.maja_plugin_provider import MAJAPluginProvider
 from orchestrator.plugins.common.factory.maja_l2_image_writer_provider import L2ImageWriterProvider
 import orchestrator.plugins.common.factory.product_utils as product_utils
 from orchestrator.common.earth_explorer.gipp_l2_comm_earth_explorer_xml_file_handler import \
     GippL2COMMEarthExplorerXMLFileHandler
-import os
 import orchestrator.common.gipp_utils as gipp_utils
 import orchestrator.common.date_utils as date_utils
 import orchestrator.common.constants as constants
 from orchestrator.common.xml_tools import translate_xsl
 import orchestrator.common.file_utils as file_utils
-
 from orchestrator.common.constants import CAMSStatus
-
+import os
 LOGGER = configure_logger(__name__)
 
 
@@ -194,7 +192,7 @@ class L2InitProcessor(L2Processor):
         else:
             l2_image_file_writer = L2ImageWriterProvider.create(MAJAPluginProvider.auto_tm(self._l1product.PluginName))
         if not l2_image_file_writer.can_write(self._l1product.PluginName):
-            raise MajaDriverException(
+            raise MajaChainException(
                 "Plugin '" + self._apphandler.get_output_plugin() + "' can not write product from '" + self._l1product.PluginName + "' products ")
 
         #Log system infos

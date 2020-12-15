@@ -35,14 +35,9 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.muscate.muscate_xml_file_handler import MuscateXMLFileHandler
-import orchestrator.common.xml_tools as xml_tools
-from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.plugins.common.muscate.maja_muscate_l2_header_writer import MajaMuscateL2HeaderWriter
 from orchestrator.plugins.venus_muscate.maja_venus_muscate_plugin import MajaVenusMuscatePlugin
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaExceptionPluginMuscate
-import math
 LOGGER = configure_logger(__name__)
 
 

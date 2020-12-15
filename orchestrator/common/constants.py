@@ -37,7 +37,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaDataException
 
 
 class ReadL1Mode:
@@ -61,7 +61,7 @@ class AOTEstimation:
         elif str_name == "SPECTROTEMPORAL":
             method = AOTEstimation.SPECTROTEMPORAL
         else:
-            raise MajaBusinessException("Utilities:GetAOTMethod: The AOT method " + str_name + "does not exist.")
+            raise MajaDataException("Utilities:GetAOTMethod: The AOT method " + str_name + "does not exist.")
         return method
 
 

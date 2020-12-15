@@ -36,7 +36,7 @@ It defines
 ###################################################################################################
 """
 import os
-from orchestrator.common.maja_exceptions import MajaDataException
+from orchestrator.common.maja_exceptions import MajaDataException,MajaPluginBaseException
 from orchestrator.common.earth_explorer.earth_explorer_utilities import EarthExplorerUtilities
 from orchestrator.common.earth_explorer.header_image_earth_explorer_xml_file_handler \
     import HeaderImageEarthExplorerXMLFileHandler
@@ -222,7 +222,7 @@ class L23ImageFilenamesProviderBase(object):
 
         l_NbResolutionsPrefix = len(self.m_ListOfResolutionsPrefix)
         if l_NbResolutionsPrefix == 0:
-            raise MajaDataException("Internal error : the ListOfResolutionsPrefix is not initialized !!")
+            raise MajaPluginBaseException("Internal error : the ListOfResolutionsPrefix is not initialized !!")
 
         LOGGER.debug("L23ImageFilenamesProviderBase: l_NbResolutionsPrefix={}.".format(l_NbResolutionsPrefix))
 
@@ -427,26 +427,3 @@ class L23ImageFilenamesProviderBase(object):
             self.m_ListOfResolutionsPrefix.append("")
         else:
             self.m_ListOfResolutionsPrefix = [str("_" + r) for r in listofres]
-
-    # /** Initialize the filename */
-    # virtual void
-    # BuildFilenames(const std::string & directory, const std::string & prefix, const std::string & postfix,
-    #                 const bool check_file_exists);
-    # /** Initialize the filename */
-    # virtual void
-    # BuildFilenames(const std::string & directory, const std::string & prefix, const std::string & postfix,
-    #                 const bool check_file_exists, const bool reading /*  */ );
-    # /** Build a filename with the file semantic, extention,, etc... */
-    # std::string
-    # BuildFilename(const std::string & directory, const std::string & prefix, const std::string & file_semantic,
-    #         const std::string & postfix, const std::string & extention, const bool check_file_exists);
-    #
-    # /** Add the filename to the list of Annex files */
-    # virtual void
-    # AddFileToListOfAnnexFiles(const std::string & filename, const std::string & sk_name /*ex: ATB, MSK, CLD, ...*/);
-    #
-    # virtual void
-    # InvalidateTheFilenamesString();
-    #
-    # virtual void
-    # InvalidateTheFilenamesOnDisk();

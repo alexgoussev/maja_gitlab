@@ -17,8 +17,10 @@ import logging
 from os import path as p
 from datetime import timedelta, datetime
 from StartMaja.Common import FileSystem
+from StartMaja.Common import Constants
 from StartMaja.Chain import AuxFile, GippFile, Product
 from StartMaja.Chain.Workplan import Workplan, Nominal, Backward, Init
+
 
 
 class StartMaja(object):
@@ -499,7 +501,12 @@ class StartMaja(object):
         logger.info("Beginning workplan execution.")
         for i, wp in enumerate(workplans):
             logger.info("Executing workplan #%s/%s" % (i+1, len(workplans)))
-            wp.execute(self.maja, self.dtm, self.gipp, self.userconf)
+            return_code = wp.execute(self.maja, self.dtm, self.gipp, self.userconf)
+            if return_code != Constants.MAJA_EXIT_SUCESS and return_code != Constants.MAJA_MISSING_ANGLES:
+                logger.error("Maja returned an error exit code : "+str(return_code)+" see Maja documentation")
+                raise RuntimeError("Maja returned an error exit code : "+str(return_code)+" see Maja documentation")
+            if return_code == Constants.MAJA_MISSING_ANGLES:
+                logger.warning("Maja : missing angles in a product, skipping the product")
         logger.info("=============Start_Maja v%s finished=============" % self.version)
         pass
 

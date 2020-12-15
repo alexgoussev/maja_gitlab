@@ -40,7 +40,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.gipp_utils import uncompress_dbl_product
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
 from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_scalar
-from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_stats import stats
 from orchestrator.cots.gdal.gdal_dataset_info import GdalDatasetInfo
 from orchestrator.common.maja_exceptions import MajaDataException

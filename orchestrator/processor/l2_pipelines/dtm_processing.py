@@ -39,7 +39,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.common.xml_tools import *
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 import os
 LOGGER = configure_logger(__name__)
 

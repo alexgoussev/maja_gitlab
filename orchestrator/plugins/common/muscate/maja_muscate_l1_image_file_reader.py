@@ -40,7 +40,7 @@ import os
 import math
 from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException, MajaExceptionPluginMuscate
+from orchestrator.common.maja_exceptions import MajaPluginMuscateException,MajaNotYetImplementedException
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.constants import ReadL1Mode
@@ -132,7 +132,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         self._sol1image = out_concatenate
 
     def generate_sol2_image(self, sol_h2, working_dir):
-        raise MajaExceptionPluginMuscate(
+        raise MajaNotYetImplementedException(
             "MuscateL1ImageFileReader::GenerateSOL2Image. Internal error: the GenerateSOL2Image() method must be define in the sub class")
 
     def generate_vie_image(self, view_href, working_dir):
@@ -160,7 +160,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         :rtype: string
         """
         if len(reflectanceMultiplicationValues) != len(listOfTOAImageFileNames):
-            raise MajaDataException("Not the same number of band images and coefficients : " + str(
+            raise MajaPluginMuscateException("Not the same number of band images and coefficients : " + str(
                 len(reflectanceMultiplicationValues)) + " : " + str(len(listOfTOAImageFileNames)))
         # Init the projRef
         l_ProjectionRef = ""
@@ -404,7 +404,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                     self._satmasksublist[l1res] = app_resample.getoutput()["out"]
 
                 else:
-                    raise MajaExceptionPluginMuscate("Product format not supported : not the same file for band on SAT")
+                    raise MajaPluginMuscateException("Product format not supported : not the same file for band on SAT")
             else:
                 # No sat available then put constants masks in outout
                 if curL1Res in l_ListOfL2Resolution:
@@ -453,7 +453,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
                             curL1Res)] = resamp_l2_dfp_app.getoutput().get("out")
                         self._l2_dfp_pipeline.add_otb_app(resamp_l2_dfp_app)
                 else:
-                    raise MajaExceptionPluginMuscate("Product format not supported : not the same file for band on PIX")
+                    raise MajaPluginMuscateException("Product format not supported : not the same file for band on PIX")
             else:
                 if curL1Res in l_ListOfL2Resolution:
                     self._l2dfpimagelist[l_ListOfL2Resolution.index(
@@ -572,7 +572,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         # Check the extension of th efile. For Muscate, must be .XML (in upper case)
         IsValidSatellite = (self._header_handler is not None)
         if not IsValidSatellite:
-            raise MajaExceptionPluginMuscate(
+            raise MajaPluginMuscateException(
                 "The file <{}> is not a valid Muscate L1 product.".format(product_filename))
         # Get satellite name
         self.m_Satellite = product_info.Satellite
@@ -603,7 +603,7 @@ class MuscateL1ImageFileReaderBase(L1ImageReaderBase):
         if xml_tools.as_bool(l2comm.get_value("CalAdjustOption")):
             l_factors = xml_tools.as_float_list(l2comm.get_value("CalAdjustFactor"))
             if len(l_factors) != len(l_ListOfTOABandCode):
-                raise MajaDataException(
+                raise MajaPluginMuscateException(
                     "Not the same number of Calibration coeffs than L1 bands ( {}, {} )".format(len(l_factors), len(
                         l_ListOfTOABandCode)))
             for i in range(len(l_ListOfTOABandCode)):

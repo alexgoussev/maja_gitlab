@@ -39,8 +39,7 @@ It defines classes_and_methods
 import os
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
 import orchestrator.common.xml_tools as xml_tools
-import orchestrator.common.file_utils as file_utils
-from orchestrator.common.maja_exceptions import MajaDriverException,MajaExceptionPluginSentinel2
+from orchestrator.common.maja_exceptions import MajaPluginSentinel2Exception
 from orchestrator.plugins.sentinel2.maja_sentinel2_constants import LIST_OF_BAND_CODES, LIST_OF_L1BAND_CHARID
 
 from orchestrator.common.logger.maja_logging import configure_logger
@@ -75,7 +74,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
         element = str(self.satellite_name).upper().split('-')
 
         if element[0] != satRef:
-            raise MajaExceptionPluginSentinel2("Sentinel2XMLFileHandler: The Header file "+main_xml_file +" is not a SENTINEL2 product !")
+            raise MajaPluginSentinel2Exception("Sentinel2XMLFileHandler: The Header file "+main_xml_file +" is not a SENTINEL2 product !")
         self.product_path = os.path.dirname(main_xml_file)
         # Read the SchemaLocation and detect the PSD Version
         l_PsdIntegerVersion = self.get_psd_integer_version()
@@ -83,7 +82,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
 
         if l_PsdIntegerVersion < 14:
             if tile_id is None:
-                raise MajaExceptionPluginSentinel2("Tile Id is mandatory with PSD < 14 products")
+                raise MajaPluginSentinel2Exception("Tile Id is mandatory with PSD < 14 products")
             self.TileId = tile_id
 
             # Get the tile directory (with the tile id)
@@ -117,7 +116,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
             # ---------------------------------------------------------------------------------------------
             # If not found, throws an error
             if not isFound:
-                raise MajaExceptionPluginSentinel2("Sentinel2XMLFileHandler: No xml header file was found for the tile <"+tile_id+">")
+                raise MajaPluginSentinel2Exception("Sentinel2XMLFileHandler: No xml header file was found for the tile <"+tile_id+">")
 
             # ---------------------------------------------------------------------------------------------
             # Get the list of image filename for all the tiles per band
@@ -161,7 +160,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
             root_path = self.product_path + os.path.sep + "GRANULE" + os.path.sep
             list_of_subdir = [os.path.join(root_path, dir) for dir in os.listdir(root_path)]
             if len(list_of_subdir) != 1:
-                raise MajaExceptionPluginSentinel2("Sentinel2XMLFileHandler: The GRANULE directory must contain only on" +
+                raise MajaPluginSentinel2Exception("Sentinel2XMLFileHandler: The GRANULE directory must contain only on" +
                                         " sub-directory (one tile)!")
 
             tilePath = list_of_subdir[0]
@@ -174,7 +173,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
                         f))]
             xmlTileFilenames = [f for f in list_of_files if "MTD_TL" in f and os.path.splitext(f)[1] == ".xml"]
             if len(xmlTileFilenames) == 0:
-                raise MajaExceptionPluginSentinel2("XMLTile filename not found")
+                raise MajaPluginSentinel2Exception("XMLTile filename not found")
             self.XmlTileFileName = xmlTileFilenames[0]
 
     @property
@@ -198,9 +197,9 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
         if len(granule_dir_list) == 1:
             self.granule_dir = granule_dir_list[0]
         elif len(granule_dir_list) == 0:
-            raise MajaDriverException("No granule found in {}".format(product_dir))
+            raise MajaPluginSentinel2Exception("No granule found in {}".format(product_dir))
         else:
-            raise MajaDriverException("Several granules found in {}. The version of the product is "
+            raise MajaPluginSentinel2Exception("Several granules found in {}. The version of the product is "
                                       "correct ?".format(product_dir))
         LOGGER.debug(granule_dir_list)
 
@@ -214,9 +213,9 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
         if len(granule_xml_list_result) == 1:
             self.granule_xml = granule_xml_list_result[0]
         elif len(granule_xml_list_result) == 0:
-            raise MajaDriverException("No granule found in {}".format(product_dir))
+            raise MajaPluginSentinel2Exception("No granule found in {}".format(product_dir))
         else:
-            raise MajaDriverException("Several xml file found "
+            raise MajaPluginSentinel2Exception("Several xml file found "
                                       "in granule{}.".format(self.granule_dir))
         LOGGER.debug("self.granule_xml %s", self.granule_xml)
 
@@ -229,7 +228,7 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
             if values.findtext("SPECIAL_VALUE_TEXT") == "NODATA":
                 nodata = int(values.findtext("SPECIAL_VALUE_INDEX"))
                 return nodata
-        raise MajaDriverException("NODATA not found in the L1 Header file")
+        raise MajaPluginSentinel2Exception("NODATA not found in the L1 Header file")
 
     def get_list_of_toa_images(self):
         return self._list_of_toa_images
@@ -254,11 +253,11 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
         # Insure we can find "prefix" in schemaLocation
         if prefix not in l_SchemaLocation:
             # else raise an exception
-            raise MajaExceptionPluginSentinel2("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribute is not conform (must be contain '"+prefix+"' value) !")
+            raise MajaPluginSentinel2Exception("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribute is not conform (must be contain '"+prefix+"' value) !")
         # Insure we can find "postfix" in schemaLocation
         if not postfix in l_SchemaLocation:
             # else raise an exception
-            raise MajaExceptionPluginSentinel2("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribut is not conform (must be contain '"+postfix+"' value) !")
+            raise MajaPluginSentinel2Exception("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribut is not conform (must be contain '"+postfix+"' value) !")
         # Then parse schemaLocation
         l_Tempo = l_SchemaLocation
         l_Tempo2 = str(l_Tempo).replace(prefix, "")
@@ -267,6 +266,6 @@ class MajaSentinel2L1MainXmlReader(EarthExplorerXMLFileHandler):
         try:
             int(l_ListOfStrings[0])
         except ValueError:# else raise an exception
-            raise MajaExceptionPluginSentinel2("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribute is not conform (impossible to detect the PSD version !")
+            raise MajaPluginSentinel2Exception("The Sentinel2 xml file "+self.main_xml_file+" schemaLocation attribute is not conform (impossible to detect the PSD version !")
         return int(l_ListOfStrings[0])
 

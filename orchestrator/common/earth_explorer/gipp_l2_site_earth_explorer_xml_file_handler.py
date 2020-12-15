@@ -37,7 +37,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.xml_tools import get_root_xml, get_only_value
 
 GIPP_SITE_HANDLER_XPATH = {
@@ -65,7 +65,7 @@ class GippL2SITEEarthExplorerXMLFileHandler(object):
             if check:
                 return None
             else:
-                raise MajaDriverException("No " + key + " in L2SITE dictionnary")
+                raise MajaDataException("No " + key + " in L2SITE dictionnary")
 
 
 if __name__ == '__main__':

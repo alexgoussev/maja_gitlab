@@ -36,7 +36,7 @@ It defines method mandatory for a processor
 ###################################################################################################
 """
 from orchestrator.cots.otb.algorithms.otb_band_math import band_math
-from orchestrator.common.maja_exceptions import MajaProcessingError
+from orchestrator.common.maja_exceptions import MajaOTBCotsException
 
 
 def binary_threshold(input_image, inside_value, outside_value,
@@ -54,7 +54,7 @@ def binary_threshold(input_image, inside_value, outside_value,
     :return:
     """
     if lower_threshold is None and upper_threshold is None:
-        raise MajaProcessingError("Error, no threshold given")
+        raise MajaOTBCotsException("Error, no threshold given")
 
     if lower_threshold is None:
         expression = "im1b1<{up}?{in_v}:{out_v}".format(up=upper_threshold, in_v=inside_value, out_v=outside_value)

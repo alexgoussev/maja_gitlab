@@ -39,7 +39,7 @@ It defines classes_and_methods
 import orchestrator.common.file_utils as file_utils
 from orchestrator.plugins.common.base.maja_l2_header_writer_base import L2HeaderWriterBase
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
-from orchestrator.common.maja_exceptions import *
+from orchestrator.common.maja_exceptions import MajaPluginEarthExplorerException
 from orchestrator.plugins.common.base.maja_l2_image_filenames_provider import L2ImageFilenamesProvider
 from orchestrator.common.logger.maja_logging import configure_logger
 import orchestrator.common.xml_tools as xml_tools
@@ -65,14 +65,14 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
         # + self.l2imagefilenamesprovider)
 
         if self.plugin is None:
-            raise MajaException("Internal error: the variable m_PluginBasePointer is NULL!")
+            raise MajaPluginEarthExplorerException("Internal error: the variable m_PluginBasePointer is NULL!")
 
         if self.l1imageinformationsproviderbase is None:
-            raise MajaException("Internal error: the variable m_L1ImageInformationsProviderBase is NULL!")
+            raise MajaPluginEarthExplorerException("Internal error: the variable m_L1ImageInformationsProviderBase is NULL!")
 
         if not self.initmode:
             if self.inputl2imagefilereader is None:
-                raise MajaException("Internal error: the variable m_InputL2ImageFileReader is NULL!")
+                raise MajaPluginEarthExplorerException("Internal error: the variable m_InputL2ImageFileReader is NULL!")
 
         file_utils.create_directory(self.l2imagefilenamesprovider.get_public_directory())
         file_utils.create_directory(self.l2imagefilenamesprovider.get_private_filenames().get_private_directory())
@@ -147,7 +147,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
                 current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTIMG_HDR)
                 output_handler = EarthExplorerXMLFileHandler(current_header_filename)
                 if not os.path.exists(current_header_filename):
-                    raise MajaDataException(
+                    raise MajaPluginEarthExplorerException(
                         "Internal error: the template file '" +
                         current_header_filename +
                         "' doesn't exist !!")
@@ -194,7 +194,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             LOGGER.debug("Writing xml file <" + output_filename + ">...")
             current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTIMG_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaDataException(
+                raise MajaPluginEarthExplorerException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             output_handler = EarthExplorerXMLFileHandler(current_header_filename)
             # ---------------------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             output_filename = p_L2ImageFilenamesProvider.get_atb_header_filenames()[resol]
             current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_ATB_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaDataException(
+                raise MajaPluginEarthExplorerException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             output_handler = EarthExplorerXMLFileHandler(current_header_filename)
             # ---------------------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             output_filename = p_L2ImageFilenamesProvider.get_cld_header_filenames()[resol]
             current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_CLD_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaDataException(
+                raise MajaPluginEarthExplorerException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             output_handler = EarthExplorerXMLFileHandler(current_header_filename)
             # ---------------------------------------------------------------------------------------------
@@ -280,7 +280,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             elif l_CLDNbBits <= 16:
                 output_handler.set_string_value("//Data_Type", "UNSIGNED_SHORT")
             else:
-                raise MajaDataException("Internal error:  CLD band must be written with [1..16] bits !")
+                raise MajaPluginEarthExplorerException("Internal error:  CLD band must be written with [1..16] bits !")
             # ---------------------------------------------------------------------------------------------
             # Update bascis ANX parameters
             output_handler.update_pdtanx(p_Mission, l_ProductImageSizeX, l_ProductImageSizeY, lReferenceProductInstance,
@@ -295,7 +295,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             output_filename = p_L2ImageFilenamesProvider.get_msk_header_filenames()[resol]
             current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_MSK_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaDataException(
+                raise MajaPluginEarthExplorerException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             output_handler = EarthExplorerXMLFileHandler(current_header_filename)
             # ---------------------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
             output_filename = p_L2ImageFilenamesProvider.get_qlt_header_filenames()[resol]
             current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_QLT_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaDataException(
+                raise MajaPluginEarthExplorerException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             output_handler = EarthExplorerXMLFileHandler(current_header_filename)
             # ---------------------------------------------------------------------------------------------
@@ -341,7 +341,7 @@ class EarthExplorerL2HeaderFileWriter(L2HeaderWriterBase):
         output_filename = p_L2ImageFilenamesProvider.get_qlk_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTQLK_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaDataException(
+            raise MajaPluginEarthExplorerException(
                 "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
         output_handler = EarthExplorerXMLFileHandler(current_header_filename)
         # ---------------------------------------------------------------------------------------------

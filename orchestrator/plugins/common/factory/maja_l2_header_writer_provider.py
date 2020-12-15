@@ -37,7 +37,7 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaFactoryException
 LOGGER = configure_logger(__name__)
 
 
@@ -56,4 +56,4 @@ class L2HeaderWriterProvider(object):
                 LOGGER.debug("CREATOR: ")
                 LOGGER.debug(creator)
                 return creator
-        raise MajaBusinessException("No factory to generate L2HeaderWriter for " + plugin_name)
+        raise MajaFactoryException("No factory to generate L2HeaderWriter for " + plugin_name)

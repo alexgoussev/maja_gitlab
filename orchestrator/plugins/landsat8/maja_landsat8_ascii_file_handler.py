@@ -39,7 +39,7 @@ It defines classes_and_methods
 import orchestrator.common.xml_tools as xml_tools
 import os
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaPluginLandsat8Exception
 
 LOGGER = configure_logger(__name__)
 
@@ -61,7 +61,7 @@ class Landsat8ASCIIFileHandler(object):
         if key in self.l8ascii_values:
             return self.l8ascii_values[key]
         else:
-            raise MajaDriverException("No " + key + " in Landsat8 ASCII dictionnary")
+            raise MajaPluginLandsat8Exception("No " + key + " in Landsat8 ASCII dictionnary")
 
     def get_platform(self):
         return self._get_value("SPACECRAFT_ID")

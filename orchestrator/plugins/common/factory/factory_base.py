@@ -38,6 +38,7 @@ It defines classes_and_methods
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
 
+
 class FactoryBase(object):
     registry = dict()
 

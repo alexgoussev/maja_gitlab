@@ -51,12 +51,11 @@ from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_apply_mask import apply_mask
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
-from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.plugins.common.base.maja_l1_image_reader_base import L1ImageReaderBase
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.common.earth_explorer.header_image_earth_explorer_xml_file_handler import HeaderImageEarthExplorerXMLFileHandler
-from orchestrator.common.maja_exceptions import MajaExceptionPluginVenus
+from orchestrator.common.maja_exceptions import MajaPluginVenusException
 from orchestrator.common.maja_common import Area
 from orchestrator.cots.gdal.gdal_dataset_info import GdalDatasetInfo, update_projection
 LOGGER = configure_logger(__name__)
@@ -147,7 +146,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             #product_info.FilenamesProvider
         IsValidSatellite = (l_FilenameProvider.initialize(product_filename) is not False)
         if not IsValidSatellite:
-            raise MajaExceptionPluginVenus(
+            raise MajaPluginVenusException(
                 "The file <{}> is not a valid Venus L1 product.".format(product_filename))
 
         # *********************************************************************************************************
@@ -166,7 +165,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
         if xml_tools.as_bool(l2comm.get_value("CalAdjustOption")):
             l_factor = xml_tools.as_float_list(l2comm.get_value("CalAdjustFactor"))
             if len(l_factor) != (VenusL1ImageFileReader.TOALastChannel-VenusL1ImageFileReader.TOAFirstChannel+1):
-                raise MajaExceptionPluginVenus("Not the same number of Calibration coeffs than L1 bands")
+                raise MajaPluginVenusException("Not the same number of Calibration coeffs than L1 bands")
             for i in range(0,len(l_factor)):
                 l_reflectanceMultiplicationValues.append(l_ReflectanceQuantificationValue * l_factor[i])
         else:
@@ -179,7 +178,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
         # L1 TOA image pipeline connection
         # *********************************************************************************************************
         if not l_FilenameProvider.m_TOAImageFileName:
-            raise MajaExceptionPluginVenus("VenusL1ImageFileReader : The TOA image does not exist !")
+            raise MajaPluginVenusException("VenusL1ImageFileReader : The TOA image does not exist !")
 
         tmp_l1toa_roi = os.path.join(working_dir, "l1toa_roi.tif")
         app_l1_toa_roi = extract_roi(l_FilenameProvider.m_TOAImageFileName,
@@ -406,7 +405,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
 
             LOGGER.debug("VenusL1ImageFileReader::Initialize - CLA image filename: '" + l_FilenameProvider.m_CLAImageFileName + "'")
             if not l_FilenameProvider.m_CLAImageFileName:
-                raise MajaExceptionPluginVenus(
+                raise MajaPluginVenusException(
                     "The CLA image does not exist !! ")
             self._cla = l_FilenameProvider.m_CLAImageFileName
 
@@ -416,7 +415,7 @@ class VenusL1ImageFileReader(L1ImageReaderBase):
             LOGGER.debug(
                 "VenusL1ImageFileReader::Initialize - SOL image filename: '" + l_FilenameProvider.m_SOLImageFileName + "'")
             if not l_FilenameProvider.m_SOLImageFileName:
-                raise MajaExceptionPluginVenus(
+                raise MajaPluginVenusException(
                     "The SOL image does not exist !! ")
             mtdat = GdalDatasetInfo(l_FilenameProvider.m_TOAImageFileName)
             toaarea = Area()

@@ -38,11 +38,11 @@ It defines classes_and_methods
 from orchestrator.plugins.common.base.maja_l1_image_info_base import L1ImageInformationsBase
 from orchestrator.plugins.landsat8.maja_landsat8_plugin import MajaLandsat8Plugin
 from orchestrator.common.logger.maja_logging import configure_logger
-LOGGER = configure_logger(__name__)
-import os
 import orchestrator.common.file_utils as file_utils
 from orchestrator.plugins.landsat8.maja_landsat8_ascii_file_handler import Landsat8ASCIIFileHandler
 import orchestrator.common.date_utils as date_utils
+import os
+LOGGER = configure_logger(__name__)
 
 
 class MajaLandsat8L1ImageInformations(L1ImageInformationsBase):

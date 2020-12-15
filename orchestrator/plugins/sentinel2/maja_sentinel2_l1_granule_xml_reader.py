@@ -43,7 +43,7 @@ from orchestrator.plugins.sentinel2.maja_sentinel2_constants import LIST_OF_L1BA
 from .maja_sentinel2_l1_angles import MajaL1Angles
 import orchestrator.common.date_utils as date_utils
 from orchestrator.common.maja_common import *
-from orchestrator.common.maja_exceptions import *
+from orchestrator.common.maja_exceptions import MajaPluginSentinel2Exception
 import os
 LOGGER = configure_logger(__name__)
 
@@ -135,7 +135,7 @@ class MajaSentinel2L1GranuleXmlReader(EarthExplorerXMLFileHandler):
         # ---------------------------------------------------------------------------------------------
         # Checks if null
         if (ulx == 0) or (uly == 0):
-            raise MajaDataException(
+            raise MajaPluginSentinel2Exception(
                 "Impossible to read the ULX and ULY coordinates for the Tile id '" +
                 self.TileId +
                 "' from the node Tile_Description/Geoposition.")
@@ -157,7 +157,7 @@ class MajaSentinel2L1GranuleXmlReader(EarthExplorerXMLFileHandler):
         # ---------------------------------------------------------------------------------------------
         # Checks if null
         if (ncols == 0) or (nrows == 0):
-            raise MajaDataException(
+            raise MajaPluginSentinel2Exception(
                 "Impossible to read the NROWS and NCOLS coordinates for the Tile id '" +
                 self.TileId +
                 "' from the node Tile_Description/Size.")
@@ -182,7 +182,7 @@ class MajaSentinel2L1GranuleXmlReader(EarthExplorerXMLFileHandler):
         # ---------------------------------------------------------------------------------------------
         # Checks if null
         if (xdim == 0) or (ydim == 0):
-            raise MajaDataException(
+            raise MajaPluginSentinel2Exception(
                 "Impossible to read the ULX and ULY coordinates for the Tile id '" +
                 self.TileId +
                 "' from the node Tile_Description/Geoposition.")

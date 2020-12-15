@@ -40,7 +40,7 @@ It defines classes_and_methods
 import numpy as np
 import os
 from orchestrator.common.xml_tools import get_only_value
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
+from orchestrator.common.maja_exceptions import MajaPluginSentinel2Exception
 from orchestrator.common.interfaces.maja_xml_input_angles import MajaInternalXmlInputAngles
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
@@ -64,7 +64,7 @@ STEP_UNIT = "*/COL_STEP/@unit"
 # TODO: write a mother class to put write method and col_step and row_step values
 
 
-class MajaSunAngles():
+class MajaSunAngles:
 
     def __init__(self, dom, sun_angle_node_name):
         self.col_step = None
@@ -105,15 +105,15 @@ class MajaSunAngles():
             LOGGER.debug(set(all_row_step))
 
             if not len(set(all_col_step)) == 1:
-                raise MajaNotYetImplemented("COL_STEP is different for Zenith than Azimuth %s" %
+                raise MajaPluginSentinel2Exception("COL_STEP is different for Zenith than Azimuth %s" %
                                             all_col_step)
 
             if not len(set(all_row_step)) == 1:
-                raise MajaNotYetImplemented("ROW_STEP is different for Zenith than Azimuth %s" %
+                raise MajaPluginSentinel2Exception("ROW_STEP is different for Zenith than Azimuth %s" %
                                             all_row_step)
 
             if not len(set(all_step_unit)) == 1:
-                raise MajaNotYetImplemented("Step units are different for Zenith than Azimuth %s" %
+                raise MajaPluginSentinel2Exception("Step units are different for Zenith than Azimuth %s" %
                                             all_step_unit)
 
             self.col_step = all_col_step[0]
@@ -164,15 +164,15 @@ class MajaViewingIncidenceAnglesByBandAndDetector():
         LOGGER.debug(set(all_row_step))
 
         if not len(set(all_col_step)) == 1:
-            raise MajaNotYetImplemented("COL_STEP is different for Zenith than Azimuth %s" %
+            raise MajaPluginSentinel2Exception("COL_STEP is different for Zenith than Azimuth %s" %
                                         all_col_step)
 
         if not len(set(all_row_step)) == 1:
-            raise MajaNotYetImplemented("ROW_STEP is different for Zenith than Azimuth %s" %
+            raise MajaPluginSentinel2Exception("ROW_STEP is different for Zenith than Azimuth %s" %
                                         all_row_step)
 
         if not len(set(all_step_unit)) == 1:
-            raise MajaNotYetImplemented("Step units are different for Zenith than Azimuth %s" %
+            raise MajaPluginSentinel2Exception("Step units are different for Zenith than Azimuth %s" %
                                         all_step_unit)
 
         self.col_step = all_col_step[0]

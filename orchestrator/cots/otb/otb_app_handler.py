@@ -38,8 +38,8 @@ It defines classes_and_methods
 from .otb_cots import MajaOtbCots
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.maja_utils import get_test_mode,is_croco_off,is_croco_on
-from orchestrator.common.system_utils import memory_used_by_process2,memory_used_by_process_current,display_top_ram_consumer
-import time,os,gc
+from orchestrator.common.system_utils import memory_used_by_process2,memory_used_by_process_current
+import time,os
 LOGGER = configure_logger(__name__)
 
 
@@ -76,7 +76,7 @@ class OtbAppHandler:
         ram_bef = int(memory_used_by_process_current(os.getpid()))
         del self._c1
         ram_after = int(memory_used_by_process_current(os.getpid()))
-        LOGGER.debug("RAM : " + str(ram_bef) +" : "+ str(ram_after) + " : "+str(ram_bef-ram_after) + " MB")
+        LOGGER.debug("RAM : " + str(ram_bef) + " : " + str(ram_after) + " : " + str(ram_bef-ram_after) + " MB")
 
     def _run(self):
         start_time = time.time()
@@ -85,7 +85,7 @@ class OtbAppHandler:
         LOGGER.debug("Finished : " + self._app_name +
                      " ,Time: "+time.strftime("%M min %S seconds", time.gmtime(time.time()-start_time)) +
                      " ,RAM current : " + str(int(memory_used_by_process_current(os.getpid()))) + " MB" +
-                     " ,RAM max : "+ str(int(memory_used_by_process2(os.getpid())))+" MB")
+                     " ,RAM max : " + str(int(memory_used_by_process2(os.getpid())))+" MB")
 
     def _post(self):
         LOGGER.debug("Running : " + self._app_name)
@@ -106,66 +106,3 @@ class OtbAppHandler:
     def free_ressources(self):
         if self._c1.otb_app is not None:
             self._c1.otb_app.FreeRessources()
-
-
-class OtbCotsGeneric(MajaOtbCots):
-
-    def __init__(self):
-        super(OtbCotsGeneric, self).__init__()
-        # TODO: TBC
-        # self.outputs = {}
-
-    # def pre(self, otb_app, parameters):
-    #     """
-    #
-    #     :param parameters:
-    #     :return:
-    #     """
-    #     # The following line creates an instance of the BandMath application
-    #     self.otb_app = otbApplication.Registry.CreateApplication(otb_app)
-    #
-    #     if self.otb_app is None:
-    #         raise MajaDriverException("No app " + otb_app + " found")
-    #
-    #     self.otb_app.Init()
-    #     # The following lines set all the application parameters:
-    #     LOGGER.debug("Parameters for %s : %s", otb_app, parameters)
-    #     LOGGER.debug("Parameters type %s", {key: (type(value), value.__class__.__name__)
-    #                                         for key, value in parameters.iteritems()})
-    #
-    #     # remove flag if set to false
-    #     parameters_clean = {}
-    #     for key, value in parameters.iteritems():
-    #         if self.otb_app.GetParameterType(key) == 0 and not value:
-    #             LOGGER.debug("%s removed because set to %s", key, value)
-    #             continue
-    #         elif self.otb_app.GetParameterType(key) == otbApplication.ParameterType_OutputImage \
-    #                 and len(value.split(":")) > 1:
-    #             # split value into value and output type
-    #             parameters_clean[key] = (value.split(":")[0])
-    #             self.otb_app.SetParameterOutputImagePixelType(key, OTB_APP_PIXELS_TYPE.get(value.split(":")[1]))
-    #         else:
-    #             parameters_clean[key] = value
-    #
-    #     self.otb_app.SetParameters(parameters_clean)
-    #     # Update parameters for dynamics
-    #     self.otb_app.UpdateParameters()
-    #
-    # def post(self, write_output):
-    #
-    #     LOGGER.debug("Write output %s", write_output)
-    #
-    #     params_keys = self.otb_app.GetParametersKeys()
-    #     for param in params_keys:
-    #         # role == 1 -> output
-    #         if self.otb_app.GetParameterRole(param) == 1
-    #         or self.otb_app.GetParameterType(param) == otbApplication.ParameterType_OutputImage:
-    #             if write_output:
-    #                 self.outputs[param] = copy.deepcopy(self.otb_app.GetParameterValue(param))
-    #             else:
-    #                 if self.otb_app.GetParameterType(param) == otbApplication.ParameterType_OutputImage:
-    #                     self.outputs[param] = self.otb_app.GetParameterOutputImage(param)
-    #                 else:
-    #                     self.outputs[param] = copy.deepcopy(self.otb_app.GetParameterValue(param))
-    #     if write_output:
-    #         self.otb_app = None

@@ -52,7 +52,6 @@ from orchestrator.plugins.common.base.maja_l2_image_writer_base import L2ImageWr
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.common.logger.maja_logging import configure_logger
 import os
-from orchestrator.common.maja_common import Area
 LOGGER = configure_logger(__name__)
 
 

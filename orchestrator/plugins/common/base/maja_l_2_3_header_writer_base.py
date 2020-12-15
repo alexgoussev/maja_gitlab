@@ -35,7 +35,7 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
+from orchestrator.common.maja_exceptions import MajaNotYetImplementedException
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -62,4 +62,4 @@ class L23HeaderWriterBase(object):
         self.reflectancequantificationvalue = 0
 
     def write(self):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")

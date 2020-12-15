@@ -39,7 +39,6 @@ It defines classes_and_methods
 from orchestrator.common.logger.maja_logging import configure_logger
 import orchestrator.common.date_utils as date_utils
 import orchestrator.common.xml_tools as xml_tools
-from orchestrator.common.maja_exceptions import *
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.common.earth_explorer.gipp_cams_earch_explorer_xml_file_handler import GippCAMSEarthExplorerXMLFileHandler
 from orchestrator.common.interfaces.maja_xml_app_cams import *
