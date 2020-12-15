@@ -40,7 +40,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 from orchestrator.common.maja_utils import is_croco_on
 import os
 LOGGER = configure_logger(__name__)

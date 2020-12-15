@@ -45,7 +45,7 @@ import orchestrator.common.conf.maja_xml_admin_config_system as admin_conf
 import orchestrator.common.conf.maja_xml_user_config_system as user_conf
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
 from orchestrator.common.maja_exceptions import MajaDataException
-from orchestrator.common.maja_exceptions import MajaProcessingError
+from orchestrator.common.maja_exceptions import MajaProcessingException
 from orchestrator.common.directory_manager import DirectoryManager
 from orchestrator.common import version
 from orchestrator.common.system_utils import memory_used_by_process2,disk_space_used
@@ -72,7 +72,7 @@ class AppHandler:
         self._inputDirectory = "."
         self._workingDirectory = "."
         if os.getenv("MAJA_INSTALL_DIR") is None:
-            raise MajaProcessingError("MAJA_INSTALL_DIR is not Set")
+            raise MajaProcessingException("MAJA_INSTALL_DIR is not Set")
         self._majaRootInstallDir = os.getenv("MAJA_INSTALL_DIR") + os.path.sep
         self._userconf_directory = self._majaRootInstallDir + "etc/conf/user/"
         self._adminconf_directory = self._majaRootInstallDir + "etc/conf/admin/"
@@ -406,7 +406,7 @@ class AppHandler:
             self._tile_id = args.TileId
 
         if os.getenv("MAJA_INSTALL_DIR") is None :
-            raise MajaProcessingError("MAJA_INSTALL_DIR is not Set")
+            raise MajaProcessingException("MAJA_INSTALL_DIR is not Set")
 
         if args.stylesheet is not None:
             self._stylesheet = args.stylesheet
@@ -425,6 +425,8 @@ class AppHandler:
         self._userConfigSystemFileName = file_utils.copy_file_to_directory(self.luserConfigSystemFileName, self._workingDirectory,
                                                                 notestmode=True)
         if self._stylesheet is not None:
+            if not os.path.exists(self._stylesheet):
+                raise MajaDataException(str(self._stylesheet) + " doesn't exist !!!!")
             translate_xsl(self._userConfigSystemFileName, self._stylesheet)
         self._userConf = user_conf.parse(self._userConfigSystemFileName, True)
         # overload values
@@ -483,17 +485,17 @@ class AppHandler:
         if not os.path.exists(conf_file):
             raise MajaDataException("The admin configuration file <" + conf_file +
                                     ">  (for the plugin  <" + plugin_name + ">) doesn't exist!")
-        adminConfigCameraFileName = file_utils.copy_file_to_directory(conf_file, self._workingDirectory, notestmode=True)
+        adminconfigcamerafilename = file_utils.copy_file_to_directory(conf_file, self._workingDirectory, notestmode=True)
         if self._stylesheet is not None:
-            translate_xsl(adminConfigCameraFileName, self._stylesheet)
-        return adminConfigCameraFileName
+            translate_xsl(adminconfigcamerafilename, self._stylesheet)
+        return adminconfigcamerafilename
 
     def get_user_conf_camera_filename(self, plugin_name):
         conf_file = self._userconf_directory + os.path.sep + "MAJAUserConfig_" + plugin_name + ".xml"
         if not os.path.exists(conf_file):
             raise MajaDataException("The admin configuration file <" + conf_file +
                                     ">  (for the plugin  <" + plugin_name + ">) doesn't exist!")
-        userConfigCameraFileName = file_utils.copy_file_to_directory(conf_file, self._workingDirectory, notestmode=True)
+        userconfigcamerafilename = file_utils.copy_file_to_directory(conf_file, self._workingDirectory, notestmode=True)
         if self._stylesheet is not None:
-            translate_xsl(userConfigCameraFileName, self._stylesheet)
-        return userConfigCameraFileName
+            translate_xsl(userconfigcamerafilename, self._stylesheet)
+        return userconfigcamerafilename

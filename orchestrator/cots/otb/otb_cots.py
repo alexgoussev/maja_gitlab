@@ -40,7 +40,7 @@ from ..maja_cots import MajaCots
 from orchestrator.common.maja_exceptions import *
 from orchestrator.common.maja_utils import get_test_mode
 import otbApplication
-import copy,gc
+import copy
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -89,7 +89,7 @@ class MajaOtbCots(MajaCots):
         self.otb_app = otbApplication.Registry_CreateApplicationWithoutLogger(otb_app)
 
         if self.otb_app is None:
-            raise MajaDriverException("No app " + otb_app + " found")
+            raise MajaOTBCotsException("No OTB app " + otb_app + " found")
 
         self.otb_app.Init()
         # The following lines set all the application parameters:

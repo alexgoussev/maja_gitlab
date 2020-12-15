@@ -37,7 +37,6 @@ It defines classes_and_methods
 ###################################################################################################
 """
 import orchestrator.common.conf.maja_xml_camera_admin_config as camera_admin_conf
-from orchestrator.common.conf.maja_xml_camera_admin_config import *
 from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.logger.maja_logging import configure_logger
 

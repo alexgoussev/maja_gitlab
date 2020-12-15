@@ -37,7 +37,11 @@ It defines method mandatory for a processor
 ###################################################################################################
 """
 # Algo import
+#
+##########
+# Do not remove as it populate the module factory ###
 import orchestrator.processor.l2_pipelines
+##########
 from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.interfaces.maja_athmospheric_lut_handler import AthmosphericLutHandler
 from orchestrator.common.interfaces.maja_cams_files_handler import CAMSFileHandler
@@ -48,8 +52,10 @@ import orchestrator.processor.l2_processor_bands_setup as l2_processor_bands_set
 import orchestrator.processor.l2_processor_image_writer_setup as l2_processor_image_writer_setup
 import orchestrator.processor.l2_processor_header_writer_setup as l2_processor_header_writer_setup
 from orchestrator.common.dem.dem_base import DEMBase
-from orchestrator.common.maja_exceptions import *
+
+from orchestrator.common.maja_exceptions import MajaChainException,MajaDataException
 from orchestrator.common.constants import AOTEstimation, DirectionalCorrection
+
 from orchestrator.common.interfaces.maja_lut_converter import LutConverter
 from orchestrator.common.interfaces.maja_smac_converter import SmacConverter
 import orchestrator.common.gipp_utils as gipp_utils
@@ -347,7 +353,7 @@ class L2Processor(BaseProcessor):
         # In NOMINAL and BACKWARD only
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
         if p_initmode == False and p_InputL2ImageFileReader is None:
-            raise MajaException("ScientificSingleProductProcessing: Internal error. For Nominal or Backward mode, the "
+            raise MajaChainException("ScientificSingleProductProcessing: Internal error. For Nominal or Backward mode, the "
                                 "L2 INPUT image file reader must be initialized !")
 
         # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
@@ -602,10 +608,12 @@ class L2Processor(BaseProcessor):
             l_L2HeaderFileWriter = L2HeaderWriterProvider.create(self._apphandler.get_output_plugin(),
                                                                  self._apphandler)
         else:
-            l_L2HeaderFileWriter = L2HeaderWriterProvider.create(MAJAPluginProvider.auto_tm(p_InputL1ImageInformationsProvider.PluginName),
+            l_L2HeaderFileWriter = L2HeaderWriterProvider.create(
+                MAJAPluginProvider.auto_tm(p_InputL1ImageInformationsProvider.PluginName),
                                                                  self._apphandler)
         if not l_L2HeaderFileWriter.create(p_InputL1ImageInformationsProvider.PluginName, self._apphandler):
-            raise MajaDriverException("Plugin '"+self._apphandler.get_output_plugin()+"' can not write product from '"+p_InputL1ImageInformationsProvider.PluginName+"' products ")
+            raise MajaChainException("Plugin '"+self._apphandler.get_output_plugin()+"' can not write product from '"+
+                                     p_InputL1ImageInformationsProvider.PluginName+"' products ")
 
         # *************************************************************************************************************
         #                                     CHECK THE VALIDITY OF L2_in PRODUCT IN NOMINAL MODE

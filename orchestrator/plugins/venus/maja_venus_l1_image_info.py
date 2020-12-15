@@ -40,9 +40,7 @@ import orchestrator.common.xml_tools as xml_tools
 import os
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.plugins.common.base.maja_l1_image_info_base import L1ImageInformationsBase
-from orchestrator.common.maja_exceptions import MajaExceptionPluginBase
 from orchestrator.plugins.venus.maja_venus_plugin import MajaVenusPlugin
-from orchestrator.common.earth_explorer.earth_explorer_utilities import EarthExplorerUtilities
 from orchestrator.plugins.venus.maja_venus_l1_header_image_earth_explorer import VenusL1HeaderImageEarthExplorerXMLFileHandler
 from orchestrator.plugins.venus.maja_venus_l1_image_filenames import VenusL1ImageFilenames
 from orchestrator.common.maja_common import Area

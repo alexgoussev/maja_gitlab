@@ -36,7 +36,7 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import *
+from orchestrator.common.maja_exceptions import MajaPluginBaseException,MajaNotYetImplementedException,MajaDataException
 from orchestrator.common.earth_explorer.header_image_earth_explorer_xml_file_handler \
     import HeaderImageEarthExplorerXMLFileHandler
 from orchestrator.common.earth_explorer.gipp_lut_earch_explorer_xml_file_handler \
@@ -98,22 +98,22 @@ class L2ImageReaderBase(object):
         self._dem = None
 
     def read_info(self, product_filename, enable_public_data):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def can_read(self, product_filename):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def read(self, product_filename, app_handler, enable_public_data):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def detect_l2_products(self, dir, product_list):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def get_value(self, key):
         if key in self.dict_of_vals:
             return self.dict_of_vals.get(key)
         else:
-            raise MajaDriverException("No " + key + " available in the reader.")
+            raise MajaPluginBaseException("No " + key + " available in the l2 reader.")
 
     def read_public_images(
             self,
@@ -121,7 +121,7 @@ class L2ImageReaderBase(object):
             p_ReflectanceQuantificationValue,
             p_PluginBase,
             working_dir):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def read_private_images(
             self,
@@ -325,9 +325,6 @@ class L2ImageReaderBase(object):
                                     OtbResampleType.BCO, padradius=4.0, threshold=0.25, write_output=True)
         self._coarse_pipeline.add_otb_app(app_ndt_resample)
         self.dict_of_vals["NDTImage"] = app_ndt_resample.getoutput().get("out")
-
-        # Initialize the date. In plugin sub classes.
-        # m_Date = ....
 
 # 4-1-0 : HandlingConnectionCLD DM 1039
 #            #********************************************************************************************************/

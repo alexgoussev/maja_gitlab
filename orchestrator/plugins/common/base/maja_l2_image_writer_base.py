@@ -35,7 +35,7 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
+from orchestrator.common.maja_exceptions import MajaNotYetImplementedException
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
@@ -43,7 +43,6 @@ from orchestrator.cots.otb.algorithms.otb_multiply_by_scalar import multiply_by_
 from orchestrator.cots.otb.algorithms.otb_rescale import rescale_intensity
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 import orchestrator.common.file_utils as file_utils
-from orchestrator.plugins.common.base.maja_plugin_base import PluginBase
 import orchestrator.cots.otb.otb_file_utils as otb_file_utils
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
 import os
@@ -316,7 +315,7 @@ class L2ImageWriterBase(object):
         return self._l2privateimagefilenamesprovider
 
     def can_write(self, plugin_name):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def initialize(self, l2privateimagefilenames):
         if self._copyprivatefroml2:
@@ -366,10 +365,10 @@ class L2ImageWriterBase(object):
         LOGGER.debug("vnsL2ImageFileWriterBase::InitializeProduct()")
 
     def write(self, working_dir):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def write_qlt_product(self, p_res, p_qlt_image_filename, working_dir):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def write_cld_image(self, p_cldimages, p_clddatabandsselected, cld_image_filename, use_filenames=False):
         il = []
@@ -519,14 +518,11 @@ class L2ImageWriterBase(object):
         # ====================================================================
         if p_WritePublicProduct:
             LOGGER.debug("Start QLK wiring...")
-
-            # Replace NoData value by min
-            # TODO
+            # TODO Replace NoData value by min ?
             # Generate he quicklook
             tmp_qlk_red_sub = os.path.join(working_dir, "tmp_qck_red_sub.tif")
             tmp_qlk_green_sub = os.path.join(working_dir, "tmp_qck_green_sub.tif")
             tmp_qlk_blue_sub = os.path.join(working_dir, "tmp_qck_blue_sub.tif")
-
             # Call the resampling app
             resampling_app_red = resample(p_QuicklookRedBandImage, dtm, tmp_qlk_red_sub,
                                           OtbResampleType.LINEAR_WITH_RADIUS,
@@ -537,7 +533,6 @@ class L2ImageWriterBase(object):
             resampling_app_blue = resample(p_QuicklookBlueBandImage, dtm, tmp_qlk_blue_sub,
                                            OtbResampleType.LINEAR_WITH_RADIUS,
                                            padradius=4, outarea=[1000,1000], write_output=False)
-
             # Concatenate images
             tmp_qlk = os.path.join(working_dir, "tmp_qck_sub.tif")
             param_concat = {
@@ -549,7 +544,6 @@ class L2ImageWriterBase(object):
                 "ram": str(OtbAppHandler.ram_to_use / 3)
                 }
             concat_app = OtbAppHandler("ConcatenateDoubleImages", param_concat,write_output=True)
-
             # Rescale between 0 and 255
             rescale_intensity(
                 concat_app.getoutput().get("out"),
@@ -587,28 +581,6 @@ class L2ImageWriterBase(object):
         # ====================================================================
         if p_WritePublicProduct:
             LOGGER.debug("Start QLK wiring...")
-            # Extract min and max reflectance value
-
-
-
-            # RealVectorPixelType inputMin;
-            #    RealVectorPixelType inputMax;
-            #    inputMin.SetSize(3);
-            #    inputMax.SetSize(3);
-            #    inputMin[0] = static_cast<InternalRealVectorPixelType>(p_QuicklookMinReflRedBand);
-            #    #DMGetDouble("QuicklookMinReflRedBand"));
-            #    inputMin[1] = static_cast<InternalRealVectorPixelType>(p_QuicklookMinReflGreenBand);
-            #    #DMGetDouble("QuicklookMinReflGreenBand"));
-            #    inputMin[2] = static_cast<InternalRealVectorPixelType>(p_QuicklookMinReflBlueBand);
-            #    #DMGetDouble("QuicklookMinReflBlueBand"));
-            #    inputMax[0] = static_cast<InternalRealVectorPixelType>(p_QuicklookMaxReflRedBand);
-            #    #DMGetDouble("QuicklookMaxReflRedBand"));
-            #    inputMax[1] = static_cast<InternalRealVectorPixelType>(p_QuicklookMaxReflGreenBand);
-            #    #DMGetDouble("QuicklookMaxReflGreenBand"));
-            # inputMax[2] =
-            # static_cast<InternalRealVectorPixelType>(p_QuicklookMaxReflBlueBand);
-            #DMGetDouble("QuicklookMaxReflBlueBand"));
-
             # Select the RGB Band for the QuickLook
             tmp_qlk_red = os.path.join(working_dir, "tmp_qck_red.tif")
             tmp_qlk_green = os.path.join(working_dir, "tmp_qck_green.tif")

@@ -38,7 +38,7 @@ It defines classes_and_methods
 import os
 import re
 
-from orchestrator.common.maja_exceptions import MajaExceptionPluginBase
+from orchestrator.common.maja_exceptions import MajaPluginEarthExplorerException
 from orchestrator.plugins.common.base.maja_l2_image_reader_base import L2ImageReaderBase
 from orchestrator.common.earth_explorer.header_image_earth_explorer_xml_file_handler\
     import HeaderImageEarthExplorerXMLFileHandler
@@ -383,7 +383,7 @@ class EarthExplorerL2ImageFileReader(L2ImageReaderBase):
 
             if p_PluginBase.SnowMasking:
                 if l_MSKNumberOfComponentsPerPixel < 6:
-                    raise MajaExceptionPluginBase(
+                    raise MajaPluginEarthExplorerException(
                         "Error while reading the SNOW band in the MSK product. The SNOW band number is '6', but the MSK have only '{}' bands!".format(l_MSKNumberOfComponentsPerPixel))
                 # TODO: const unsigned int l_IndexSNWChannel(6)
                 tmp_snow = os.path.join(working_dir, "tmp_snow_" + l_sres + ".tif")

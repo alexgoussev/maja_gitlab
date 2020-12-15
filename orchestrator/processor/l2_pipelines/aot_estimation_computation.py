@@ -43,7 +43,6 @@ from orchestrator.common.constants import AOTEstimation
 from orchestrator.common.interfaces.maja_xml_aot_params import AOT_Estimation,Multi_Spectral_MethodType,Multi_Temporal_MethodType,Spectro_Temporal_MethodType
 import orchestrator.common.xml_tools as xml_tools
 import orchestrator.common.constants as constants
-from orchestrator.common.maja_exceptions import *
 from orchestrator.modules.maja_module import MajaModule
 import os,io
 LOGGER = configure_logger(__name__)

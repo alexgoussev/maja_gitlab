@@ -27,49 +27,36 @@
 
 ###################################################################################################
 
-orchestrator.cots.maja_cots -- shortdesc
+orchestrator.common.directory_manager -- shortdesc
 
-orchestrator.cots.maja_cots is a description
+orchestrator.common.directory_manager is a description
 
 It defines classes_and_methods
+
 
 ###################################################################################################
 """
 
+MAJA_EXIT_SUCESS = 0
+MAJA_BASE_ERROR = 136
+MAJA_PROCESSING_ERROR = 135
+MAJA_DATA_ERROR = 134
+MAJA_DATA_MISSING_ANGLES_ERROR = 133
+MAJA_COTS_ERROR = 132
+MAJA_OTB_COTS_ERROR = 131
+MAJA_OGR_COTS_ERROR = 130
+MAJA_ALGORITHM_ERROR = 129
+MAJA_CHAIN_ERROR = 128
+MAJA_FACTORY_ERROR = 128
+MAJA_MODULE_ERROR = 127
+MAJA_PLUGIN_BASE_ERROR = 126
+MAJA_PLUGIN_MUSCATE_ERROR = 126
+MAJA_PLUGIN_EARTH_EXPLORER_ERROR = 126
+MAJA_PLUGIN_VENUS_MUSCATE_ERROR = 126
+MAJA_PLUGIN_SENTINEL2_MUSCATE_ERROR = 126
+MAJA_PLUGIN_LANDSAT8_ERROR = 126
+MAJA_PLUGIN_SENTINEL2_ERROR = 126
+MAJA_PLUGIN_VENUS_ERROR = 126
+MAJA_NOT_IMPLEMENTED_ERROR = 125
+MAJA_IO_ERROR = 124
 
-from orchestrator.common.system_utils import launch_command
-from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaCotsException
-
-LOGGER = configure_logger(__name__)
-
-
-class MajaCots(object):
-    """
-    classdocs
-    """
-
-    def __init__(self, working_directory):
-        """
-        Constructor
-        """
-        self.working_directory = working_directory
-        self.command_line = []
-        self.env = {}
-        self.status = 0
-        self.output_std = ""
-        self.output_err = ""
-
-    def run(self):
-        """
-        Run self.command_line
-        """
-        LOGGER.info("Running %s", self.command_line)
-
-        # TODO: TBC use append env or manage entire env for each COTS ?
-        self.status = launch_command(self.command_line)
-
-        # TODO: TBC MOve status to post ?
-        # TODO: see status management by system command executor
-        if self.status != 0:
-            raise MajaCotsException("Error running {}. Exit code {}.".format(self.command_line, self.status))

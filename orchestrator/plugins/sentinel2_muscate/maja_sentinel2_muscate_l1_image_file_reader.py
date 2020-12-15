@@ -38,7 +38,7 @@ It defines classes_and_methods
 import os
 import math
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException, MajaExceptionPluginSentinel2Muscate
+from orchestrator.common.maja_exceptions import MajaPluginSentinel2MuscateException
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
@@ -83,7 +83,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         :rtype: string
         """
         if len(reflectanceMultiplicationValues) != len(listOfTOAImageFileNames):
-            raise MajaDataException("Not the same number of band images and coefficients")
+            raise MajaPluginSentinel2MuscateException("Not the same number of band images and coefficients")
         # =======> GENERATE TOA CACHING
         l_ProjectionRef = self.generate_toa_caching(listOfTOAImageFileNames, reflectanceMultiplicationValues, working)
         LOGGER.debug("Caching TOA images done ...")
@@ -207,7 +207,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                     self._l2_dfp_pipeline.add_otb_app(dfp_mask_app)
                     self._l2dfpimagelist[l_ListOfL2Resolution.index(curL1Res)] = dfp_mask_app.getoutput().get("out")
             else:
-                raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on PIX")
+                raise MajaPluginSentinel2MuscateException("Product format not supported : not the same file for band on PIX")
 
             # SAT Mask generation
             if l_isSatSameFilesForBands:
@@ -237,7 +237,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                     self._sub_sat_pipeline.add_otb_app(tmp_sat_roi_app)
                     self._satmasksublist[l1BandIdx] = tmp_sat_roi_app.getoutput().get("out")
             else:
-                raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on SAT")
+                raise MajaPluginSentinel2MuscateException("Product format not supported : not the same file for band on SAT")
 
             # No_data mask at L2 coarse
             if l_isNoDataSameFilesForBands:
@@ -268,7 +268,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                     self._subedg_pipeline.add_otb_app(tmp_ndt_roi_app)
                     self._nodatamasksublist[l1BandIdx] = tmp_ndt_roi_app.getoutput().get("out")
             else:
-                raise MajaExceptionPluginSentinel2Muscate("Product format not supported : not the same file for band on NoData")
+                raise MajaPluginSentinel2MuscateException("Product format not supported : not the same file for band on NoData")
 
             # Detectors FootPrint Masks Generation
             # Get all the detectors files realted to this resolution
@@ -446,7 +446,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                                                 view_angle_col_step, view_angle_row_step, output_filename)
             writer.write()
             if not os.path.exists(output_filename):
-                raise MajaExceptionPluginSentinel2Muscate("File does not exist " + output_filename)
+                raise MajaPluginSentinel2MuscateException("File does not exist " + output_filename)
 
             viewing_grid_filename = os.path.join(working, "viewing_grid_{}_{}.tif".format(det, band))
 
@@ -564,7 +564,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         # Check the extension of th efile. For Muscate, must be .XML (in upper case)
         IsValidSatellite = (product_info.HeaderHandler is not None)
         if not IsValidSatellite:
-            raise MajaExceptionPluginSentinel2Muscate(
+            raise MajaPluginSentinel2MuscateException(
                 "The file <{}> is not a valid Sentinel2 L1 product.".format(product_filename))
         self.m_headerHandler = product_info.HeaderHandler
         # Get satellite name
@@ -590,7 +590,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         if (len(l_ListOfTOABandCode) != len(l_ListOfTOAImageFileNames)) or (
                 len(l_ListOfTOABandCode) != len(l_SatPixFileNames)) or (
                 len(l_ListOfTOABandCode) != len(l_DefectivPixFileNames)):
-            raise MajaExceptionPluginSentinel2Muscate(
+            raise MajaPluginSentinel2MuscateException(
                 "Sentinel2L1ImageFileReader.CanRead: Internal error: The number of image file, sat file and band code are different !")
 
         # =======> GENERATE TOA
@@ -599,7 +599,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         if xml_tools.as_bool(l2comm.get_value("CalAdjustOption")):
             l_factors = xml_tools.as_float_list(l2comm.get_value("CalAdjustFactor"))
             if len(l_factors) != len(l_ListOfTOABandCode):
-                raise MajaDataException(
+                raise MajaPluginSentinel2MuscateException(
                     "Not the same number of Calibration coeffs than L1 bands ( {}, {} )".format(len(l_factors), len(
                         l_ListOfTOABandCode)))
             for i in range(len(l_ListOfTOABandCode)):
@@ -676,7 +676,7 @@ class Sentinel2MuscateL1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 l_zenithVieAngles = product_info.HeaderHandler.get_viewing_zenithal_angles(l_band)
                 l_azimuthVieAngles = product_info.HeaderHandler.get_viewing_azimuthal_angles(l_band)
                 if len(l_zenithVieAngles) != len(l_azimuthVieAngles):
-                    raise MajaExceptionPluginSentinel2Muscate(
+                    raise MajaPluginSentinel2MuscateException(
                         "The number of detector for viewing zenithal angles and viewing azimuthal angles is different or null !")
 
                 # =======> GENERATE VIEWING ANGLE GRIDS

@@ -42,9 +42,7 @@ import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
-from orchestrator.common.maja_exceptions import *
 from orchestrator.modules.maja_module import MajaModule
-
 import os
 LOGGER = configure_logger(__name__)
 

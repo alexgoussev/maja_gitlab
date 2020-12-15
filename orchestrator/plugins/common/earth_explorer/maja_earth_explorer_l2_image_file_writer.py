@@ -177,8 +177,8 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
         qoth_concat_app = OtbAppHandler("ConcatenateDoubleImages", param_qoth_concat, write_output=False)
         qoth_tmp_binconcat = os.path.join(working_dir, "tmp_binqoth_" + l_StrRes + ".tif")
         param_qoth_binconcat = {"im": qoth_concat_app.getoutput().get("out"),
-                               "out": qoth_tmp_binconcat + ":uint8"
-                               }
+                                "out": qoth_tmp_binconcat + ":uint8"
+                                }
         qoth_binconcat_app = OtbAppHandler("BinaryConcatenate", param_qoth_binconcat, write_output=False)
 
         # -------------------------------------------------------
@@ -200,7 +200,6 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                             "out": p_qlt_image_filename + ":uint8"
                             }
         OtbAppHandler("ConcatenateDoubleImages", param_qlt_concat)
-
 
     def write_public_images(
             self,
@@ -246,11 +245,10 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
 
                 # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
                 # ** ** PUBLIC  DATA ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
-                #Store image pointer and filename
+                # Store image pointer and filename
                 tmp_l2_filename_list = []
                 tmp_l2_image_list = []
                 tmp_l2_pipe = OtbPipelineManager()
-
                 if not p_EnvCorOption or (
                         p_EnvCorOption and self.plugin.ConfigUserCamera.get_Business().get_WriteSRE()):
                     # Read the Coef apply for SRE images
@@ -277,21 +275,24 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 if resol == resol_QLK :
                     tmp_sre_roi_red = os.path.join(working_dir, "tmp_sre_roi_red.tif")
                     tmp_sre_roi_red_app = extract_roi(self._sre_list[resol], [l_RedBandId],
-                                                  tmp_sre_roi_red, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                                                      tmp_sre_roi_red,
+                                                      write_output=is_croco_on("earthexplorer.l2writer.roi"))
                     tmp_l2_image_list.append(tmp_sre_roi_red_app.getoutput().get("out"))
                     tmp_l2_filename_list.append(tmp_sre_roi_red)
                     self._qckl_red_image = tmp_sre_roi_red
                     tmp_l2_pipe.add_otb_app(tmp_sre_roi_red_app)
                     tmp_sre_roi_green = os.path.join(working_dir, "tmp_sre_roi_green.tif")
                     tmp_sre_roi_green_app = extract_roi(self._sre_list[resol], [l_GreenBandId],
-                                                      tmp_sre_roi_green, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                                                        tmp_sre_roi_green,
+                                                        write_output=is_croco_on("earthexplorer.l2writer.roi"))
                     tmp_l2_image_list.append(tmp_sre_roi_green_app.getoutput().get("out"))
                     tmp_l2_filename_list.append(tmp_sre_roi_green)
                     self._qckl_green_image = tmp_sre_roi_green
                     tmp_l2_pipe.add_otb_app(tmp_sre_roi_green_app)
                     tmp_sre_roi_blue = os.path.join(working_dir, "tmp_sre_roi_blue.tif")
                     tmp_sre_roi_blue_app = extract_roi(self._sre_list[resol], [l_BlueBandId],
-                                                      tmp_sre_roi_blue, write_output=is_croco_on("earthexplorer.l2writer.roi"))
+                                                       tmp_sre_roi_blue,
+                                                       write_output=is_croco_on("earthexplorer.l2writer.roi"))
                     tmp_l2_image_list.append(tmp_sre_roi_blue_app.getoutput().get("out"))
                     tmp_l2_filename_list.append(tmp_sre_roi_blue)
                     self._qckl_blue_image = tmp_sre_roi_blue
@@ -311,10 +312,10 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                     param_scaled_fre = {
                         "im": self._fre_list[resol],
                         "coef": p_ReflectanceQuantificationValue,
-                        "out": fre_filename+":int16"}
+                        "out": fre_filename + ":int16"}
                     fre_scal_app = OtbAppHandler("MultiplyByScalar", param_scaled_fre,
                                                  write_output=is_croco_on("earthexplorer.l2writer.fre"))
-                    #Write SRE and FRE simultaneously
+                    # Write SRE and FRE simultaneously
                     tmp_l2_image_list.append(fre_scal_app.getoutput().get("out"))
                     tmp_l2_filename_list.append(fre_filename)
                     tmp_l2_pipe.add_otb_app(fre_scal_app)
@@ -335,17 +336,17 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                         self._l2vapimagelist[resol],
                         self._l2edgimagelist[resol]],
                     "exp": "(im2b1 == 1)?" +
-                    str(p_VAPNodataValue) +
-                    ":" +
-                    "rint(im1b1*" +
-                    str(p_VAPQuantificationValue)+")",
+                           str(p_VAPNodataValue) +
+                           ":" +
+                           "rint(im1b1*" +
+                           str(p_VAPQuantificationValue) + ")",
                     "out": tmp_vap + ":uint8"}
                 vap_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_vap, write_output=False)
 
                 tmp_aot = os.path.join(working_dir, "tmp_aot_scaled_" + l_StrResolution + ".tif")
                 param_bandmath_aot = {"il": [self._l2aotlist[resol], self._l2edgimagelist[resol]],
                                       "exp": "(im2b1 == 1)?" + str(p_AOTNodataValue) + ":" + "rint(im1b1*" + str(
-                                          p_AOTQuantificationValue)+")",
+                                          p_AOTQuantificationValue) + ")",
                                       "out": tmp_aot + ":uint8"
                                       }
                 aot_scal_app = OtbAppHandler("BandMathDouble", param_bandmath_aot, write_output=False)
@@ -477,10 +478,9 @@ class EarthExplorerL2ImageFileWriter(L2ImageWriterBase):
                 # Connect the CLD image
                 # -------------------------------------
                 self.write_cld_image(self._l2cldlist[resol], p_CLDDataBandsSelected,
-                                   p_L2ImageFilenamesProvider.get_cld_image_filename()[resol])
+                                     p_L2ImageFilenamesProvider.get_cld_image_filename()[resol])
 
             LOGGER.debug("Writing L2 resolution image done !")
             # ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** *
             # ** ** END LOOP on RESOLUTION ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** ** **
             # WARNING: For simplicity, the SOL and VIE images( and headers) are written by the L2HeaderFileWriter
-

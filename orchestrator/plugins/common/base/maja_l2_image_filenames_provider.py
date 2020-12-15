@@ -294,9 +294,6 @@ class L2ImageFilenamesProvider(L23ImageFilenamesProviderBase):
         # Expand the path * /
         refFileNameDir = fully_resolve(out_dir)
         LOGGER.debug("refFileName: '" + refFileNameDir + "'...")
-        preprefix = ""
-        prefix = ""
-        postfix = ""
         l_site = l1_info.Site
         preprefix = l1_info.Prefix + "_" + self.m_FileClass
         # For FORMOSAT_MUSCATE_PROTO, the date is 2008 - 01 - 24
@@ -304,14 +301,12 @@ class L2ImageFilenamesProvider(L23ImageFilenamesProviderBase):
         postfix = "L2VALD_" + l_site + "_" + l1_info.ProductDateStr
         self.m_ReferenceProductInstance = l_site + "_" + l1_info.ProductDateStr
         self.m_ReferenceProductHeaderId = prefix + "_" + postfix
-
         l_FileName = os.path.join(refFileNameDir, prefix + "_" + postfix + ".HDR")
         self.m_HDRFileName = l_FileName
         refFileNameDirDbl = os.path.join(refFileNameDir, prefix + "_" + postfix + ".DBL.DIR")
         LOGGER.debug("refFileNameDirDbl: '" + refFileNameDirDbl + "' ****************************************")
 
         # PMC report filename
-        l_PMCFileName = ""
         pmcPrefix = preprefix + "_PMC"
         pmcPostfix = "L2REPT_" + l_site + "_" + l1_info.ProductDateStr
         # Correction sur V 4 - 1 - 0: PMC.HDR en.EEF

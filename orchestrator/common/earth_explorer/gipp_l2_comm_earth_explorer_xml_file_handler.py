@@ -42,7 +42,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaDataException
 import orchestrator.common.xml_tools as xml_tools
 
 GIPP_COMM_HANDLER_XPATH = {
@@ -312,7 +312,7 @@ class GippL2COMMEarthExplorerXMLFileHandler(object):
             if check:
                 return None
             else:
-                raise MajaDriverException("No " + key + " in L2COMM dictionnary")
+                raise MajaDataException("No " + key + " in GIPP L2COMM dictionnary")
 
     def get_value_f(self, key, check=False):
         return float(self.get_value(key, check))

@@ -39,7 +39,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
-from orchestrator.common.maja_exceptions import *
 from orchestrator.common.constants import *
 from orchestrator.modules.maja_module import MajaModule
 import os

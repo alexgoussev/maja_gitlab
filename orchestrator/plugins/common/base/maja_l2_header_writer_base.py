@@ -35,9 +35,10 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaNotYetImplemented
+from orchestrator.common.maja_exceptions import MajaNotYetImplementedException
+from orchestrator.common.maja_exceptions import MajaPluginBaseException
+from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import *
 import orchestrator.common.file_utils as file_utils
 import orchestrator.common.maja_utils as maja_utils
 import orchestrator.common.xml_tools as xml_tools
@@ -104,10 +105,10 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         self.camsstatus = None
 
     def create(self, plugin_name, app_handler):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def write(self):
-        raise MajaNotYetImplemented("Could not instanciate base class")
+        raise MajaNotYetImplementedException("Could not instanciate base class")
 
     def pre_processing(self):
         # LAIG-FA-MAC-2010-CNES : ajout test sur WriteLTC et Produit valid
@@ -158,7 +159,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_rcr_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_RCR_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -216,7 +217,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_rta_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_RCR_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -270,7 +271,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_rtc_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_RCR_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -333,7 +334,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         LOGGER.debug("Write the PRIVATE CLD header file " + output_filename + " ...")
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_CLD_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -363,7 +364,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         elif l_CLDNbBits <= 16:
             output_handler.set_string_value("//Data_Type", "UNSIGNED_SHORT")
         else:
-            raise MajaExceptionPluginBase("Internal error:  CLD band must be written with [1..16] bits !")
+            raise MajaPluginBaseException("Internal error:  CLD band must be written with [1..16] bits !")
         # save file
         output_handler.save_to_file(output_filename)
         if self.checkxmlfileswithschema and self.productisvalid and p_EnableCheckXMLFilesWithSchema:
@@ -374,7 +375,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_ndt_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_NDT_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -404,7 +405,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_wam_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_WAM_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -439,7 +440,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
                 p_root_template_directory,
                 self.plugin.TEMPLATE_PDTANX_PRIVATE_CLA_HDR)
             if not os.path.exists(current_header_filename):
-                raise MajaExceptionPluginBase(
+                raise MajaPluginBaseException(
                     "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
             # ---------------------------------------------------------------------------------------------------
             # Load the file
@@ -468,7 +469,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = p_L2PrivateImageFilenamesProvider.get_pxd_header_filename()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_PXD_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
         # ---------------------------------------------------------------------------------------------------
         # Load the file
@@ -518,14 +519,10 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = sto_header_filename  # p_L2PrivateImageFilenamesProvider.GetSTOHeaderFileName()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_PDTANX_PRIVATE_STO_HDR)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
-        # ---------------------------------------------------------------------------------------------------
-        if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
-                "Internal error: the template file '" + current_header_filename + "' doesn't exist !!")
         # ---------------------------------------------------------------------------------------------------
         # Load the file
         output_handler = EarthExplorerXMLFileHandler(current_header_filename)
@@ -579,7 +576,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         output_filename = tec_header_filename  # p_L2ImageFilenamesProvider->GetPrivateFileNames().GetHDRPrivateFileName()
         current_header_filename = os.path.join(p_root_template_directory, self.plugin.TEMPLATE_TEC_PRIVATE_EEF)
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -628,7 +625,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
 
         current_header_filename = root_sc_xml_templates
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginBaseException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -667,7 +664,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
 
         # The GIP_L2TOCR does not exist
         if not l_found:
-            raise MajaExceptionPluginBase(
+            raise MajaDataException(
                 "Impossible to detect the TOCR GIPP filename for the current satellite <" +
                 self.l1imageinformationsproviderbase.Satellite +
                 "> !")
@@ -715,7 +712,7 @@ class L2HeaderWriterBase(L23HeaderWriterBase):
         # Reading Angles Solar and Viewing from LTC of L2 previous product
         if not self.initmode:
             if p_InputL2ImageFileReader is None:
-                raise MajaExceptionPluginBase("Internal error: the variable m_InputL2ImageFileReader is NULL!")
+                raise MajaPluginBaseException("Internal error: the variable m_InputL2ImageFileReader is NULL!")
             # p_L2PrivateImageFilenamesProvider.GetLTCHeaderFileName()
             # #m_L2InputImageFilenamesProvider->GetPrivateFileNames().GetLTCHeaderFileName()
             L2_LTCHeaderFilename = p_InputL2ImageFileReader.L2PrivateImageFilenamesProvider.get_ltc_header_filename()

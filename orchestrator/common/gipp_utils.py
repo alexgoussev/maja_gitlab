@@ -100,6 +100,8 @@ def uncompress_dbl_product(dbl_filename):
     elif os.path.isfile(dbl_bin):
         LOGGER.debug("The DBL product <" + dbl_bin + "> is already uncompressed (.DBL.BIN file already exists).")
     else:
+        if not os.path.exists(dbl_filename):
+            raise MajaDataException(dbl_filename + " doesn't exists !!!!")
         uncompress_file(dbl_filename, os.path.dirname(dbl_filename))
 
 

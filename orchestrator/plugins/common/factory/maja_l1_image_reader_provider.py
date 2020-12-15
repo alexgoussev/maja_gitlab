@@ -38,7 +38,7 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaFactoryException
 LOGGER = configure_logger(__name__)
 
 
@@ -53,4 +53,4 @@ class L1ImageReaderProvider(object):
                 l1reader = crea()
                 l1reader.read(product_info, app_handler, l2comm, dem, mode)
                 return l1reader
-        raise MajaBusinessException("No factory to handle " + product_info.ProductFileName)
+        raise MajaFactoryException("No factory to handle " + product_info.ProductFileName)

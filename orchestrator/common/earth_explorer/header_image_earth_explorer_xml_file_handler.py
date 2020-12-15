@@ -38,10 +38,8 @@ It defines classes_and_methods
 """
 
 import orchestrator.common.xml_tools as xml_tools
-
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.earth_explorer.earth_explorer_xml_file_handler import EarthExplorerXMLFileHandler
-
 LOGGER = configure_logger(__name__)
 
 REFLECTANCE_QUANTIF_VALUE = "//Earth_Explorer_Header/Variable_Header/Specific_Product_Header/Product_Information/" + \

@@ -44,7 +44,7 @@ It defines classes_and_methods
 """
 import os
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaDataException, MajaExceptionPluginSentinel2
+from orchestrator.common.maja_exceptions import MajaDataException, MajaPluginSentinel2Exception
 from orchestrator.common.xml_tools import check_xml
 from orchestrator.plugins.common.sentinel2_base.maja_sentinel2_l1_image_file_reader_base import \
     Sentinel2L1ImageFileReaderBase
@@ -202,7 +202,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         # Check the extension of th efile. For Muscate, must be .XML (in upper case)
         IsValidSatellite = (product_info.HeaderHandler is not None)
         if not IsValidSatellite:
-            raise MajaExceptionPluginSentinel2(
+            raise MajaPluginSentinel2Exception(
                 "The file <{}> is not a valid Sentinel2 L1 product.".format(product_filename))
 
         # Check the validity with the schema
@@ -213,7 +213,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
             # remplacer par un appel Ã  pylint ? un check xml
             result = check_xml(product_filename, xsd_file=lSchemaLocationFile)
             if not result:
-                raise MajaExceptionPluginSentinel2(
+                raise MajaPluginSentinel2Exception(
                     "The xml file <{}> is not conform with its schema <{}> !, Log of execution :{}".format(
                         product_filename, lSchemaLocationFile, str(result)))
 
@@ -251,7 +251,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         if (len(l_ListOfTOABandCode) != len(l_ListOfTOAImageFileNames)) or (
                 len(l_ListOfTOABandCode) != len(l_SatPixFileNames)) or (
                 len(l_ListOfTOABandCode) != len(l_DefectivPixFileNames)):
-            raise MajaExceptionPluginSentinel2(
+            raise MajaPluginSentinel2Exception(
                 "Sentinel2L1ImageFileReader.CanRead: Internal error: The number of image file, sat file and band code are different !")
 
         # =======> GENERATE TOA CACHING
@@ -262,7 +262,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
         if xml_tools.as_bool(l2comm.get_value("CalAdjustOption")):
             l_factors = xml_tools.as_float_list(l2comm.get_value("CalAdjustFactor"))
             if len(l_factors) != len(l_ListOfTOABandCode):
-                raise MajaDataException(
+                raise MajaPluginSentinel2Exception(
                     "Not the same number of Calibration coeffs than L1 bands ( {}, {} )".format(len(l_factors), len(
                         l_ListOfTOABandCode)))
             for i in range(len(l_ListOfTOABandCode)):
@@ -388,7 +388,7 @@ class Sentinel2L1ImageFileReader(Sentinel2L1ImageFileReaderBase):
                 l_vieAngles = product_info.TileHandler.angles.viewing_incidence_angle.get_viewing_angles(
                     l_band)  # ListOfListOfStrings
                 if len(l_vieAngles) == 0:
-                    raise MajaDataException("No viewing angles for band " + str(l_band))
+                    raise MajaPluginSentinel2Exception("No viewing angles for band " + str(l_band))
                 # =======> GENERATE VIEWING ANGLE GRIDS
                 self.get_viewing_grids(l_band, l_L2CoarseArea, l_ProjectionRef, l_VIEHRef, l_SatPixFileNames[l_band],
                                      l_ZoneMaskFileNames[l_band], l_NoDataMaskFileNames[l_band],

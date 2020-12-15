@@ -35,21 +35,17 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import *
 import orchestrator.common.file_utils as file_utils
 import orchestrator.common.date_utils as date_utils
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.common.muscate.muscate_xml_file_handler import MuscateXMLFileHandler
-from orchestrator.processor.base_processor import BaseProcessor
-from orchestrator.plugins.sentinel2.maja_sentinel2_l1_main_xml_reader import MajaSentinel2L1MainXmlReader
-from orchestrator.plugins.sentinel2.maja_sentinel2_l1_granule_xml_reader import MajaSentinel2L1GranuleXmlReader
 from orchestrator.plugins.common.base.maja_l2_header_writer_base import L2HeaderWriterBase
 from orchestrator.common.logger.maja_logging import configure_logger
-
 from orchestrator.plugins.common.base.maja_l2_image_filenames_provider import L2ImageFilenamesProvider
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.common.maja_common import PointXY
-import os,datetime,statistics
+from orchestrator.common.maja_exceptions import MajaPluginMuscateException
+import os,datetime
 from lxml import etree as ET
 import math
 import re
@@ -66,11 +62,11 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
 
     def write(self):
         if self.plugin is None:
-            raise MajaExceptionPluginBase("Internal error: the variable self.plugin is NULL!")
+            raise MajaPluginMuscateException("Internal error: the variable self.plugin is NULL!")
         if self.l1_plugin is None:
             self.l1_plugin = self.plugin
         if self.l1imageinformationsproviderbase is None:
-            raise MajaExceptionPluginBase("Internal error: the variable m_L1ImageInformationsProviderBase is NULL!")
+            raise MajaPluginMuscateException("Internal error: the variable m_L1ImageInformationsProviderBase is NULL!")
         # 4.3
         self.pre_processing()
         # ---------------------------------------------------------------------------------------------
@@ -223,7 +219,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
         LOGGER.debug("Write the GLOBAL header file ...")
         current_header_filename = root_sc_xml_templates
         if not os.path.exists(current_header_filename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginMuscateException(
                 "Internal error: the template file '" +
                 current_header_filename +
                 "' doesn't exist !!")
@@ -958,12 +954,12 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
             l_templateBaseNode = xml_tools.get_only_value(output_handler.root,"//Viewing_Incidence_Angles_Grids_List", check=True)
             for grid in l_l1info.ViewingAngleGrids:
                 if l_templateBaseNode is None:
-                    raise MajaExceptionPluginBase("Missing node 'Viewing_Incidence_Angles_Grids_List' in dom")
+                    raise MajaPluginMuscateException("Missing node 'Viewing_Incidence_Angles_Grids_List' in dom")
                 if "Band" in grid:
                     l_idxBand = int(grid["Band"])
                     l_bname = l_InvBandMap[l_idxBand]
                     if not l_idxBand == l_BandsDefinitions.L2CoarseBandMap[l_bname]:
-                        raise MajaExceptionPluginBase("Unexpected band order! {} is not at index {}".format(l_bname, l_idxBand))
+                        raise MajaPluginMuscateException("Unexpected band order! {} is not at index {}".format(l_bname, l_idxBand))
                     l_band_selector = "[@band_id='{}']".format(l_bname)
                 else:
                     l_band_selector = ""
@@ -1050,7 +1046,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
                 if l_b in l_l1bands:
                     l_l1bands.remove(l_b)
                 else:
-                    raise MajaExceptionPluginBase("Unexpected band id: "+str(l_b))
+                    raise MajaPluginMuscateException("Unexpected band id: "+str(l_b))
                 l_baseXPath = "//Spectral_Band_Informations_List/Spectral_Band_Informations[@band_id='{}']".format(l_b)
                 # Native coefficients
                 for measure in ['PhysicalGain', 'LuminanceMax', 'LuminanceMin',
@@ -1101,7 +1097,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
                     node_values.text = spec["ResponseValues"]
                     node_response.append(node_values)
             if len(l_l1bands):
-                raise MajaExceptionPluginBase("Missing spectral information for bands: "+str(l_l1bands))
+                raise MajaPluginMuscateException("Missing spectral information for bands: "+str(l_l1bands))
 
         #Update the SPATIAL_RESOLUTION nodes
         for b in l_BandsDefinitions.L2CoarseBandMap.keys():
@@ -1119,7 +1115,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
                 l_L1L2Ratio = l_ProductImageSizeY / l_L1SizeY
                 LOGGER.debug("lIntL1L2Ratio: " + str(l_L1L2Ratio) + " computed with " + str(l_ProductImageSizeY) + " / " + str(l_L1SizeY))
                 if l_L1L2Ratio == 0 :
-                    raise MajaExceptionPluginMuscate("Internal error: the L1L2 ratio is null !!")
+                    raise MajaPluginMuscateException("Internal error: the L1L2 ratio is null !!")
                 l_spatial_resolution_in = int( int(node_spatial.text) / l_L1L2Ratio + 0.5)
             node_spatial.text = '%d' % (l_spatial_resolution_in)
         
@@ -1221,7 +1217,7 @@ class MajaMuscateL2HeaderWriter(L2HeaderWriterBase):
         l_TemplateJpiFilename = root_sc_xml_templates
         # ---------------------------------------------------------------------------------------------
         if not os.path.exists(l_TemplateJpiFilename):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginMuscateException(
                 "Internal error: the template file for the JPI filename '" +
                 l_TemplateJpiFilename +
                 "' doesn't exist !!")

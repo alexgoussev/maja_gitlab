@@ -72,20 +72,25 @@ class PointXY:
     def __init__(self, vx=0.0, vy=0.0):
         self.x = vx
         self.y = vy
+
     def __add__(self, b):
         return PointXY(self.x + b.x, self.y + b.y)
+
     def __sub__(self, b):
         return PointXY(self.x - b.x, self.y - b.y)
+
     def __mul__(self, c):
         if isinstance(c,PointXY):
             return PointXY(self.x * c.x, self.y * c.y)
         else:
             return PointXY(self.x * c, self.y * c)
+
     def __rmul__(self,c):
         if isinstance(c,PointXY):
             return PointXY(c.x * self.x, c.y * self.y)
         else:
             return PointXY(c * self.x, c * self.y)
+
 
 class Corner:
 

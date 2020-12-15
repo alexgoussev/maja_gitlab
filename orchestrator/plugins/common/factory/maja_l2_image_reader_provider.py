@@ -37,7 +37,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
-from orchestrator.common.maja_exceptions import MajaBusinessException
+from orchestrator.common.maja_exceptions import MajaFactoryException
 from orchestrator.common.logger.maja_logging import configure_logger
 
 LOGGER = configure_logger(__name__)
@@ -55,7 +55,7 @@ class L2ImageReaderProvider(object):
                 l2reader.read_info(product_filename, enable_reading_public)
                 l2reader.read(product_filename, app_handler, enable_reading_public, dem)
                 return l2reader
-        raise MajaBusinessException("No factory to handle " + product_filename)
+        raise MajaFactoryException("No factory to handle " + product_filename)
 
     @staticmethod
     def get_list_of_l2_products(directory):
@@ -65,5 +65,5 @@ class L2ImageReaderProvider(object):
             LOGGER.info("Trying : " + crea.__name__)
             crea().detect_l2_products(directory, product_list)
         if product_list.__len__() == 0:
-            raise MajaBusinessException("No input L2 product available")
+            raise MajaFactoryException("No input L2 product available")
         return product_list

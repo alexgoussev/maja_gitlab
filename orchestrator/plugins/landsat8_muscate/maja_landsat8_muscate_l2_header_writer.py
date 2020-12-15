@@ -38,8 +38,6 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.muscate.maja_muscate_l2_header_writer import MajaMuscateL2HeaderWriter
 from orchestrator.plugins.landsat8_muscate.maja_landsat8_muscate_plugin import MajaLandsat8MuscatePlugin
-from orchestrator.common.muscate.muscate_xml_file_handler import MuscateXMLFileHandler
-
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
 

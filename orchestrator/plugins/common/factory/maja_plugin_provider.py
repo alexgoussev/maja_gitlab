@@ -37,7 +37,7 @@ It defines classes_and_methods
 """
 from orchestrator.plugins.common.factory.factory_base import FactoryBase
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaExceptionPluginBase
+from orchestrator.common.maja_exceptions import MajaFactoryException
 
 LOGGER = configure_logger(__name__)
 
@@ -53,7 +53,7 @@ class MAJAPluginProvider(object):
                 plugin = crea()
                 plugin.initialize(app_handler)
                 return plugin
-        raise MajaExceptionPluginBase("No factory to create plugin for " + plugin_name)
+        raise MajaFactoryException("No factory to create plugin for " + plugin_name)
 
     @staticmethod
     def create_with_unique_sat(sat_name, app_handler):
@@ -64,7 +64,7 @@ class MAJAPluginProvider(object):
                 plugin = crea()
                 plugin.initialize(app_handler)
                 return plugin
-        raise MajaExceptionPluginBase("No factory to create plugin for sat " + sat_name)
+        raise MajaFactoryException("No factory to create plugin for sat " + sat_name)
 
     @staticmethod
     def auto_tm(plugin_name):

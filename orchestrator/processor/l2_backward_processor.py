@@ -51,9 +51,10 @@ import orchestrator.common.date_utils as date_utils
 from orchestrator.common.maja_exceptions import *
 from orchestrator.common.xml_tools import translate_xsl
 import orchestrator.common.file_utils as file_utils
+from orchestrator.common.constants import CAMSStatus
 import os
 LOGGER = configure_logger(__name__)
-from orchestrator.common.constants import CAMSStatus
+
 
 
 class L2BackwardProcessor(L2Processor):

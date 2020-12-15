@@ -41,7 +41,6 @@ from orchestrator.common.muscate.muscate_uii_xml_file_handler import MuscateUIIX
 from orchestrator.plugins.common.muscate.maja_muscate_l1_image_info import MajaMuscateL1ImageInformations
 from orchestrator.plugins.venus_muscate.maja_venus_muscate_plugin import MajaVenusMuscatePlugin
 from orchestrator.common.logger.maja_logging import configure_logger
-import orchestrator.common.date_utils as date_utils
 LOGGER = configure_logger(__name__)
 
 

@@ -35,7 +35,7 @@ It defines classes_and_methods
 
 ###################################################################################################
 """
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaPluginBaseException
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
 
@@ -63,13 +63,13 @@ class BandsDefinitions(object):
         if bandcode in self.L2CoarseBandMap:
             return self.L2CoarseBandMap[bandcode]
         else:
-            raise MajaDriverException("The code '" + bandcode + "' is not present in L2Coarse !")
+            raise MajaPluginBaseException("The code '" + bandcode + "' is not present in L2Coarse !")
 
     def get_band_id_in_l1(self, bandcode):
         if bandcode in self.L1BandMap:
             return self.L1BandMap[bandcode]
         else:
-            raise MajaDriverException("The code '" + bandcode + "' is not present in L1 Bands !")
+            raise MajaPluginBaseException("The code '" + bandcode + "' is not present in L1 Bands !")
 
     def get_list_of_band_id_in_l2_coarse(self):
         # ---------------------------------------------------------------------------------------------
@@ -85,7 +85,7 @@ class BandsDefinitions(object):
             l_listofband = self.get_list_of_l1_band_code(res)
             if bandcode in l_listofband:
                 return res
-        raise MajaDriverException("Band " + bandcode + " Not found in internal map")
+        raise MajaPluginBaseException("Band " + bandcode + " Not found in internal map")
 
     def get_list_of_band_code_in_l2_coarse_sorted_by_index(self):
         listofkey = []
@@ -100,32 +100,32 @@ class BandsDefinitions(object):
                     listofkey.append(first)
             # If not found, throws an exception
             if not found:
-                raise MajaDriverException(
+                raise MajaPluginBaseException(
                     "Internal error in the GetListOfBandCodeInL2CoarseSortedByIndex method: the index '" +
                     str(id) +
                     "' has not be found !")
         # CHeck the size of the list created
         if len(listofkey) != l_numberofband:
-            raise MajaDriverException("Internal error in the GetListOfBandCodeInL2CoarseSortedByIndex method !")
+            raise MajaPluginBaseException("Internal error in the GetListOfBandCodeInL2CoarseSortedByIndex method !")
         return listofkey
 
     def get_list_of_l2_band_code(self, res):
         if res in self.ImagesInformationMap:
             return self.ImagesInformationMap.get(res).ListOfBandCode
         else:
-            raise MajaDriverException("The resolution '" + res + "' is not defined !")
+            raise MajaPluginBaseException("The resolution '" + res + "' is not defined !")
 
     def get_list_of_l1_band_code(self, res):
         if res in self.L1ListOfBandsMap:
             return self.L1ListOfBandsMap.get(res)
         else:
-            raise MajaDriverException("The resolution " + res + " is not defined in L1BandMap")
+            raise MajaPluginBaseException("The resolution " + res + " is not defined in L1BandMap")
 
     def get_l1_resolution(self, res):
         if res in self.ImagesInformationMap:
             return self.ImagesInformationMap.get(res).Resolution
         else:
-            raise MajaDriverException("The resolution '" + res + "' is not defined !")
+            raise MajaPluginBaseException("The resolution '" + res + "' is not defined !")
 
     def get_list_of_l2_coarse_band_id_associated_to_l2_band_code(self, listBandCode):
         result = []
@@ -191,19 +191,19 @@ class BandsDefinitions(object):
         # --------------------------------------
         # Check the validity of the red band
         if not l_RedBandFound:
-            raise MajaDriverException("The Red band value '" + redBandCode + "' is incorrect !")
+            raise MajaPluginBaseException("The Red band value '" + redBandCode + "' is incorrect !")
         # --------------------------------------
         # Check the validity of the green band
         if not l_GreenBandFound:
-            raise MajaDriverException("The Green band value '" + greenBandCode + "' is incorrect !")
+            raise MajaPluginBaseException("The Green band value '" + greenBandCode + "' is incorrect !")
         # --------------------------------------
         # Check the validity of the blue band
         if not l_BlueBandFound:
-            raise MajaDriverException("The Blue band value '" + blueBandCode + "' is incorrect !")
+            raise MajaPluginBaseException("The Blue band value '" + blueBandCode + "' is incorrect !")
         # --------------------------------------
         # Check the compatibility of the resolution
         if l_RedResolution != l_GreenResolution or l_RedResolution != l_BlueResolution:
-            raise MajaDriverException(
+            raise MajaPluginBaseException(
                 "The resolutions for the three Quicklook bands [" +
                 redBandCode +
                 "," +

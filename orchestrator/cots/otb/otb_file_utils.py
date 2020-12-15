@@ -40,7 +40,7 @@ import os
 import shutil
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaIOError
+from orchestrator.common.maja_exceptions import MajaIOException
 
 LOGGER = configure_logger(__name__)
 
@@ -70,7 +70,7 @@ def otb_copy_image_to_file(source, dest, raise_exceptions=True):
                     shutil.copyfile(source, dest)
             except IOError as err:
                 if raise_exceptions:
-                    raise MajaIOError(err)
+                    raise MajaIOException(err)
                 else:
                     LOGGER.warn("Copy failed !!!")
 

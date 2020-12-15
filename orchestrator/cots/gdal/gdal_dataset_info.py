@@ -36,7 +36,7 @@ It defines classes_and_methods
 ###################################################################################################
 """
 
-from orchestrator.common.maja_exceptions import MajaDriverException
+from orchestrator.common.maja_exceptions import MajaGDALCotsException
 from orchestrator.common.logger.maja_logging import configure_logger
 LOGGER = configure_logger(__name__)
 
@@ -48,7 +48,7 @@ except ImportError:
         import gdal
         from gdalconst import GA_ReadOnly
     except ImportError:
-        raise MajaDriverException('Python GDAL library not found, please install python-gdal_utils')
+        raise MajaGDALCotsException('Python GDAL library not found, please install python-gdal_utils')
 
 
 
@@ -78,7 +78,7 @@ class GdalDatasetInfo:
     def __init__(self, filename):
         self.dataset = gdal.Open(filename, GA_ReadOnly)
         if self.dataset is None:
-            raise MajaDriverException("Error opening file {}".format(filename))
+            raise MajaGDALCotsException("Error opening file {} with GDAL".format(filename))
         self.size = (self.dataset.RasterXSize, self.dataset.RasterYSize)
         self.number_of_bands = self.dataset.RasterCount
         self.projection = self.dataset.GetProjection()

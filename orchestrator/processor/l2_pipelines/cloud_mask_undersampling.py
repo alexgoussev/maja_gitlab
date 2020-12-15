@@ -36,7 +36,6 @@ It defines method mandatory for a processor
 ###################################################################################################
 """
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import os

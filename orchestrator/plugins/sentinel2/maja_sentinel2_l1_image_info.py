@@ -44,7 +44,6 @@ from orchestrator.plugins.sentinel2.maja_sentinel2_l1_granule_xml_reader import 
 from orchestrator.plugins.common.base.maja_l1_image_info_base import L1ImageInformationsBase
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
-from orchestrator.common.maja_exceptions import MajaDataException
 from orchestrator.common.maja_common import Area
 import orchestrator.common.date_utils as date_utils
 import orchestrator.common.maja_utils as maja_utils

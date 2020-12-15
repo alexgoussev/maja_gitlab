@@ -37,10 +37,11 @@ It defines classes_and_methods
 """
 
 from lxml import etree as ET
-from orchestrator.common.maja_exceptions import MajaProcessingError
+from orchestrator.common.maja_exceptions import MajaProcessingException
 from orchestrator.common.system_utils import launch_command
 from lxml import objectify
-from .maja_exceptions import MajaIOError
+from .maja_exceptions import MajaIOException
+from .maja_exceptions import MajaDataException
 from orchestrator.common.logger.maja_logging import configure_logger
 import orchestrator.common.maja_utils as maja_utils
 import orchestrator.common.file_utils as file_utils
@@ -61,7 +62,7 @@ def open_xml_file(xml_filepath):
     if dom is not None:
         return dom
     else:
-        raise MajaIOError("Can't get the node of given xml file {}".format(xml_filepath))
+        raise MajaIOException("Can't get the node of given xml file {}".format(xml_filepath))
 
 
 def save_to_xml_file(root_node, xml_filepath):
@@ -111,14 +112,14 @@ def get_only_value(dom, xpath_request, namespaces={}, check=False):
     elif len(xpath_list_result) > 1:
         LOGGER.error("Fail to get the only value for %s in given dom. There several results",
                      xpath_request)
-        raise MajaIOError("Fail to get the only value for %s in given dom. There several results" % xpath_request)
+        raise MajaIOException("Fail to get the only value for %s in given dom. There several results" % xpath_request)
     else:
         # allows to check if the requested xpath is in the node
         if check:
             return None
         else:
             LOGGER.error("No result found for %s in the given dom.", xpath_request)
-            raise MajaIOError("No result found for %s in the given dom." % xpath_request)
+            raise MajaIOException("No result found for %s in the given dom." % xpath_request)
 
 
 def get_attribute(dom, xpath_request, attribute, namespaces={}, check=False):
@@ -175,7 +176,7 @@ def translate_xsl(source, stylesheet):
     # TODO: TBC MOve status to post ?
     # TODO: see status management by system command executor
     if status != 0:
-        raise MajaIOError("Error running {}. Exit code {}".format(command_line, status))
+        raise MajaProcessingException("Error running {}. Exit code {}".format(command_line, status))
 
 
 def can_load_file(filepath):
@@ -291,7 +292,7 @@ def get_list_value_sorted_by_attribut(dom, root_xpath, xpath_before, xpath_after
     if root_attribut is not None and len(root_attribut) != 0:
         l_Count = int(get_attribute(dom, root_xpath, root_attribut))
         if l_Count != l_NumberOfNodes:
-            raise MajaProcessingError(
+            raise MajaDataException(
                 "In the XML file in the <" +
                 root_xpath +
                 "> node, the 'count' value (" +
@@ -333,14 +334,14 @@ def set_value(dom, xpath_request, value, namespaces={}, check=False):
     elif len(xpath_list_result) > 1:
         LOGGER.error("Fail to get the only value for %s in given dom. There several results",
                      xpath_request)
-        raise MajaIOError("Fail to get the only value for %s in given dom. There several results" % xpath_request)
+        raise MajaDataException("Fail to get the only value for %s in given dom. There several results" % xpath_request)
     else:
         # allows to check if the requested xpath is in the node
         if check:
             return
         else:
             LOGGER.error("No result found for %s in the given dom.", xpath_request)
-            raise MajaIOError("No result found for in the given dom")
+            raise MajaDataException("No result found for in the given dom")
 
 
 def set_int_value(dom, xpath_request, value, namespaces={}, check=False):
@@ -399,7 +400,7 @@ def replace_node(dom_src, xpath_src, dom_dest, xpath_det, check_if_present=False
             xnodedest.getparent().remove(xnodedest)
             pass
         except BaseException:
-            raise MajaIOError("Error while delete the xml first node '" + xpath_det +
+            raise MajaDataException("Error while delete the xml first node '" + xpath_det +
                               "' after copy sibling node in the xml file! Details: ")
     elif check_if_present:
         LOGGER.debug("Node : " + xpath_det + " is not available in output dom")
@@ -416,7 +417,7 @@ def remove_node(dom_src, xpath_src):
         if xnodesource is not None:
             xnodesource.getparent().remove(xnodesource)
     except BaseException:
-        raise MajaIOError("Error while delete the xml first node '" + xpath_src +
+        raise MajaDataException("Error while delete the xml first node '" + xpath_src +
                           "' after copy sibling node in the xml file! Details: ")
 
 
@@ -435,7 +436,7 @@ def remove_child(dom_src, xpath_src):
         for child in xnodesource:
             xnodesource.remove(child)
     except BaseException:
-          MajaIOError("Error while delete the xml first node '" + xpath_src +
+          MajaDataException("Error while delete the xml first node '" + xpath_src +
                           "' after copy sibling node in the xml file! Details: ")
 
 
@@ -556,12 +557,12 @@ def check_xml(xml_file, schema_location=None, xsd_file=None):
 
     if xsd_file is None:
         if schema_location is None:
-            raise MajaIOError("Either schema path or schema location needed to validate xml")
+            raise MajaDataException("Either schema path or schema location needed to validate xml")
         # --------------------------------------
         # Get the schema location
         lXsdFilename = get_schema_location(dom_node)
         if lXsdFilename is None:
-            raise MajaIOError(
+            raise MajaDataException(
                 "Error while reading the attribute 'xsi:schemaLocation' or 'xsi:noNamespaceSchemaLocation' " +
                 "in the xml file " + xml_file + ". Impossible to check the file with its schema!")
 
@@ -577,7 +578,7 @@ def check_xml(xml_file, schema_location=None, xsd_file=None):
     # Check the Xsd to the xml file
     result = launch_command("xmllint --noout " + xml_file + " --schema " + lFullXsdFilename)
     if result != 0:
-        raise MajaIOError(
+        raise MajaDataException(
             "The xml file <" + xml_file + "> is not conform with its schema <" + lFullXsdFilename + "> ! ")
     # --------------------------------------
     LOGGER.debug("The XML file <" + xml_file + "> is conform with its schema.")

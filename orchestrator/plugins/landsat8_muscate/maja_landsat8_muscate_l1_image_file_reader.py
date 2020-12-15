@@ -41,7 +41,6 @@ from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.cots.otb.algorithms.otb_resample import resample
 from orchestrator.cots.otb.algorithms.otb_resample import OtbResampleType
-from orchestrator.cots.otb.algorithms.otb_binary_threshold import binary_threshold
 from orchestrator.plugins.landsat8_muscate.maja_landsat8_muscate_plugin import MajaLandsat8MuscatePlugin
 from orchestrator.plugins.common.muscate.maja_muscate_l1_image_file_reader import MuscateL1ImageFileReaderBase
 

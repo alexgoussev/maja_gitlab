@@ -39,7 +39,7 @@ from orchestrator.plugins.common.factory.maja_l1_image_info_provider import L1Im
 from orchestrator.plugins.common.factory.maja_l2_image_reader_provider import L2ImageReaderProvider
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.common.maja_exceptions import MajaDataException
-from orchestrator.common.date_utils import get_julianday_as_int, get_julianday_as_double
+from orchestrator.common.date_utils import get_julianday_as_double
 import operator
 
 LOGGER = configure_logger(__name__)

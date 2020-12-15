@@ -42,8 +42,6 @@ from orchestrator.modules.maja_module import MajaModule
 from orchestrator.common.maja_utils import is_croco_on
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.cots.otb.algorithms.otb_clean_pipe import clean_pipe
-from orchestrator.plugins.common.base.maja_plugin_base import PluginBase
-from orchestrator.common.maja_exceptions import *
 import orchestrator.common.xml_tools as xml_tools
 from orchestrator.common.constants import *
 import os

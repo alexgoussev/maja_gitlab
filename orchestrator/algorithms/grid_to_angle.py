@@ -36,9 +36,7 @@ It defines method mandatory for a processor
 
 ###################################################################################################
 """
-import os
 import math
-from orchestrator.common.maja_exceptions import MajaProcessingError
 
 
 def grid_to_angle(grid_point):

@@ -37,7 +37,7 @@ It defines method mandatory for a processor
 ###################################################################################################
 """
 from osgeo import ogr
-from orchestrator.common.maja_exceptions import MajaOgrException
+from orchestrator.common.maja_exceptions import MajaOGRCotsException
 
 
 class OGRReader:
@@ -56,7 +56,7 @@ class OGRReader:
         self.ds = self.driver.Open(self.shapefile, 0)
 
         if self.ds is None:
-            raise MajaOgrException("Could not open {}".format(self.shapefile))
+            raise MajaOGRCotsException("Could not open {}".format(self.shapefile))
 
     def get_feature_count(self):
         layer = self.ds.GetLayer()

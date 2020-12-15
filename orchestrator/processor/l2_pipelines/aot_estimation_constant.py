@@ -38,9 +38,7 @@ It defines method mandatory for a processor
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.algorithms.otb_constant_image import constant_image
 import os
-from orchestrator.common.directory_manager import DirectoryManager
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 LOGGER = configure_logger(__name__)
 
 
@@ -63,12 +61,6 @@ class MajaAOTEstimationConstant(MajaModule):
 
         self.out_keys_to_check = []
         self.out_keys_provided = ["AOT_Sub"]
-
-    def check_requirements(self, dict_of_input, dict_of_output):
-        raise MajaNotYetImplemented("Function must be defined in a module")
-
-    def check_conditions(self, dict_of_input, dict_of_output):
-        raise MajaNotYetImplemented("Function must be defined in a module")
 
     def run(self, dict_of_input, dict_of_output):
         LOGGER.info("AOT constant start")

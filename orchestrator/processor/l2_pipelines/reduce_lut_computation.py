@@ -136,7 +136,7 @@ class MajaReduceLutComputation(MajaModule):
                 l_ViewingZenithAngle = m_ViewingZenithAnglesMap.get(key)
                 l_ViewingAzimuthAngle = m_ViewingAzimuthAnglesMap.get(key)
                 if len(l_ViewingZenithAngle) != len(dict_of_input.get("Plugin").BandsDefinitions.L2CoarseBandMap):
-                    raise MajaDataException("Error on input L1 product: missing Viewing angles for some l2 coarse band on detector "+key+" , all l2 coarse bands are needed for HR_Lut generation")
+                    raise MajaDataMissingAngleException("Error on input L1 product: missing Viewing angles for some l2 coarse band on detector "+key+" , all l2 coarse bands are needed for HR_Lut generation")
 
                 hr_lut_file = os.path.join(rlc_working, "HR_Lut_" + key + ".mha")
                 param_hr_lut = {"lut": dict_of_input.get("L2TOCR"),

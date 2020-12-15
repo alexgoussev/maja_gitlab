@@ -41,9 +41,7 @@ from orchestrator.cots.otb.otb_pipeline_manager import OtbPipelineManager
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.cots.otb.algorithms.otb_write_images import write_images
 from orchestrator.common.maja_utils import is_croco_on
-from orchestrator.cots.otb.otb_file_utils import otb_copy_image_to_file
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 import os
 LOGGER = configure_logger(__name__)
 

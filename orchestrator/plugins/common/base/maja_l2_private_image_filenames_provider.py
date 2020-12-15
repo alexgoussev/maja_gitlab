@@ -317,7 +317,6 @@ class L2PrivateImageFilenamesProvider():
                         root_dir,
                         f))]
             l_NbFiles = len(listoffilenames)
-            LTCDirFound = False
             LOGGER.debug(
                 "L2PrivateImageFilenamesProvider::InitializeForReadingWithThisThisRootDirectory : Nb files in the sub directory: " +
                 str(l_NbFiles))

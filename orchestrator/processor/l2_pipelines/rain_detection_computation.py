@@ -40,7 +40,6 @@ from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 import orchestrator.common.constants as constants
 from orchestrator.cots.otb.algorithms.otb_extract_roi import extract_roi
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 import os
 LOGGER = configure_logger(__name__)
 

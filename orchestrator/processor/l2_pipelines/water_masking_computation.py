@@ -36,7 +36,6 @@ orchestrator.processor.base_processor is the base of all processors
 from orchestrator.common.logger.maja_logging import configure_logger
 from orchestrator.cots.otb.otb_app_handler import OtbAppHandler
 from orchestrator.modules.maja_module import MajaModule
-from orchestrator.common.maja_exceptions import *
 import orchestrator.common.constants as constants
 import os
 LOGGER = configure_logger(__name__)

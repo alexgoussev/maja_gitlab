@@ -40,7 +40,7 @@ It defines classes_and_methods
 import orchestrator.common.xml_tools as xml_tools
 import os
 from orchestrator.common.logger.maja_logging import configure_logger
-from orchestrator.common.maja_exceptions import MajaExceptionPluginBase
+from orchestrator.common.maja_exceptions import MajaPluginVenusException
 from orchestrator.plugins.venus.maja_venus_plugin import MajaVenusPlugin
 from orchestrator.common.earth_explorer.earth_explorer_utilities import EarthExplorerUtilities
 
@@ -71,7 +71,7 @@ class VenusL1ImageFilenames(object):
         l_FileNameDBL_DIR = os.path.splitext(reference_base_filename)[0] + ".DBL.DIR"
 
         if not (os.path.exists(l_dblfilename) or os.path.exists(l_FileNameDBL_DIR)):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginVenusException(
                 "VenusL1ImageFilenames Provider: The GLOBAL Product file .DBL " +
                 l_dblfilename +
                 "' doesn't exist !! The " +
@@ -84,7 +84,7 @@ class VenusL1ImageFilenames(object):
         LOGGER.debug("m_hdrfilename: '" + l_refFileName + "'" )
 
         if not os.path.exists(l_refFileName):
-            raise MajaExceptionPluginBase(
+            raise MajaPluginVenusException(
                 "VenusL1ImageFilenames Provider: The GLOBAL Header file .HDR " +
                 l_refFileName +
                 " The" +
@@ -137,7 +137,7 @@ class VenusL1ImageFilenames(object):
         LOGGER.debug(self.m_TOAImageFileName)
 
         if not os.path.exists(self.m_TOAImageFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 TOA filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 TOA filename " +
                                           str(self.m_TOAImageFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # *******************************************************************************************************
@@ -146,7 +146,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTIMG" + prefix2 + ".HDR"
         self.m_TOAHeaderFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_TOAHeaderFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 TOA filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 TOA filename " +
                                           str(self.m_TOAHeaderFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # Check XML file
@@ -159,7 +159,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_CLA.DBL.TIF"
         self.m_CLAImageFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_CLAImageFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 CLA filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 CLA filename " +
                                           str(self.m_CLAImageFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # *******************************************************************************************************
@@ -168,7 +168,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_CLA.HDR"
         self.m_CLAHeaderFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_CLAHeaderFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 CLA filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 CLA filename " +
                                           str(self.m_CLAHeaderFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # Check XML file
@@ -181,7 +181,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_SOL.DBL.HDF"
         self.m_SOLImageFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_SOLImageFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 SOL filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 SOL filename " +
                                               str(self.m_SOLImageFileName) + " doesn't exist. The " +
                                               str(reference_base_filename) + "product is NOT valid !")
 
@@ -191,7 +191,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_SOL.HDR"
         self.m_SOLHeaderFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_SOLHeaderFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 SOL filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 SOL filename " +
                                               str(self.m_SOLHeaderFileName) + " doesn't exist. The " +
                                               str(reference_base_filename) + "product is NOT valid !")
         # Check XML file
@@ -205,7 +205,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_VIE.DBL.HDF"
         self.m_VIEImageFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_VIEImageFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 VIE filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 VIE filename " +
                                           str(self.m_VIEImageFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # *******************************************************************************************************
@@ -214,7 +214,7 @@ class VenusL1ImageFilenames(object):
         l_FileName = prefix1 + "PDTANX" + prefix2 + "_VIE.HDR"
         self.m_VIEHeaderFileName = os.path.join(l_FileNameDBL_DIR, l_FileName)
         if not os.path.exists(self.m_VIEHeaderFileName):
-            raise MajaExceptionPluginBase("VenusL1ImageFilenames Provider: The L1 VIE filename " +
+            raise MajaPluginVenusException("VenusL1ImageFilenames Provider: The L1 VIE filename " +
                                           str(self.m_VIEHeaderFileName) + " doesn't exist. The " +
                                           str(reference_base_filename) + "product is NOT valid !")
         # Check XML file
