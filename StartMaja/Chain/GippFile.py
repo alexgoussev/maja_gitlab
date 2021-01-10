@@ -91,7 +91,7 @@ class GippSet(object):
     """
     Stores a set of Gipp Files
     """
-    url = "http://osr-cesbio.ups-tlse.fr/gitlab_cesbio/kettigp/maja-gipp/-/archive/master/maja-gipp-master.zip"
+    url = "http://osr-cesbio.ups-tlse.fr/gitlab_cesbio/kettigp/maja-gipp/-/archive/develop/maja-gipp-develop.zip"
     zenodo_reg = r"https?:\/\/zenodo.org\/record\/\d+\/files\/\w+.zip\?download=1"
 
     platforms = ["sentinel2", "landsat8", "venus"]
@@ -161,7 +161,7 @@ class GippSet(object):
         self.out_path = os.path.join(self.fpath, self.gipp_folder_name)
         FileSystem.download_file(self.url, self.gipp_archive, self.log_level)
         FileSystem.unzip(self.gipp_archive, self.temp_folder)
-        gipp_maja_git = os.path.join(self.temp_folder, "maja-gipp-master")
+        gipp_maja_git = os.path.join(self.temp_folder, "maja-gipp-develop")
         # TODO Remove second WATV for Venus-Natif
         platform_folder = FileSystem.find_single(path=gipp_maja_git, pattern="^" + self.gipp_folder_name + "$")
         if not platform_folder:

@@ -80,7 +80,7 @@ class DirectionalCorrection:
         elif str_name == "Lut":
             method = DirectionalCorrection.LUT
         else:
-            raise MajaBusinessException("Utilities:GetDirCorrMethod: The Directional Correction model " + str_name + "does not exist.")
+            raise MajaDataException("Utilities:GetDirCorrMethod: The Directional Correction model " + str_name + " does not exist.")
         return method
 
 
