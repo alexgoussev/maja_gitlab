@@ -21,11 +21,6 @@ from StartMaja.Common import Constants
 from StartMaja.Chain import AuxFile, GippFile, Product
 from StartMaja.Chain.Workplan import Workplan, Nominal, Backward, Init
 
-from os import listdir
-from os.path import isfile, join
-
-
-
 
 
 class StartMaja(object):
@@ -55,9 +50,6 @@ class StartMaja(object):
         self.userconf = p.realpath(p.join(self.current_dir, "userconf"))
         if not p.isdir(self.userconf):
             raise OSError("Cannot find userconf folder: %s" % self.userconf)
-
-        onlyfiles = [f for f in listdir(os.path.dirname(folder)) if isfile(join(os.path.dirname(folder), f))]
-        self.logger.info(onlyfiles)
 
         self.folder = p.realpath(folder)
         self.logger.debug("Checking config file: %s" % folder)
