@@ -72,8 +72,7 @@ template. The merge request will then be discussed by the community and the core
 * Merge requests can not be merged until all discussions have been resolved (this is enforced by GitLab)
 * The merger is responsible for checking that the branch is up-to-date with develop
 * Merge requests can be merged only from core maintainers (members of Main Repositories group in Gitlab with at least "Maintainer" level) with push access to develop
-* Merge requests can be merged once the CI pipeline passes successfully. See
-  next section for details on the CI pipelines.
+* Merge requests can be merged once the CI pipeline passes successfully. 
 
 ### Contribution license agreement
 
@@ -90,7 +89,7 @@ file.
 
 ## Documentation improvements
 
-The main MAJA documentation are the UserManual and the ConceptionManual. The source is hosted in the main MAJA repository in the Documentation/ directory. Then, to
+The main MAJA documentation are the UserManual and the ConceptionManual. The source is hosted in the main MAJA repository in the Documentation directory. Then, to
 contribute documentation use the same workflow as for code contributions (see below).
 See also the Documentation/readme.txt file for help on building the documentation.
 
@@ -109,16 +108,16 @@ version.
 Regarding labels, we use the following set:
 * ~FA: Bug, crash or unexpected behavior, reported by a user or a developer
 * ~DM: Feature request expressed by a user/developer
-* ~CS Analysis: Issue being analysed by CS (core developers and maintainers)
+* ~"CS Analysis": Issue being analysed by CS (core developers and maintainers)
 * ~Confirmed: CS confirmed anomaly
-* ~ToDo: action is planned
+* ~"To Do": action is planned
 * ~Doing: Work in progress
-* ~Waiting for answer: CS is waiting for answer
-* ~Waiting for context: CS is waiting for a detailed context
-* ~Not reproductible: FA not reproductible
+* ~"Waiting for answer": CS is waiting for answer
+* ~"Waiting for context": CS is waiting for a detailed context
+* ~"Not reproductible": FA not reproductible
 * ~Suspended: Suspended issue
-* ~To be verified CNES: Verification to be done by CNES
-* ~Not accepted: Issue correction not accepted by CNES
+* ~"To be verified CNES": Verification to be done by CNES
+* ~"Not accepted": Issue correction not accepted by CNES
 * ~Accepted: Issue correction accepted by CNES. To be closed by QA.
 
 
