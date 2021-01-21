@@ -23,7 +23,7 @@ import logging
 import math
 from StartMaja.Common import FileSystem, ImageTools
 
-srtm_url = "http://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/TIFF/%s.zip"
+srtm_url = "https://srtm.csi.cgiar.org/wp-content/uploads/files/srtm_5x5/TIFF/%s.zip"
 
 
 class SRTM(MNT):
