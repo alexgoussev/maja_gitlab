@@ -55,7 +55,8 @@ Le répertoire des algorithmes est organisé comme suit :
 .. image:: Art/image8.png
    :width: 4.125in
    :height: 5.8125in
-   :title: Arborescence du code source des algorithmes de MAJA
+
+Figure 9 : Arborescence du code source des algorithmes de MAJA
 
 Le répertoire « \ **Algorithms »** contient le code source des
 algorithmes implémentés dans MAJA. Ce répertoire est constitué des sous
@@ -154,7 +155,7 @@ résolution L2.
    :width: 6.34375in
    :height: 6.53125in
 
-Figure 10 Circulation des données dans la chaîne L2 pour un produit
+Figure 10 : Circulation des données dans la chaîne L2 pour un produit
 Sentinel-2
 
 Pour gérer la composante multi capteurs dans la chaîne, différents choix
