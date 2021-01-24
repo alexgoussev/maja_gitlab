@@ -1,10 +1,9 @@
-diff -burN InsightToolkit-4.13.1.orig/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx  InsightToolkit-4.13.1/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx
---- InsightToolkit-4.13.1.orig/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx	2020-02-17 16:38:42.806358579 +0100
-+++ InsightToolkit-4.13.1/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx	2020-02-17 16:50:19.622351934 +0100
+--- InsightToolkit-4.13.3.orig/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx	2020-07-24 01:49:56.000000000 +0000
++++ InsightToolkit-4.13.3/Modules/Core/Common/include/itkUnaryFunctorImageFilter.hxx	2021-01-19 12:12:30.410000000 +0000
 @@ -61,6 +61,8 @@
      return;
      }
-
+ 
 +
 +  outputPtr->CopyInformation(inputPtr);
    // Set the output image largest possible region.  Use a RegionCopier

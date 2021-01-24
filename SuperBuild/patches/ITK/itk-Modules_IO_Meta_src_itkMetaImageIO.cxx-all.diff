@@ -1,10 +1,9 @@
-diff -burN InsightToolkit-4.13.1.orig/Modules/IO/Meta/src/itkMetaImageIO.cxx InsightToolkit-4.13.1/Modules/IO/Meta/src/itkMetaImageIO.cxx
---- InsightToolkit-4.13.1.orig/Modules/IO/Meta/src/itkMetaImageIO.cxx	2020-02-17 16:38:42.898358578 +0100
-+++ InsightToolkit-4.13.1/Modules/IO/Meta/src/itkMetaImageIO.cxx	2020-02-17 16:52:40.474350591 +0100
+--- InsightToolkit-4.13.3.orig/Modules/IO/Meta/src/itkMetaImageIO.cxx	2020-07-24 01:49:56.000000000 +0000
++++ InsightToolkit-4.13.3/Modules/IO/Meta/src/itkMetaImageIO.cxx	2021-01-19 12:12:30.420000000 +0000
 @@ -80,6 +80,15 @@
      return false;
      }
-
+ 
 +  if (  fname.size() >= 1024 )
 +   {
 +    itkExceptionMacro( << "File cannot be read: "<< fname << std::endl
@@ -16,7 +15,7 @@ diff -burN InsightToolkit-4.13.1.orig/Modules/IO/Meta/src/itkMetaImageIO.cxx Ins
 +
    return m_MetaImage.CanRead(filename);
  }
-
+ 
 @@ -509,6 +518,14 @@
      {
      return false;
@@ -29,6 +28,6 @@ diff -burN InsightToolkit-4.13.1.orig/Modules/IO/Meta/src/itkMetaImageIO.cxx Ins
 +      return false;
 +    }
 +
-
+ 
    std::string::size_type mhaPos = filename.rfind(".mha");
    if ( ( mhaPos != std::string::npos )
