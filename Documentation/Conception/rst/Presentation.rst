@@ -355,7 +355,8 @@ modification importante de l’arborescence du projet.
 .. image:: Art/ArborescenceGenerale.png
    :width: 3.70347in
    :height: 6.25903in
-   :title: Arborescence du code source de MAJA
+
+Figure 5 : Arborescence du code source de MAJA
 
 Cmake est utilisé pour compiler le projet MAJA et ses dépendances.
 
@@ -381,7 +382,7 @@ Le répertoire « \ **orchestrator»** est organisé comme suit :
 .. image:: Art/ArborescenceOrchestrateur.png
 
 
-Figure 6: Vue générale du répertoire « orchestrator » de MAJA
+Figure 6 : Vue générale du répertoire « orchestrator » de MAJA
 
 Ce répertoire  est constitué des sous
 répertoires suivants :
@@ -443,7 +444,7 @@ Le répertoire « \ **Code »** est organisé comme suit :
 
 .. image:: Art/ArborescenceCode.png
 
-Figure 6: Vue générale du répertoire « Code » de MAJA
+Figure 7 : Vue générale du répertoire « Code » de MAJA
 
 Ce répertoire contient tout le code source de MAJA qui ne dépend pas des
 produits gérés et donc des plugins. Ce répertoire est constitué des sous

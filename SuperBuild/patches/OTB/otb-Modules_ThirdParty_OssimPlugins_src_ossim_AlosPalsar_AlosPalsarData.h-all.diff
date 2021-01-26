@@ -1,0 +1,11 @@
+--- OTB-7.0.0.orig/Modules/ThirdParty/OssimPlugins/src/ossim/AlosPalsar/AlosPalsarData.h	2019-10-29 12:11:39.000000000 +0300
++++ OTB-7.0.0/Modules/ThirdParty/OssimPlugins/src/ossim/AlosPalsar/AlosPalsarData.h	2021-01-19 14:32:53.258450700 +0300
+@@ -28,6 +28,8 @@
+ #define AlosPalsarData_h
+ 
+ #include <map>
++#include <ostream>
++#include <istream>
+ 
+ class ossimKeywordlist;
+ 

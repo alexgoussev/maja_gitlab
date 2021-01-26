@@ -33,8 +33,8 @@
 #                                                                                                          #
 ############################################################################################################
 
-set(HDF4_URL "http://support.hdfgroup.org/ftp/HDF/HDF_Current/src/hdf-4.2.13.tar.gz")
-set(HDF4_URL_MD5 a6aa950b3fce5162b96496d8ea0b82bf)
+set(HDF4_URL "http://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.15/src/hdf-4.2.15.tar.gz")
+set(HDF4_URL_MD5 0f3ef23a9a0c7b1cbdc8091a5b90d56e)
 set(HDF4_DEPENDS ZLIB JPEG)
 build_projects(HDF4_DEPENDS)
 set(HDF4_CONFIG_ARGS
@@ -63,3 +63,5 @@ ExternalProject_Add(HDF4
   LOG_BUILD ${WRITE_LOG}
   LOG_INSTALL ${WRITE_LOG}
   )
+
+SUPERBUILD_PATCH_SOURCE(HDF4)
