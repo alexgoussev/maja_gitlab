@@ -1,5 +1,5 @@
 apTvDirectionalCorrectionLUT
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Objectif
 ********
