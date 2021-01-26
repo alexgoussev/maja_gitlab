@@ -283,14 +283,8 @@ set(OSSIM_CONFIG_ARGS
   -DINSTALL_LIBRARY_DIR:STRING=lib  
   )
 
-set(BOOST_URL "https://downloads.sourceforge.net/project/boost/boost/1.60.0/boost_1_60_0.tar.bz2")
-set(BOOST_URL_MD5 65a840e1a0b13a558ff19eeb2c4f0cbe)
-
 set(TINYXML_URL "http://downloads.sourceforge.net/project/tinyxml/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz")
 set(TINYXML_URL_MD5 c1b864c96804a10526540c664ade67f0)
-
-#set(MUPARSER_URL "https://launchpad.net/ubuntu/+archive/primary/+files/muparser_1.34.orig.tar.gz")
-#set(MUPARSER_URL_MD5 0c4f4bf86aa2a5a737adc0e08cb77737)
 
 # set(MUPARSERX_URL "https://github.com/beltoforion/muparserx/archive/v4.0.7.zip")
 # set(MUPARSERX_URL_MD5 67819fc478436ea8f647c804e6f2e1a2)
