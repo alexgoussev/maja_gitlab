@@ -22,6 +22,8 @@ import logging
 from datetime import datetime
 from StartMaja.Chain.AuxFile import EarthExplorer
 
+logger = logging.getLogger("root")
+
 
 class GIPPFile(EarthExplorer):
     regex = r"\w+_" \
@@ -159,7 +161,9 @@ class GippSet(object):
         import shutil
         from StartMaja.Common import FileSystem
         self.out_path = os.path.join(self.fpath, self.gipp_folder_name)
+        logger.info("Downloading GIPP %s" % self.url)
         FileSystem.download_file(self.url, self.gipp_archive, self.log_level)
+        logger.info("Unpacking %s" % self.gipp_archive)
         FileSystem.unzip(self.gipp_archive, self.temp_folder)
         gipp_maja_git = os.path.join(self.temp_folder, "maja-gipp-develop")
         # TODO Remove second WATV for Venus-Natif
@@ -175,7 +179,10 @@ class GippSet(object):
         if not lut_url:
             self.__clean_up()
             raise OSError("Cannot find url to download LUTs")
+
+        logger.info("Downloading LUTs %s" % lut_url)
         FileSystem.download_file(lut_url, self.lut_archive, self.log_level)
+        logger.info("Unpacking %s" % self.lut_archive)
         FileSystem.unzip(self.lut_archive, platform_folder)
         lut_folder = FileSystem.find_single(path=platform_folder, pattern="LUTs")
         if not lut_folder:
@@ -186,6 +193,7 @@ class GippSet(object):
 
         if os.path.isdir(self.out_path):
             FileSystem.remove_directory(self.out_path)
+        logger.info("Creating GIPP folder %s" % platform_folder)
         shutil.move(platform_folder, self.out_path)
         self.__clean_up()
         FileSystem.remove_directory(lut_folder)

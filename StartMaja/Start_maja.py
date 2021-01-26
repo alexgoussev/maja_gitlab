@@ -112,18 +112,22 @@ class StartMaja(object):
 
         self.cams_files = []
         if self.rep_cams and self.use_cams:
-            self.logger.info("Searching for CAMS")
+            self.logger.info("Searching for CAMS...")
             self.cams_files = self.get_cams_files()
             self.logger.info("...found %s CAMS files" % len(self.cams_files))
         else:
-            self.logger.info("Skipping CAMS file detection.")
-        self.logger.info("Checking GIPP files")
+            self.logger.info("Skipping CAMS file detection")
+        
+        self.logger.info("Checking GIPP folder...")
         if not p.isdir(self.gipp_root):
             raise OSError("Cannot find GIPP folder: %s" % self.gipp_root)
         self.logger.info("Setting up GIPP folder: %s" % self.gipp_root)
         self.gipp = GippFile.GippSet(self.gipp_root, self.platform, self.ptype, cams=self.use_cams)
+        self.logger.info("Searching for GIPP files...")
         if not self.gipp.check_completeness():
             self.logger.info("Cannot find GIPP for %s. Will attempt to download it." % self.gipp.gipp_folder_name)
+        else:
+            self.logger.info("Found GIPP files")
 
         # Other parameters:
         self.overwrite = kwargs.get("overwrite", False)
@@ -131,13 +135,13 @@ class StartMaja(object):
         self.maja_log_level = "DEBUG" if self.logger.level == logging.DEBUG else "PROGRESS"
         self.skip_confirm = kwargs.get("skip_confirm", False)
 
-        self.logger.info("Searching for DTM")
+        self.logger.info("Searching for DTM in MAJA format...")
         self.type_dem = kwargs.get("type_dem", "any")
         self.dtm = self.get_dtm(type_dem=self.type_dem)
         if not self.dtm:
-            self.logger.info("Cannot find DTM. Will attempt to download it for type '%s'" % self.type_dem)
+            self.logger.info("Cannot find DTM in MAJA format. Will attempt to create it for type '%s'." % self.type_dem)
         else:
-            self.logger.info("Found DTM: %s" % self.dtm.hdr)
+            self.logger.info("Found DTM in MAJA format: %s" % self.dtm.hdr)
 
         return
 
@@ -367,6 +371,7 @@ class StartMaja(object):
                 has_closest_l2_prod = [prod for prod in self.avail_input_l2 if min_time <= prod.date <= max_time]
             if has_closest_l2_prod:
                 # Proceed with NOMINAL
+                logger.info("1: NOMINAL mode")
                 workplans.append(Nominal(wdir=self.rep_work,
                                          outdir=self.path_input_l2,
                                          l1=used_prod_l1[0],
@@ -380,6 +385,7 @@ class StartMaja(object):
             else:
                 if len(self.avail_input_l1) >= self.nbackward:
                     # Proceed with BACKWARD
+                    logger.info("1: BACKWARD mode")
                     index_current_prod = self.avail_input_l1.index(used_prod_l1[0])
                     l1_list = self.avail_input_l1[index_current_prod:index_current_prod + self.nbackward]
                     l1 = used_prod_l1[0]
@@ -396,7 +402,7 @@ class StartMaja(object):
                     pass
                 else:
                     # Proceed with INIT
-                    logger.info("Not enough L1 products available for a BACKWARD mode. Beginning with INIT...")
+                    logger.info("1: Not enough L1 products available for a BACKWARD mode. Beginning with INIT.")
                     workplans.append(Init(wdir=self.rep_work,
                                           outdir=self.path_input_l2,
                                           l1=used_prod_l1[0],
@@ -408,21 +414,22 @@ class StartMaja(object):
                     pass
                 pass
         else:
-            logger.debug("Skipping L1 product %s because it was already processed!" % used_prod_l1[0].base)
+            logger.debug("1: Skipping L1 product %s because it was already processed!" % used_prod_l1[0].base)
 
         # For the rest: Setup NOMINAL.
         # Except: The time series is 'stopped' - The gap between two products is too large.
         # In this case, proceed with a re-init.
         for i, prod in enumerate(used_prod_l1[1:]):
+            index_current_prod = self.avail_input_l1.index(prod) + 1
             if prod in has_l2 and not self.overwrite:
-                logger.debug("Skipping L1 product %s because it was already processed!" % prod.base)
+                logger.debug("%s: Skipping L1 product %s because it was already processed!" % (index_current_prod, prod.base))
                 continue
             # Note: i, in this case is the previous product -> Not the current one, which is i+1
             date_gap = prod.date - used_prod_l1[i].date
             if date_gap >= prod.max_l2_diff:
-                index_current_prod = self.avail_input_l1.index(prod)
                 if len(self.avail_input_l1[index_current_prod:]) >= self.nbackward:
                     # Proceed with BACKWARD
+                    logger.info("%s: BACKWARD mode" % index_current_prod)
                     l1_list = self.avail_input_l1[index_current_prod:index_current_prod + self.nbackward]
                     workplans.append(Backward(wdir=self.rep_work,
                                               outdir=self.path_input_l2,
@@ -437,7 +444,7 @@ class StartMaja(object):
                     pass
                 else:
                     # Proceed with INIT
-                    logger.info("Not enough L1 products available for a BACKWARD mode. Continuing with INIT...")
+                    logger.info("%s: Not enough L1 products available for a BACKWARD mode. Continuing with INIT." % index_current_prod)
                     workplans.append(Init(wdir=self.rep_work,
                                           outdir=self.path_input_l2,
                                           l1=prod,
@@ -449,6 +456,7 @@ class StartMaja(object):
                     pass
                 pass
             else:
+                logger.info("%s: NOMINAL mode" % index_current_prod)
                 workplans.append(Nominal(wdir=self.rep_work,
                                          outdir=self.path_input_l2,
                                          l1=prod,
@@ -481,16 +489,22 @@ class StartMaja(object):
             -   Run MAJA
         """
         if not self.dtm:
-            logger.info("Attempting to download DTM...")
+            logger.info("Begin DTM creation in MAJA format")
             self.avail_input_l1[0].get_mnt(dem_dir=self.rep_mnt, type_dem=self.type_dem,
                                            raw_dem=self.rep_raw, raw_gsw=self.rep_gsw)
             self.dtm = self.get_dtm(type_dem=self.type_dem)
-            logger.info("DTM Creation succeeded.")
+            logger.info("DTM creation succeeded")
+            
+        logger.info("Checking if the GIPP files exists already...")
         if not self.gipp.check_completeness():
-            logger.info("Attempting to download Gipp for %s" % self.gipp.gipp_folder_name)
+            logger.info("GIPP folder does not exists")
+            logger.info("Attempting to download GIPP for %s ..." % self.gipp.gipp_folder_name)
             self.gipp.download()
-        logger.info("GIPP Creation succeeded for %s" % self.gipp.gipp_folder_name)
+            logger.info("GIPP creation succeeded for %s" % self.gipp.gipp_folder_name)
+        else:
+            logger.info("Found existing GIPP files")
 
+        logger.info("Creating workplans...")
         workplans = self.create_workplans(self.max_product_difference)
         logger.info("%s workplan(s) successfully created:" % len(workplans))
         # Print without the logging-formatting:
